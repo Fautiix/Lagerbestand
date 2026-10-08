@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Materialverwaltung</title>
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#0b0d10">
+
+<meta name="apple-mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent">
+
+<meta name="apple-mobile-web-app-title"
+      content="Material">
+
+
+<style>
+:root {
+  --bg: #0b0d10;
+  --card: #15181d;
+  --card2: #1c2026;
+  --text: #f4f6f8;
+  --muted: #9ba3ad;
+  --border: #2b3038;
+  --accent: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  max-width: 700px;
+  margin: auto;
+  padding-bottom: 100px;
+}
+
+header {
+  padding: 24px 18px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(11,13,16,.94);
+  backdrop-filter: blur(14px);
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h1 {
+  font-size: 27px;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.content {
+  padding: 14px 16px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.tab {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  padding: 12px 5px;
+  border-radius: 13px;
+  font-size: 13px;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 17px;
+  margin-bottom: 13px;
+}
+
+.card h2 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.stock {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 8px 0;
+}
+
+.stock.low {
+  color: var(--red);
+}
+
+.stock.ok {
+  color: var(--green);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.btn {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 700;
+  color: white;
+  background: var(--card2);
+}
+
+.btn.primary {
+  background: var(--accent);
+}
+
+.btn.green {
+  background: var(--green);
+}
+
+.btn.red {
+  background: var(--red);
+}
+
+.btn.orange {
+  background: var(--orange);
+  color: #111;
+}
+
+.btn.full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+input,
+select {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 13px;
+  padding: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+}
+
+label {
+  display: block;
+  margin: 13px 0 7px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.site-stock {
+  margin-top: 13px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.site-material {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.movement {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.movement:last-child {
+  border-bottom: 0;
+}
+
+.movement-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.movement-route {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.movement-meta {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.route {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.arrow {
+  text-align: center;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 35px 10px;
+}
+
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  z-index: 30;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: white;
+  font-size: 28px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.45);
+}
+
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,.72);
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-bg.show {
+  display: flex;
+}
+
+.modal {
+  width: 100%;
+  max-width: 700px;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 22px 18px 30px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close {
+  border: 0;
+  background: var(--card2);
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.notice {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card2);
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: var(--muted);
+}
+
+@media (min-width: 701px) {
+  .modal-bg {
+    align-items: center;
+  }
+
+  .modal {
+    border-radius: 24px;
+    max-height: 85vh;
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="header-row">
+    <div>
+      <h1>Materialverwaltung</h1>
+      <div class="subtitle">Lager & Baustellen</div>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+  <div class="tabs">
+    <button class="tab active"
+            onclick="showTab('lager', this)">
+      📦 Lager
+    </button>
+
+    <button class="tab"
+            onclick="showTab('baustellen', this)">
+      🏗️ Baustellen
+    </button>
+
+    <button class="tab"
+            onclick="showTab('buchen', this)">
+      🔄 Buchen
+    </button>
+
+    <button class="tab"
+            onclick="showTab('historie', this)">
+      📜 Historie
+    </button>
+  </div>
+
+  <section id="lager"></section>
+
+  <section id="baustellen"
+           style="display:none">
+  </section>
+
+  <section id="buchen"
+           style="display:none">
+  </section>
+
+  <section id="historie"
+           style="display:none">
+  </section>
+
+</div>
+</div>
+
+
+<button class="fab"
+        onclick="openBooking()">
+  +
+</button>
+
+
+<!-- ================================
+     BUCHUNGS-MODAL
+================================ -->
+
+<div class="modal-bg"
+     id="bookingModal">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <div>
+        <h2 style="margin:0">
+          Material buchen
+        </h2>
+
+        <div class="subtitle">
+          Von → Nach
+        </div>
+      </div>
+
+      <button class="close"
+              onclick="closeBooking()">
+        ×
+      </button>
+
+    </div>
+
+
+    <label>Material</label>
+
+    <select id="bookingMaterial"></select>
+
+
+    <label>Menge in Meter</label>
+
+    <input
+      id="bookingAmount"
+      type="number"
+      inputmode="decimal"
+      min="0.01"
+      step="0.01"
+      placeholder="z. B. 25">
+
+
+    <label>Von</label>
+
+    <select id="bookingFrom"></select>
+
+
+    <div class="arrow"
+         style="margin:8px 0">
+      ↓
+    </div>
+
+
+    <label>Nach</label>
+
+    <select id="bookingTo"></select>
+
+
+    <label>Mitarbeiter</label>
+
+    <input
+      id="bookingEmployee"
+      type="text"
+      placeholder="Name">
+
+
+    <div id="bookingInfo"
+         class="notice">
+
+      Wähle Material, Menge und Quelle/Ziel.
+
+    </div>
+
+
+    <button class="btn primary full"
+            onclick="submitBooking()">
+
+      🔄 Material buchen
+
+    </button>
+
+
+    <button class="btn orange full"
+            onclick="warehouseEntry()">
+
+      📥 Zugang ins Lager
+
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ================================
+     BAUSTELLEN-MODAL
+================================ -->
+
+<div class="modal-bg"
+     id="siteModal">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <h2 style="margin:0">
+        Neue Baustelle
+      </h2>
+
+      <button class="close"
+              onclick="closeSiteModal()">
+        ×
+      </button>
+
+    </div>
+
+
+    <label>
+      Name der Baustelle
+    </label>
+
+    <input
+      id="siteName"
+      placeholder="z. B. Baustelle Duisburg">
+
+
+    <label>
+      Adresse
+    </label>
+
+    <input
+      id="siteAddress"
+      placeholder="Straße, Ort">
+
+
+    <button class="btn primary full"
+            onclick="createSite()">
+
+      🏗️ Baustelle anlegen
+
+    </button>
+
+  </div>
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+  "https://zjomsuqowqgpzodawixw.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD";
+
+
+/* =========================================================
+   API
+========================================================= */
+
+async function supabase(path, options = {}) {
+
+  const response = await fetch(
+    SUPABASE_URL + "/rest/v1/" + path,
+    {
+      ...options,
+
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+        ...(options.headers || {})
+      }
+    }
+  );
+
+
+  if (!response.ok) {
+
+    const text =
+      await response.text();
+
+    throw new Error(
+      text || "Supabase Fehler"
+    );
+  }
+
+
+  const text =
+    await response.text();
+
+  return text
+    ? JSON.parse(text)
+    : null;
+}
+
+
+
+async function rpc(functionName, body) {
+
+  const response = await fetch(
+    SUPABASE_URL +
+    "/rest/v1/rpc/" +
+    functionName,
+
+    {
+      method: "POST",
+
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization":
+          "Bearer " + SUPABASE_KEY,
+        "Content-Type":
+          "application/json"
+      },
+
+      body: JSON.stringify(body)
+    }
+  );
+
+
+  if (!response.ok) {
+
+    const text =
+      await response.text();
+
+    throw new Error(
+      text || "RPC Fehler"
+    );
+  }
+
+
+  return response.json();
+}
+
+
+/* =========================================================
+   DATEN
+========================================================= */
+
+let materials = [];
+let sites = [];
+let siteStocks = [];
+let movements = [];
+
+
+/* =========================================================
+   START
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadAll
+);
+
+
+async function loadAll() {
+
+  try {
+
+    document.getElementById("lager")
+      .innerHTML =
+      '<div class="loading">Lade Daten...</div>';
+
+
+    await Promise.all([
+      loadMaterials(),
+      loadSites(),
+      loadMovements()
+    ]);
+
+
+    await loadSiteStocks();
+
+    renderAll();
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("lager")
+      .innerHTML =
+      `<div class="card">
+
+        <h2>Fehler</h2>
+
+        <div class="muted">
+          ${escapeHtml(error.message)}
+        </div>
+
+      </div>`;
+  }
+}
+
+
+
+async function loadMaterials() {
+
+  materials =
+    await supabase(
+      "materials?select=id,name,unit,stock,minimum_stock&order=id"
+    );
+}
+
+
+
+async function loadSites() {
+
+  sites =
+    await supabase(
+      "sites?select=id,name,address,active,created_at&active=eq.true&order=name"
+    );
+}
+
+
+
+async function loadSiteStocks() {
+
+  siteStocks =
+    await supabase(
+      "site_stock?select=site_id,material_id,stock"
+    );
+}
+
+
+
+async function loadMovements() {
+
+  movements =
+    await supabase(
+      "stock_movements?select=id,material_id,amount,type,employee,created_at,from_site_id,to_site_id&order=created_at.desc&limit=100"
+    );
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+function showTab(tab, button) {
+
+  document
+    .querySelectorAll(".content section")
+    .forEach(
+      section =>
+        section.style.display = "none"
+    );
+
+
+  document.getElementById(tab)
+    .style.display = "block";
+
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(
+      b => b.classList.remove("active")
+    );
+
+
+  button.classList.add("active");
+
+
+  if (tab === "buchen") {
+    renderBookingPage();
+  }
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function renderAll() {
+
+  renderWarehouse();
+  renderSites();
+  renderBookingPage();
+  renderHistory();
+}
+
+
+
+function renderWarehouse() {
+
+  const container =
+    document.getElementById("lager");
+
+
+  let html = `
+
+    <div class="card">
+
+      <h2>📦 Lagerbestand</h2>
+
+      <div class="muted">
+        Aktueller zentraler Lagerbestand
+      </div>
+
+    </div>
+
+  `;
+
+
+  materials.forEach(material => {
+
+    const low =
+      Number(material.stock) <=
+      Number(material.minimum_stock);
+
+
+    html += `
+
+      <div class="card">
+
+        <div class="card-title">
+          ${escapeHtml(material.name)}
+        </div>
+
+
+        <div class="stock ${
+          low ? "low" : "ok"
+        }">
+
+          ${formatNumber(material.stock)}
+          ${escapeHtml(
+            material.unit || "m"
+          )}
+
+        </div>
+
+
+        <div class="muted">
+
+          Mindestbestand:
+          ${formatNumber(
+            material.minimum_stock
+          )}
+          ${escapeHtml(
+            material.unit || "m"
+          )}
+
+        </div>
+
+
+        ${
+          low
+          ? `<div class="notice">
+               ⚠️ Mindestbestand erreicht
+               oder unterschritten
+             </div>`
+          : ""
+        }
+
+      </div>
+
+    `;
+  });
+
+
+  if (!materials.length) {
+
+    html += `
+      <div class="empty">
+        Keine Materialien vorhanden.
+      </div>
+    `;
+  }
+
+
+  container.innerHTML = html;
+}
+
+
+
+function renderSites() {
+
+  const container =
+    document.getElementById(
+      "baustellen"
+    );
+
+
+  let html = `
+
+    <div class="card">
+
+      <h2>🏗️ Baustellen</h2>
+
+      <div class="muted">
+        Materialbestand je Baustelle
+      </div>
+
+
+      <button
+        class="btn primary full"
+        onclick="openSiteModal()">
+
+        ➕ Baustelle hinzufügen
+
+      </button>
+
+    </div>
+
+  `;
+
+
+  sites.forEach(site => {
+
+    const stocks =
+      siteStocks.filter(
+        s =>
+          Number(s.site_id) ===
+          Number(site.id)
+      );
+
+
+    html += `
+
+      <div class="card">
+
+        <div class="card-title">
+
+          🏗️
+          ${escapeHtml(site.name)}
+
+        </div>
+
+
+        ${
+          site.address
+          ? `<div class="muted">
+               ${escapeHtml(site.address)}
+             </div>`
+          : ""
+        }
+
+
+        <div class="site-stock">
+    `;
+
+
+    if (!stocks.length) {
+
+      html += `
+
+        <div class="empty">
+
+          Noch kein Material
+          auf dieser Baustelle.
+
+        </div>
+
+      `;
+
+    } else {
+
+      stocks.forEach(stock => {
+
+        const material =
+          materials.find(
+            m =>
+              Number(m.id) ===
+              Number(stock.material_id)
+          );
+
+
+        if (
+          !material ||
+          Number(stock.stock) <= 0
+        ) {
+          return;
+        }
+
+
+        html += `
+
+          <div class="site-material">
+
+            <span>
+              ${escapeHtml(material.name)}
+            </span>
+
+            <strong>
+
+              ${formatNumber(
+                stock.stock
+              )}
+
+              ${escapeHtml(
+                material.unit || "m"
+              )}
+
+            </strong>
+
+          </div>
+
+        `;
+      });
+    }
+
+
+    html += `
+
+        </div>
+
+
+        <button
+          class="btn primary full"
+          onclick="openBooking(null, ${site.id})">
+
+          🔄 Material buchen
+
+        </button>
+
+
+      </div>
+
+    `;
+  });
+
+
+  if (!sites.length) {
+
+    html += `
+
+      <div class="empty">
+
+        Noch keine Baustellen
+        angelegt.
+
+      </div>
+
+    `;
+  }
+
+
+  container.innerHTML = html;
+}
+
+
+/* =========================================================
+   BUCHUNGSSEITE
+========================================================= */
+
+function renderBookingPage() {
+
+  document.getElementById(
+    "buchen"
+  ).innerHTML = `
+
+    <div class="card">
+
+      <h2>🔄 Material buchen</h2>
+
+      <div class="muted">
+
+        Jede Bewegung läuft über
+        <strong>Von → Nach</strong>.
+
+      </div>
+
+
+      <div class="route">
+
+        <div class="badge">
+          📦 Lager
+        </div>
+
+        <div class="arrow">
+          →
+        </div>
+
+        <div class="badge">
+          🏗️ Baustelle
+        </div>
+
+      </div>
+
+
+      <button
+        class="btn primary full"
+        onclick="openBooking()">
+
+        Neue Buchung
+
+      </button>
+
+
+      <button
+        class="btn orange full"
+        onclick="openBookingForEntry()">
+
+        📥 Zugang ins Lager
+
+      </button>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>
+        So funktioniert's
+      </h2>
+
+
+      <div class="site-material">
+
+        <span>
+          Lager → Baustelle
+        </span>
+
+        <strong>
+          Material raus
+        </strong>
+
+      </div>
+
+
+      <div class="site-material">
+
+        <span>
+          Baustelle → Lager
+        </span>
+
+        <strong>
+          Material zurück
+        </strong>
+
+      </div>
+
+
+      <div class="site-material">
+
+        <span>
+          Baustelle → Baustelle
+        </span>
+
+        <strong>
+          Umbuchung
+        </strong>
+
+      </div>
+
+
+      <div class="site-material">
+
+        <span>
+          Lieferant → Lager
+        </span>
+
+        <strong>
+          Zugang
+        </strong>
+
+      </div>
+
+    </div>
+
+  `;
+}
+
+
+/* =========================================================
+   HISTORIE
+========================================================= */
+
+function renderHistory() {
+
+  const container =
+    document.getElementById(
+      "historie"
+    );
+
+
+  let html = `
+
+    <div class="card">
+
+      <h2>
+        📜 Buchungshistorie
+      </h2>
+
+      <div class="muted">
+
+        Die letzten 100
+        Materialbewegungen
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  if (!movements.length) {
+
+    html += `
+
+      <div class="empty">
+
+        Noch keine Buchungen
+        vorhanden.
+
+      </div>
+
+    `;
+
+
+    container.innerHTML = html;
+
+    return;
+  }
+
+
+  movements.forEach(movement => {
+
+    const material =
+      materials.find(
+        m =>
+          Number(m.id) ===
+          Number(movement.material_id)
+      );
+
+
+    const fromName =
+      movement.from_site_id
+      ? getSiteName(
+          movement.from_site_id
+        )
+      : "📦 Lager";
+
+
+    const toName =
+      movement.to_site_id
+      ? getSiteName(
+          movement.to_site_id
+        )
+      : "📦 Lager";
+
+
+    const date =
+      new Date(
+        movement.created_at
+      );
+
+
+    html += `
+
+      <div class="card movement">
+
+        <div class="movement-main">
+
+          <strong>
+            ${escapeHtml(
+              material?.name ||
+              "Unbekannt"
+            )}
+          </strong>
+
+
+          <strong>
+
+            ${formatNumber(
+              movement.amount
+            )}
+
+            ${escapeHtml(
+              material?.unit || "m"
+            )}
+
+          </strong>
+
+        </div>
+
+
+        <div class="movement-route">
+
+          ${escapeHtml(fromName)}
+
+          &nbsp; → &nbsp;
+
+          ${escapeHtml(toName)}
+
+        </div>
+
+
+        <div class="movement-meta">
+
+          👤
+          ${escapeHtml(
+            movement.employee ||
+            "Unbekannt"
+          )}
+
+          ·
+
+          ${date.toLocaleString(
+            "de-DE"
+          )}
+
+        </div>
+
+      </div>
+
+    `;
+  });
+
+
+  container.innerHTML = html;
+}
+
+
+/* =========================================================
+   BUCHUNGS-MODAL
+========================================================= */
+
+function openBooking(
+  preselectedMaterial = null,
+  preselectedSite = null
+) {
+
+  fillBookingSelects();
+
+
+  document.getElementById(
+    "bookingModal"
+  ).classList.add("show");
+
+
+  if (preselectedSite) {
+
+    document.getElementById(
+      "bookingFrom"
+    ).value =
+      "site:" + preselectedSite;
+
+  } else {
+
+    document.getElementById(
+      "bookingFrom"
+    ).value =
+      "warehouse";
+  }
+
+
+  updateBookingInfo();
+}
+
+
+
+function closeBooking() {
+
+  document.getElementById(
+    "bookingModal"
+  ).classList.remove("show");
+}
+
+
+
+function fillBookingSelects() {
+
+  const materialSelect =
+    document.getElementById(
+      "bookingMaterial"
+    );
+
+
+  const fromSelect =
+    document.getElementById(
+      "bookingFrom"
+    );
+
+
+  const toSelect =
+    document.getElementById(
+      "bookingTo"
+    );
+
+
+  materialSelect.innerHTML =
+    materials.map(
+      m => `
+
+        <option value="${m.id}">
+
+          ${escapeHtml(m.name)}
+
+        </option>
+
+      `
+    ).join("");
+
+
+  fromSelect.innerHTML = `
+
+    <option value="warehouse">
+      📦 Lager
+    </option>
+
+
+    ${
+      sites.map(
+        site => `
+
+          <option
+            value="site:${site.id}">
+
+            🏗️
+            ${escapeHtml(site.name)}
+
+          </option>
+
+        `
+      ).join("")
+    }
+
+  `;
+
+
+  toSelect.innerHTML = `
+
+    <option value="warehouse">
+      📦 Lager
+    </option>
+
+
+    ${
+      sites.map(
+        site => `
+
+          <option
+            value="site:${site.id}">
+
+            🏗️
+            ${escapeHtml(site.name)}
+
+          </option>
+
+        `
+      ).join("")
+    }
+
+  `;
+
+
+  fromSelect.onchange =
+    updateBookingInfo;
+
+  toSelect.onchange =
+    updateBookingInfo;
+
+  materialSelect.onchange =
+    updateBookingInfo;
+}
+
+
+
+function updateBookingInfo() {
+
+  const from =
+    document.getElementById(
+      "bookingFrom"
+    ).value;
+
+
+  const to =
+    document.getElementById(
+      "bookingTo"
+    ).value;
+
+
+  const info =
+    document.getElementById(
+      "bookingInfo"
+    );
+
+
+  if (
+    from === "warehouse" &&
+    to === "warehouse"
+  ) {
+
+    info.innerHTML =
+      "📥 Für einen Zugang vom Lieferanten ins Lager bitte „Zugang ins Lager“ verwenden.";
+
+  }
+
+  else if (
+    from !== "warehouse" &&
+    to !== "warehouse"
+  ) {
+
+    if (from === to) {
+
+      info.innerHTML =
+        "⚠️ Quelle und Ziel dürfen nicht identisch sein.";
+
+    } else {
+
+      info.innerHTML =
+        "🔄 Baustelle → Baustelle: Bestand wird automatisch umgebucht.";
+
+    }
+
+  }
+
+  else if (
+    from === "warehouse"
+  ) {
+
+    info.innerHTML =
+      "📦 → 🏗️ Der Lagerbestand wird reduziert und der Baustellenbestand erhöht.";
+
+  }
+
+  else {
+
+    info.innerHTML =
+      "🏗️ → 📦 Der Baustellenbestand wird reduziert und dem Lager gutgeschrieben.";
+  }
+}
+
+
+/* =========================================================
+   BUCHUNG
+========================================================= */
+
+async function submitBooking() {
+
+  try {
+
+    const materialId =
+      Number(
+        document.getElementById(
+          "bookingMaterial"
+        ).value
+      );
+
+
+    const amount =
+      Number(
+        document.getElementById(
+          "bookingAmount"
+        ).value
+      );
+
+
+    const from =
+      document.getElementById(
+        "bookingFrom"
+      ).value;
+
+
+    const to =
+      document.getElementById(
+        "bookingTo"
+      ).value;
+
+
+    const employee =
+      document.getElementById(
+        "bookingEmployee"
+      ).value.trim();
+
+
+    if (!materialId) {
+
+      alert(
+        "Bitte Material auswählen."
+      );
+
+      return;
+    }
+
+
+    if (!amount || amount <= 0) {
+
+      alert(
+        "Bitte eine gültige Menge eingeben."
+      );
+
+      return;
+    }
+
+
+    if (!employee) {
+
+      alert(
+        "Bitte Mitarbeiter eingeben."
+      );
+
+      return;
+    }
+
+
+    if (
+      from === "warehouse" &&
+      to === "warehouse"
+    ) {
+
+      alert(
+        "Lager → Lager ist nicht möglich.\n\n" +
+        "Für einen Zugang bitte „Zugang ins Lager“ verwenden."
+      );
+
+      return;
+    }
+
+
+    if (from === to) {
+
+      alert(
+        "Quelle und Ziel dürfen nicht identisch sein."
+      );
+
+      return;
+    }
+
+
+    const fromSiteId =
+      from.startsWith("site:")
+      ? Number(
+          from.split(":")[1]
+        )
+      : null;
+
+
+    const toSiteId =
+      to.startsWith("site:")
+      ? Number(
+          to.split(":")[1]
+        )
+      : null;
+
+
+    await rpc(
+      "book_material",
+      {
+        p_material_id: materialId,
+        p_amount: amount,
+        p_type: "auto",
+        p_employee: employee,
+        p_from_site_id: fromSiteId,
+        p_to_site_id: toSiteId
+      }
+    );
+
+
+    closeBooking();
+
+
+    document.getElementById(
+      "bookingAmount"
+    ).value = "";
+
+
+    document.getElementById(
+      "bookingEmployee"
+    ).value = "";
+
+
+    alert(
+      "✅ Buchung erfolgreich!"
+    );
+
+
+    await loadAll();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Buchung fehlgeschlagen:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
+   ZUGANG
+========================================================= */
+
+function openBookingForEntry() {
+
+  fillBookingSelects();
+
+
+  document.getElementById(
+    "bookingModal"
+  ).classList.add("show");
+
+
+  document.getElementById(
+    "bookingFrom"
+  ).value =
+    "warehouse";
+
+
+  document.getElementById(
+    "bookingTo"
+  ).value =
+    "warehouse";
+
+
+  updateBookingInfo();
+}
+
+
+
+async function warehouseEntry() {
+
+  try {
+
+    const materialId =
+      Number(
+        document.getElementById(
+          "bookingMaterial"
+        ).value
+      );
+
+
+    const amount =
+      Number(
+        document.getElementById(
+          "bookingAmount"
+        ).value
+      );
+
+
+    const employee =
+      document.getElementById(
+        "bookingEmployee"
+      ).value.trim();
+
+
+    if (!materialId) {
+
+      alert(
+        "Bitte Material auswählen."
+      );
+
+      return;
+    }
+
+
+    if (!amount || amount <= 0) {
+
+      alert(
+        "Bitte gültige Menge eingeben."
+      );
+
+      return;
+    }
+
+
+    if (!employee) {
+
+      alert(
+        "Bitte Mitarbeiter eingeben."
+      );
+
+      return;
+    }
+
+
+    await rpc(
+      "book_material",
+      {
+        p_material_id: materialId,
+        p_amount: amount,
+        p_type: "in",
+        p_employee: employee,
+        p_from_site_id: null,
+        p_to_site_id: null
+      }
+    );
+
+
+    closeBooking();
+
+
+    alert(
+      "✅ Zugang ins Lager gebucht!"
+    );
+
+
+    await loadAll();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Zugang konnte nicht gebucht werden:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
+   BAUSTELLEN
+========================================================= */
+
+function openSiteModal() {
+
+  document.getElementById(
+    "siteModal"
+  ).classList.add("show");
+
+
+  document.getElementById(
+    "siteName"
+  ).value = "";
+
+
+  document.getElementById(
+    "siteAddress"
+  ).value = "";
+}
+
+
+
+function closeSiteModal() {
+
+  document.getElementById(
+    "siteModal"
+  ).classList.remove("show");
+}
+
+
+
+async function createSite() {
+
+  try {
+
+    const name =
+      document.getElementById(
+        "siteName"
+      ).value.trim();
+
+
+    const address =
+      document.getElementById(
+        "siteAddress"
+      ).value.trim();
+
+
+    if (!name) {
+
+      alert(
+        "Bitte einen Baustellennamen eingeben."
+      );
+
+      return;
+    }
+
+
+    await supabase(
+      "sites",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          name: name,
+          address:
+            address || null,
+          active: true
+        })
+      }
+    );
+
+
+    closeSiteModal();
+
+
+    alert(
+      "✅ Baustelle angelegt!"
+    );
+
+
+    await loadAll();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Baustelle konnte nicht angelegt werden:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
+   HILFSFUNKTIONEN
+========================================================= */
+
+function getSiteName(id) {
+
+  const site =
+    sites.find(
+      s =>
+        Number(s.id) ===
+        Number(id)
+    );
+
+
+  return site
+    ? "🏗️ " + site.name
+    : "🏗️ Unbekannte Baustelle";
+}
+
+
+
+function formatNumber(value) {
+
+  return Number(value || 0)
+    .toLocaleString(
+      "de-DE",
+      {
+        maximumFractionDigits: 2
+      }
+    );
+}
+
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+}
+
+
+/* =========================================================
+   AUTOMATISCHE AKTUALISIERUNG
+========================================================= */
+
+setInterval(
+  async () => {
+
+    try {
+
+      await loadMaterials();
+      await loadSites();
+      await loadSiteStocks();
+      await loadMovements();
+
+      renderAll();
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Automatische Aktualisierung fehlgeschlagen:",
+        error
+      );
+    }
+
+  },
+  30000
+);
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+        .register("./sw.js")
+        .then(
+          registration => {
+
+            console.log(
+              "Service Worker aktiv:",
+              registration.scope
+            );
+
+          }
+        )
+        .catch(
+          error => {
+
+            console.error(
+              "Service Worker Fehler:",
+              error
+            );
+
+          }
+        );
+
+    }
+  );
+}
+
+</script>
+
+</body>
+</html>
+```
