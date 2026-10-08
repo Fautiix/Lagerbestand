@@ -2,25 +2,16 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>Materialverwaltung</title>
 
-<!-- PWA -->
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#0b0d10">
-
-<meta name="apple-mobile-web-app-capable"
-      content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent">
-
-<meta name="apple-mobile-web-app-title"
-      content="Material">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Material">
 
 <style>
 :root {
@@ -33,6 +24,7 @@
   --accent: #3b82f6;
   --green: #22c55e;
   --red: #ef4444;
+  --orange: #f59e0b;
   --radius: 18px;
 }
 
@@ -77,12 +69,6 @@ header {
   backdrop-filter: blur(14px);
 }
 
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 h1 {
   font-size: 27px;
   margin: 0;
@@ -100,7 +86,7 @@ h1 {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 7px;
   margin-bottom: 18px;
 }
@@ -109,7 +95,7 @@ h1 {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--muted);
-  padding: 12px 5px;
+  padding: 13px 5px;
   border-radius: 13px;
   font-size: 13px;
 }
@@ -143,6 +129,37 @@ h1 {
   color: var(--muted);
 }
 
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.stat-icon {
+  font-size: 22px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
 .stock {
   font-size: 30px;
   font-weight: 800;
@@ -153,11 +170,58 @@ h1 {
   color: var(--green);
 }
 
-.actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-  margin-top: 13px;
+.material-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.material-info {
+  min-width: 0;
+}
+
+.material-name {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.material-unit {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.material-stock {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.material-stock-number {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.material-stock-unit {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.search-box {
+  position: relative;
+  margin: 12px 0;
+}
+
+.search-box input {
+  padding-left: 42px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
 }
 
 .btn {
@@ -181,9 +245,19 @@ h1 {
   background: var(--red);
 }
 
+.btn.orange {
+  background: var(--orange);
+  color: #111;
+}
+
 .btn.full {
   width: 100%;
   margin-top: 10px;
+}
+
+.btn.small {
+  padding: 10px 12px;
+  font-size: 13px;
 }
 
 .direction-buttons {
@@ -257,7 +331,30 @@ label {
 .site-material {
   display: flex;
   justify-content: space-between;
-  padding: 7px 0;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.site-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.site-status {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: rgba(34,197,94,.14);
+  color: var(--green);
+  font-size: 12px;
+  margin-top: 7px;
+}
+
+.site-status.closed {
+  background: rgba(155,163,173,.14);
+  color: var(--muted);
 }
 
 .badge {
@@ -269,13 +366,15 @@ label {
   font-size: 12px;
 }
 
-.movement {
-  padding: 13px 0;
-  border-bottom: 1px solid var(--border);
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.movement:last-child {
-  border-bottom: 0;
+.movement {
+  padding: 15px;
 }
 
 .movement-main {
@@ -285,22 +384,21 @@ label {
 }
 
 .movement-route {
-  margin-top: 6px;
+  margin-top: 8px;
   color: var(--muted);
   font-size: 14px;
 }
 
 .movement-meta {
-  margin-top: 5px;
+  margin-top: 7px;
   color: var(--muted);
   font-size: 12px;
 }
 
-.arrow {
-  text-align: center;
-  font-size: 22px;
-  color: var(--accent);
-  margin: 8px 0;
+.movement-reversal {
+  margin-top: 8px;
+  color: var(--orange);
+  font-size: 12px;
 }
 
 .empty {
@@ -373,10 +471,20 @@ label {
   font-size: 14px;
 }
 
+.employee-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
 .loading {
   text-align: center;
   padding: 30px;
   color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
 }
 
 @media (min-width: 701px) {
@@ -397,12 +505,8 @@ label {
 <div class="app">
 
 <header>
-  <div class="header-row">
-    <div>
-      <h1>Materialverwaltung</h1>
-      <div class="subtitle">Lager & Baustellen</div>
-    </div>
-  </div>
+  <h1>Materialverwaltung</h1>
+  <div class="subtitle">Lager & Baustellen</div>
 </header>
 
 <div class="content">
@@ -420,11 +524,6 @@ label {
     </button>
 
     <button class="tab"
-            onclick="showTab('buchen', this)">
-      🔄 Buchen
-    </button>
-
-    <button class="tab"
             onclick="showTab('historie', this)">
       📜 Historie
     </button>
@@ -434,16 +533,10 @@ label {
   <section id="lager"></section>
 
   <section id="baustellen"
-           style="display:none">
-  </section>
-
-  <section id="buchen"
-           style="display:none">
-  </section>
+           style="display:none"></section>
 
   <section id="historie"
-           style="display:none">
-  </section>
+           style="display:none"></section>
 
 </div>
 </div>
@@ -455,9 +548,9 @@ label {
 </button>
 
 
-<!-- ================================
+<!-- =========================================
      BUCHUNGS-MODAL
-================================ -->
+========================================= -->
 
 <div class="modal-bg"
      id="bookingModal">
@@ -472,7 +565,7 @@ label {
         </h2>
 
         <div class="subtitle">
-          Nur Lager ↔ Baustelle
+          Lager ↔ Baustelle
         </div>
       </div>
 
@@ -495,6 +588,7 @@ label {
 
         <span class="direction-icon">📦</span>
         VOM LAGER
+
         <div class="subtitle">
           Material auf eine Baustelle bringen
         </div>
@@ -509,6 +603,7 @@ label {
 
         <span class="direction-icon">🏗️</span>
         VON BAUSTELLE
+
         <div class="subtitle">
           Material zurück ins Lager bringen
         </div>
@@ -520,7 +615,6 @@ label {
 
     <div id="bookingFields"
          style="display:none">
-
 
       <label>Material</label>
 
@@ -548,15 +642,25 @@ label {
 
       <label>Mitarbeiter</label>
 
-      <input
-        id="bookingEmployee"
-        type="text"
-        placeholder="Name">
+      <div class="employee-row">
+
+        <select id="bookingEmployee">
+          <option value="">
+            Mitarbeiter auswählen
+          </option>
+        </select>
+
+        <button
+          class="btn"
+          onclick="openEmployeeModal()">
+          +
+        </button>
+
+      </div>
 
 
       <div id="bookingInfo"
            class="notice">
-
       </div>
 
 
@@ -573,9 +677,55 @@ label {
 </div>
 
 
-<!-- ================================
+<!-- =========================================
+     MITARBEITER-MODAL
+========================================= -->
+
+<div class="modal-bg"
+     id="employeeModal">
+
+  <div class="modal">
+
+    <div class="modal-head">
+
+      <h2 style="margin:0">
+        Mitarbeiter
+      </h2>
+
+      <button class="close"
+              onclick="closeEmployeeModal()">
+        ×
+      </button>
+
+    </div>
+
+    <div class="subtitle">
+      Neuer Mitarbeiter
+    </div>
+
+
+    <label>Name</label>
+
+    <input
+      id="newEmployeeName"
+      placeholder="z. B. Thomas">
+
+
+    <button
+      class="btn primary full"
+      onclick="createEmployee()">
+
+      👷 Mitarbeiter hinzufügen
+
+    </button>
+
+  </div>
+</div>
+
+
+<!-- =========================================
      BAUSTELLEN-MODAL
-================================ -->
+========================================= -->
 
 <div class="modal-bg"
      id="siteModal">
@@ -623,7 +773,6 @@ label {
 
   </div>
 </div>
-
 
 
 <script>
@@ -681,7 +830,6 @@ async function supabase(path, options = {}) {
 }
 
 
-
 async function rpc(functionName, body) {
 
   const response = await fetch(
@@ -728,8 +876,13 @@ let materials = [];
 let sites = [];
 let siteStocks = [];
 let movements = [];
+let employees = [];
 
 let bookingDirection = null;
+
+let historyMaterialFilter = "";
+let historySiteFilter = "";
+let historyEmployeeFilter = "";
 
 
 /* =========================================================
@@ -754,7 +907,8 @@ async function loadAll() {
     await Promise.all([
       loadMaterials(),
       loadSites(),
-      loadMovements()
+      loadMovements(),
+      loadEmployees()
     ]);
 
 
@@ -781,7 +935,6 @@ async function loadAll() {
 }
 
 
-
 async function loadMaterials() {
 
   materials =
@@ -791,15 +944,13 @@ async function loadMaterials() {
 }
 
 
-
 async function loadSites() {
 
   sites =
     await supabase(
-      "sites?select=id,name,address,active,created_at&active=eq.true&order=name"
+      "sites?select=id,name,address,active,created_at&order=name"
     );
 }
-
 
 
 async function loadSiteStocks() {
@@ -811,12 +962,20 @@ async function loadSiteStocks() {
 }
 
 
-
 async function loadMovements() {
 
   movements =
     await supabase(
       "stock_movements?select=id,material_id,amount,type,employee,created_at,from_site_id,to_site_id&order=created_at.desc&limit=100"
+    );
+}
+
+
+async function loadEmployees() {
+
+  employees =
+    await supabase(
+      "employees?select=id,name,active&active=eq.true&order=name"
     );
 }
 
@@ -847,11 +1006,6 @@ function showTab(tab, button) {
 
 
   button.classList.add("active");
-
-
-  if (tab === "buchen") {
-    renderBookingPage();
-  }
 }
 
 
@@ -863,10 +1017,8 @@ function renderAll() {
 
   renderWarehouse();
   renderSites();
-  renderBookingPage();
   renderHistory();
 }
-
 
 
 /* =========================================================
@@ -879,60 +1031,238 @@ function renderWarehouse() {
     document.getElementById("lager");
 
 
+  const totalMaterials =
+    materials.length;
+
+
+  const totalSites =
+    sites.filter(
+      s => s.active
+    ).length;
+
+
+  const today =
+    new Date();
+
+
+  const todayCount =
+    movements.filter(
+      movement => {
+
+        const date =
+          new Date(
+            movement.created_at
+          );
+
+        return (
+          date.getFullYear() ===
+            today.getFullYear() &&
+
+          date.getMonth() ===
+            today.getMonth() &&
+
+          date.getDate() ===
+            today.getDate()
+        );
+      }
+    ).length;
+
+
   let html = `
+
+    <div class="dashboard">
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📦
+        </div>
+
+        <div class="stat-number">
+          ${totalMaterials}
+        </div>
+
+        <div class="stat-label">
+          Materialien
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          🏗️
+        </div>
+
+        <div class="stat-number">
+          ${totalSites}
+        </div>
+
+        <div class="stat-label">
+          Baustellen
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          🔄
+        </div>
+
+        <div class="stat-number">
+          ${todayCount}
+        </div>
+
+        <div class="stat-label">
+          Heute
+        </div>
+
+      </div>
+
+    </div>
+
 
     <div class="card">
 
-      <h2>📦 Lagerbestand</h2>
+      <h2>
+        📦 Lagerbestand
+      </h2>
 
       <div class="muted">
         Aktueller zentraler Lagerbestand
       </div>
 
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          🔎
+        </span>
+
+        <input
+          id="materialSearch"
+          type="search"
+          placeholder="Material suchen..."
+          oninput="renderWarehouseMaterials()">
+
+      </div>
+
     </div>
+
+
+    <div id="warehouseMaterials"></div>
 
   `;
 
 
-  materials.forEach(material => {
+  container.innerHTML = html;
 
-    html += `
-
-      <div class="card">
-
-        <div class="card-title">
-          ${escapeHtml(material.name)}
-        </div>
+  renderWarehouseMaterials();
+}
 
 
-        <div class="stock ok">
+function renderWarehouseMaterials() {
 
-          ${formatNumber(material.stock)}
-          ${escapeHtml(
-            material.unit || "m"
-          )}
-
-        </div>
-
-      </div>
-
-    `;
-  });
+  const container =
+    document.getElementById(
+      "warehouseMaterials"
+    );
 
 
-  if (!materials.length) {
-
-    html += `
-      <div class="empty">
-        Keine Materialien vorhanden.
-      </div>
-    `;
+  if (!container) {
+    return;
   }
 
 
-  container.innerHTML = html;
-}
+  const search =
+    (
+      document.getElementById(
+        "materialSearch"
+      )?.value || ""
+    )
+      .trim()
+      .toLowerCase();
 
+
+  const filtered =
+    materials.filter(
+      material =>
+        material.name
+          .toLowerCase()
+          .includes(search)
+    );
+
+
+  if (!filtered.length) {
+
+    container.innerHTML = `
+
+      <div class="empty">
+        Kein Material gefunden.
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    filtered.map(
+      material => `
+
+        <div class="card material-card">
+
+          <div class="material-info">
+
+            <div class="material-name">
+
+              ${escapeHtml(
+                material.name
+              )}
+
+            </div>
+
+            <div class="material-unit">
+
+              Einheit:
+              ${escapeHtml(
+                material.unit || "m"
+              )}
+
+            </div>
+
+          </div>
+
+
+          <div class="material-stock">
+
+            <div class="material-stock-number">
+
+              ${formatNumber(
+                material.stock
+              )}
+
+            </div>
+
+            <div class="material-stock-unit">
+
+              ${escapeHtml(
+                material.unit || "m"
+              )}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `
+    ).join("");
+}
 
 
 /* =========================================================
@@ -947,14 +1277,28 @@ function renderSites() {
     );
 
 
+  const activeSites =
+    sites.filter(
+      s => s.active
+    );
+
+
+  const closedSites =
+    sites.filter(
+      s => !s.active
+    );
+
+
   let html = `
 
     <div class="card">
 
-      <h2>🏗️ Baustellen</h2>
+      <h2>
+        🏗️ Baustellen
+      </h2>
 
       <div class="muted">
-        Materialbestand je Baustelle
+        Aktive Baustellen und deren Material
       </div>
 
 
@@ -971,149 +1315,59 @@ function renderSites() {
   `;
 
 
-  sites.forEach(site => {
+  activeSites.forEach(
+    site => {
 
-    const stocks =
-      siteStocks.filter(
-        s =>
-          Number(s.site_id) ===
-          Number(site.id)
+      html += renderSiteCard(
+        site,
+        false
       );
 
+    }
+  );
+
+
+  if (!activeSites.length) {
+
+    html += `
+
+      <div class="empty">
+        Keine aktiven Baustellen.
+      </div>
+
+    `;
+  }
+
+
+  if (closedSites.length) {
 
     html += `
 
       <div class="card">
 
-        <div class="card-title">
+        <h2>
+          ⚪ Abgeschlossene Baustellen
+        </h2>
 
-          🏗️
-          ${escapeHtml(site.name)}
-
+        <div class="muted">
+          Diese Baustellen sind für neue Buchungen gesperrt.
         </div>
 
+      </div>
 
-        ${
-          site.address
-          ? `<div class="muted">
-               ${escapeHtml(site.address)}
-             </div>`
-          : ""
-        }
-
-
-        <div class="site-stock">
     `;
 
 
-    if (!stocks.length) {
+    closedSites.forEach(
+      site => {
 
-      html += `
+        html += renderSiteCard(
+          site,
+          true
+        );
 
-        <div class="empty">
-
-          Noch kein Material
-          auf dieser Baustelle.
-
-        </div>
-
-      `;
-
-    } else {
-
-      let hasVisibleStock = false;
-
-      stocks.forEach(stock => {
-
-        const material =
-          materials.find(
-            m =>
-              Number(m.id) ===
-              Number(stock.material_id)
-          );
-
-
-        if (
-          !material ||
-          Number(stock.stock) <= 0
-        ) {
-          return;
-        }
-
-        hasVisibleStock = true;
-
-
-        html += `
-
-          <div class="site-material">
-
-            <span>
-              ${escapeHtml(material.name)}
-            </span>
-
-            <strong>
-
-              ${formatNumber(
-                stock.stock
-              )}
-
-              ${escapeHtml(
-                material.unit || "m"
-              )}
-
-            </strong>
-
-          </div>
-
-        `;
-      });
-
-      if (!hasVisibleStock) {
-
-        html += `
-
-          <div class="empty">
-            Noch kein Material
-            auf dieser Baustelle.
-          </div>
-
-        `;
       }
-    }
-
-
-    html += `
-
-        </div>
-
-
-        <button
-          class="btn primary full"
-          onclick="openBooking(null, ${site.id})">
-
-          🔄 Material buchen
-
-        </button>
-
-
-      </div>
-
-    `;
-  });
-
-
-  if (!sites.length) {
-
-    html += `
-
-      <div class="empty">
-
-        Noch keine Baustellen
-        angelegt.
-
-      </div>
-
-    `;
+    );
   }
 
 
@@ -1121,99 +1375,160 @@ function renderSites() {
 }
 
 
-/* =========================================================
-   BUCHUNGSSEITE
-========================================================= */
+function renderSiteCard(
+  site,
+  closed
+) {
 
-function renderBookingPage() {
+  const stocks =
+    siteStocks.filter(
+      s =>
+        Number(s.site_id) ===
+        Number(site.id)
+    );
 
-  document.getElementById(
-    "buchen"
-  ).innerHTML = `
+
+  let stockHtml = "";
+
+  let hasStock = false;
+
+
+  stocks.forEach(
+    stock => {
+
+      const material =
+        materials.find(
+          m =>
+            Number(m.id) ===
+            Number(stock.material_id)
+        );
+
+
+      if (
+        !material ||
+        Number(stock.stock) <= 0
+      ) {
+        return;
+      }
+
+
+      hasStock = true;
+
+
+      stockHtml += `
+
+        <div class="site-material">
+
+          <span>
+            ${escapeHtml(
+              material.name
+            )}
+          </span>
+
+          <strong>
+
+            ${formatNumber(
+              stock.stock
+            )}
+
+            ${escapeHtml(
+              material.unit || "m"
+            )}
+
+          </strong>
+
+        </div>
+
+      `;
+    }
+  );
+
+
+  if (!hasStock) {
+
+    stockHtml = `
+
+      <div class="empty">
+        Kein Material vorhanden.
+      </div>
+
+    `;
+  }
+
+
+  return `
 
     <div class="card">
 
-      <h2>🔄 Material buchen</h2>
+      <div class="card-title">
 
-      <div class="muted">
-
-        Material wird ausschließlich
-        zwischen Lager und Baustelle bewegt.
+        🏗️
+        ${escapeHtml(site.name)}
 
       </div>
 
 
-      <div class="direction-buttons">
+      ${
+        site.address
+        ? `<div class="muted">
+             ${escapeHtml(site.address)}
+           </div>`
+        : ""
+      }
 
-        <button
-          class="direction-btn"
-          onclick="openBooking('warehouse')">
 
-          <span class="direction-icon">
-            📦
-          </span>
+      <div class="site-status ${
+        closed ? "closed" : ""
+      }">
 
-          VOM LAGER
+        ${closed
+          ? "⚪ Abgeschlossen"
+          : "🟢 Aktiv"}
 
-          <div class="subtitle">
-            Material auf eine Baustelle bringen
+      </div>
+
+
+      <div class="site-stock">
+
+        ${stockHtml}
+
+      </div>
+
+
+      ${
+        closed
+        ? `
+          <button
+            class="btn green full"
+            onclick="setSiteActive(${site.id}, true)">
+
+            🟢 Baustelle wieder aktivieren
+
+          </button>
+        `
+        : `
+          <div class="site-actions">
+
+            <button
+              class="btn primary"
+              onclick="openBooking('site', ${site.id})">
+
+              🔄 Material
+
+            </button>
+
+
+            <button
+              class="btn"
+              onclick="setSiteActive(${site.id}, false)">
+
+              ✓ Abschließen
+
+            </button>
+
           </div>
-
-        </button>
-
-
-        <button
-          class="direction-btn"
-          onclick="openBooking('site')">
-
-          <span class="direction-icon">
-            🏗️
-          </span>
-
-          VON BAUSTELLE
-
-          <div class="subtitle">
-            Material zurück ins Lager bringen
-          </div>
-
-        </button>
-
-      </div>
-
-    </div>
-
-
-    <div class="card">
-
-      <h2>
-        So funktioniert's
-      </h2>
-
-
-      <div class="site-material">
-
-        <span>
-          📦 Lager → Baustelle
-        </span>
-
-        <strong>
-          Material raus
-        </strong>
-
-      </div>
-
-
-      <div class="site-material">
-
-        <span>
-          🏗️ Baustelle → Lager
-        </span>
-
-        <strong>
-          Material zurück
-        </strong>
-
-      </div>
+        `
+      }
 
     </div>
 
@@ -1238,141 +1553,410 @@ function renderHistory() {
     <div class="card">
 
       <h2>
-        📜 Buchungshistorie
+        📜 Historie
       </h2>
 
       <div class="muted">
+        Die letzten 100 Materialbewegungen
+      </div>
 
-        Die letzten 100
-        Materialbewegungen
+
+      <div class="filter-grid">
+
+        <select
+          id="historyMaterial"
+          onchange="applyHistoryFilters()">
+
+          <option value="">
+            Alle Materialien
+          </option>
+
+          ${
+            materials.map(
+              m => `
+
+                <option value="${m.id}"
+                  ${
+                    String(
+                      historyMaterialFilter
+                    ) === String(m.id)
+                    ? "selected"
+                    : ""
+                  }>
+
+                  ${escapeHtml(m.name)}
+
+                </option>
+
+              `
+            ).join("")
+          }
+
+        </select>
+
+
+        <select
+          id="historySite"
+          onchange="applyHistoryFilters()">
+
+          <option value="">
+            Alle Baustellen
+          </option>
+
+          ${
+            sites.map(
+              s => `
+
+                <option value="${s.id}"
+                  ${
+                    String(
+                      historySiteFilter
+                    ) === String(s.id)
+                    ? "selected"
+                    : ""
+                  }>
+
+                  ${escapeHtml(s.name)}
+
+                </option>
+
+              `
+            ).join("")
+          }
+
+        </select>
+
+
+      </div>
+
+
+      <div style="margin-top:8px">
+
+        <select
+          id="historyEmployee"
+          onchange="applyHistoryFilters()">
+
+          <option value="">
+            Alle Mitarbeiter
+          </option>
+
+          ${
+            employees.map(
+              e => `
+
+                <option value="${escapeHtml(e.name)}"
+                  ${
+                    historyEmployeeFilter === e.name
+                    ? "selected"
+                    : ""
+                  }>
+
+                  ${escapeHtml(e.name)}
+
+                </option>
+
+              `
+            ).join("")
+          }
+
+        </select>
 
       </div>
 
     </div>
 
+
+    <div id="historyList"></div>
+
   `;
 
 
-  if (!movements.length) {
+  container.innerHTML = html;
 
-    html += `
+  renderHistoryList();
+}
+
+
+function applyHistoryFilters() {
+
+  historyMaterialFilter =
+    document.getElementById(
+      "historyMaterial"
+    ).value;
+
+
+  historySiteFilter =
+    document.getElementById(
+      "historySite"
+    ).value;
+
+
+  historyEmployeeFilter =
+    document.getElementById(
+      "historyEmployee"
+    ).value;
+
+
+  renderHistoryList();
+}
+
+
+function renderHistoryList() {
+
+  const container =
+    document.getElementById(
+      "historyList"
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  let filtered =
+    movements.filter(
+      movement => {
+
+        if (
+          historyMaterialFilter &&
+          String(
+            movement.material_id
+          ) !==
+          String(
+            historyMaterialFilter
+          )
+        ) {
+          return false;
+        }
+
+
+        if (
+          historySiteFilter &&
+          String(
+            movement.from_site_id
+          ) !==
+          String(
+            historySiteFilter
+          ) &&
+          String(
+            movement.to_site_id
+          ) !==
+          String(
+            historySiteFilter
+          )
+        ) {
+          return false;
+        }
+
+
+        if (
+          historyEmployeeFilter &&
+          movement.employee !==
+          historyEmployeeFilter
+        ) {
+          return false;
+        }
+
+
+        return true;
+      }
+    );
+
+
+  if (!filtered.length) {
+
+    container.innerHTML = `
 
       <div class="empty">
-
-        Noch keine Buchungen
-        vorhanden.
-
+        Keine passenden Buchungen gefunden.
       </div>
 
     `;
-
-
-    container.innerHTML = html;
 
     return;
   }
 
 
-  movements.forEach(movement => {
+  container.innerHTML =
+    filtered.map(
+      movement => {
 
-    const material =
-      materials.find(
-        m =>
-          Number(m.id) ===
-          Number(movement.material_id)
-      );
+        const material =
+          materials.find(
+            m =>
+              Number(m.id) ===
+              Number(movement.material_id)
+          );
 
 
-    const fromName =
-      movement.from_site_id
-      ? getSiteName(
+        const fromName =
           movement.from_site_id
-        )
-      : "📦 Lager";
+          ? getSiteName(
+              movement.from_site_id
+            )
+          : "📦 Lager";
 
 
-    const toName =
-      movement.to_site_id
-      ? getSiteName(
+        const toName =
           movement.to_site_id
-        )
-      : "📦 Lager";
+          ? getSiteName(
+              movement.to_site_id
+            )
+          : "📦 Lager";
 
 
-    const date =
-      new Date(
-        movement.created_at
-      );
+        const date =
+          new Date(
+            movement.created_at
+          );
 
 
-    html += `
-
-      <div class="card movement">
-
-        <div class="movement-main">
-
-          <strong>
-            ${escapeHtml(
-              material?.name ||
-              "Unbekannt"
-            )}
-          </strong>
+        const isReversal =
+          movement.type ===
+          "reversal";
 
 
-          <strong>
-
-            ${formatNumber(
-              movement.amount
-            )}
-
-            ${escapeHtml(
-              material?.unit || "m"
-            )}
-
-          </strong>
-
-        </div>
+        let originalId = null;
 
 
-        <div class="movement-route">
+        if (
+          isReversal &&
+          movement.employee
+        ) {
 
-          ${escapeHtml(fromName)}
-
-          &nbsp; → &nbsp;
-
-          ${escapeHtml(toName)}
-
-        </div>
-
-
-        <div class="movement-meta">
-
-          👤
-          ${escapeHtml(
-            movement.employee ||
-            "Unbekannt"
-          )}
-
-          ·
-
-          ${date.toLocaleString(
-            "de-DE"
-          )}
-
-        </div>
-
-      </div>
-
-    `;
-  });
+          originalId =
+            movement.employee
+              .replace(
+                "REVERSAL:",
+                ""
+              );
+        }
 
 
-  container.innerHTML = html;
+        const alreadyReversed =
+          movements.some(
+            m =>
+              m.type === "reversal" &&
+              m.employee ===
+              "REVERSAL:" +
+              movement.id
+          );
+
+
+        return `
+
+          <div class="card movement">
+
+            <div class="movement-main">
+
+              <strong>
+
+                ${escapeHtml(
+                  material?.name ||
+                  "Unbekannt"
+                )}
+
+              </strong>
+
+
+              <strong>
+
+                ${formatNumber(
+                  movement.amount
+                )}
+
+                ${escapeHtml(
+                  material?.unit || "m"
+                )}
+
+              </strong>
+
+            </div>
+
+
+            <div class="movement-route">
+
+              ${escapeHtml(fromName)}
+
+              &nbsp; → &nbsp;
+
+              ${escapeHtml(toName)}
+
+            </div>
+
+
+            <div class="movement-meta">
+
+              👤
+              ${escapeHtml(
+                isReversal
+                ? "Rückbuchung"
+                : (
+                    movement.employee ||
+                    "Unbekannt"
+                  )
+              )}
+
+              ·
+
+              ${date.toLocaleString(
+                "de-DE"
+              )}
+
+            </div>
+
+
+            ${
+              isReversal
+              ? `
+
+                <div class="movement-reversal">
+
+                  ↩️ Rückbuchung von
+                  Buchung #${escapeHtml(
+                    originalId
+                  )}
+
+                </div>
+
+              `
+              : (
+                alreadyReversed
+                ? `
+
+                  <div class="movement-reversal">
+
+                    ↩️ Bereits rückgängig gemacht
+
+                  </div>
+
+                `
+                : `
+
+                  <button
+                    class="btn small full"
+                    onclick="reverseMovement(${movement.id})">
+
+                    ↩️ Buchung rückgängig
+
+                  </button>
+
+                `
+              )
+            }
+
+          </div>
+
+        `;
+
+      }
+    ).join("");
 }
 
 
 /* =========================================================
-   BUCHUNGS-MODAL
+   BUCHUNG
 ========================================================= */
 
 function openBooking(
@@ -1381,6 +1965,7 @@ function openBooking(
 ) {
 
   fillMaterialSelect();
+  fillEmployeeSelect();
 
 
   document.getElementById(
@@ -1424,7 +2009,6 @@ function openBooking(
 }
 
 
-
 function closeBooking() {
 
   document.getElementById(
@@ -1433,7 +2017,6 @@ function closeBooking() {
 
   bookingDirection = null;
 }
-
 
 
 function fillMaterialSelect() {
@@ -1459,9 +2042,44 @@ function fillMaterialSelect() {
 }
 
 
+function fillEmployeeSelect() {
+
+  const select =
+    document.getElementById(
+      "bookingEmployee"
+    );
+
+
+  select.innerHTML = `
+
+    <option value="">
+      Mitarbeiter auswählen
+    </option>
+
+    ${
+      employees.map(
+        employee => `
+
+          <option value="${escapeHtml(
+            employee.name
+          )}">
+
+            ${escapeHtml(
+              employee.name
+            )}
+
+          </option>
+
+        `
+      ).join("")
+    }
+
+  `;
+}
+
 
 /* =========================================================
-   RICHTUNG AUSWÄHLEN
+   RICHTUNG
 ========================================================= */
 
 function selectDirection(
@@ -1501,22 +2119,31 @@ function selectDirection(
     );
 
 
-  if (direction === "warehouse") {
+  area.innerHTML = `
 
-    area.innerHTML = `
+    <label>
 
-      <label>
-        Ziel-Baustelle
-      </label>
+      ${
+        direction === "warehouse"
+        ? "Ziel-Baustelle"
+        : "Baustelle"
+      }
 
-      <select id="bookingSite">
+    </label>
 
-        <option value="">
-          Baustelle auswählen
-        </option>
 
-        ${
-          sites.map(
+    <select id="bookingSite">
+
+      <option value="">
+        Baustelle auswählen
+      </option>
+
+      ${
+        sites
+          .filter(
+            site => site.active
+          )
+          .map(
             site => `
 
               <option value="${site.id}">
@@ -1528,90 +2155,33 @@ function selectDirection(
 
             `
           ).join("")
-        }
+      }
 
-      </select>
+    </select>
 
-    `;
-
-
-    const siteSelect =
-      document.getElementById(
-        "bookingSite"
-      );
+  `;
 
 
-    if (preselectedSite) {
-
-      siteSelect.value =
-        String(preselectedSite);
-
-    }
+  const siteSelect =
+    document.getElementById(
+      "bookingSite"
+    );
 
 
-    siteSelect.onchange =
-      updateBookingInfo;
+  if (preselectedSite) {
 
+    siteSelect.value =
+      String(preselectedSite);
 
-    updateBookingInfo();
-
-
-  } else {
-
-    area.innerHTML = `
-
-      <label>
-        Baustelle
-      </label>
-
-      <select id="bookingSite">
-
-        <option value="">
-          Baustelle auswählen
-        </option>
-
-        ${
-          sites.map(
-            site => `
-
-              <option value="${site.id}">
-
-                🏗️
-                ${escapeHtml(site.name)}
-
-              </option>
-
-            `
-          ).join("")
-        }
-
-      </select>
-
-    `;
-
-
-    const siteSelect =
-      document.getElementById(
-        "bookingSite"
-      );
-
-
-    if (preselectedSite) {
-
-      siteSelect.value =
-        String(preselectedSite);
-
-    }
-
-
-    siteSelect.onchange =
-      updateBookingInfo;
-
-
-    updateBookingInfo();
   }
-}
 
+
+  siteSelect.onchange =
+    updateBookingInfo;
+
+
+  updateBookingInfo();
+}
 
 
 /* =========================================================
@@ -1641,7 +2211,7 @@ function updateBookingInfo() {
   if (!bookingDirection) {
 
     info.innerHTML =
-      "Bitte zuerst die Richtung auswählen.";
+      "Bitte Richtung auswählen.";
 
     preview.innerHTML =
       "Noch keine Richtung ausgewählt.";
@@ -1653,20 +2223,10 @@ function updateBookingInfo() {
   if (!siteSelect ||
       !siteSelect.value) {
 
-    if (
-      bookingDirection ===
-      "warehouse"
-    ) {
-
-      preview.innerHTML =
-        "📦 Lager → 🏗️ Baustelle";
-
-    } else {
-
-      preview.innerHTML =
-        "🏗️ Baustelle → 📦 Lager";
-
-    }
+    preview.innerHTML =
+      bookingDirection === "warehouse"
+      ? "📦 Lager → 🏗️ Baustelle"
+      : "🏗️ Baustelle → 📦 Lager";
 
 
     info.innerHTML =
@@ -1694,36 +2254,40 @@ function updateBookingInfo() {
       📦 Lager
       &nbsp; → &nbsp;
       🏗️ ${escapeHtml(
-        site?.name || "Baustelle"
+        site?.name ||
+        "Baustelle"
       )}
 
     `;
 
 
     info.innerHTML =
-      "📦 Der Lagerbestand wird reduziert und der Bestand der Baustelle erhöht.";
+      "Der Lagerbestand wird reduziert und der Baustellenbestand erhöht.";
 
   } else {
 
     preview.innerHTML = `
 
       🏗️ ${escapeHtml(
-        site?.name || "Baustelle"
+        site?.name ||
+        "Baustelle"
       )}
+
       &nbsp; → &nbsp;
+
       📦 Lager
 
     `;
 
 
     info.innerHTML =
-      "🏗️ Der Baustellenbestand wird reduziert und dem Lager gutgeschrieben.";
+      "Der Baustellenbestand wird reduziert und dem Lager gutgeschrieben.";
   }
 }
 
 
 /* =========================================================
-   BUCHUNG
+   BUCHUNG ABSENDEN
 ========================================================= */
 
 async function submitBooking() {
@@ -1733,7 +2297,7 @@ async function submitBooking() {
     if (!bookingDirection) {
 
       alert(
-        "Bitte zuerst auswählen, ob das Material vom Lager oder von einer Baustelle kommt."
+        "Bitte zuerst die Richtung auswählen."
       );
 
       return;
@@ -1767,7 +2331,7 @@ async function submitBooking() {
     const employee =
       document.getElementById(
         "bookingEmployee"
-      ).value.trim();
+      ).value;
 
 
     if (!materialId) {
@@ -1793,7 +2357,7 @@ async function submitBooking() {
     if (!siteId) {
 
       alert(
-        "Bitte eine Baustelle auswählen."
+        "Bitte Baustelle auswählen."
       );
 
       return;
@@ -1803,7 +2367,7 @@ async function submitBooking() {
     if (!employee) {
 
       alert(
-        "Bitte Mitarbeiter eingeben."
+        "Bitte Mitarbeiter auswählen."
       );
 
       return;
@@ -1862,11 +2426,6 @@ async function submitBooking() {
     ).value = "";
 
 
-    document.getElementById(
-      "bookingEmployee"
-    ).value = "";
-
-
     alert(
       "✅ Buchung erfolgreich!"
     );
@@ -1882,6 +2441,95 @@ async function submitBooking() {
 
     alert(
       "❌ Buchung fehlgeschlagen:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
+   MITARBEITER
+========================================================= */
+
+function openEmployeeModal() {
+
+  document.getElementById(
+    "employeeModal"
+  ).classList.add("show");
+
+
+  document.getElementById(
+    "newEmployeeName"
+  ).value = "";
+}
+
+
+function closeEmployeeModal() {
+
+  document.getElementById(
+    "employeeModal"
+  ).classList.remove("show");
+}
+
+
+async function createEmployee() {
+
+  try {
+
+    const name =
+      document.getElementById(
+        "newEmployeeName"
+      ).value.trim();
+
+
+    if (!name) {
+
+      alert(
+        "Bitte Namen eingeben."
+      );
+
+      return;
+    }
+
+
+    await supabase(
+      "employees",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          name: name,
+          active: true
+        })
+      }
+    );
+
+
+    closeEmployeeModal();
+
+
+    await loadEmployees();
+
+    fillEmployeeSelect();
+
+
+    document.getElementById(
+      "bookingEmployee"
+    ).value = name;
+
+
+    alert(
+      "✅ Mitarbeiter hinzugefügt!"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Mitarbeiter konnte nicht hinzugefügt werden:\n\n" +
       error.message
     );
   }
@@ -1910,14 +2558,12 @@ function openSiteModal() {
 }
 
 
-
 function closeSiteModal() {
 
   document.getElementById(
     "siteModal"
   ).classList.remove("show");
 }
-
 
 
 async function createSite() {
@@ -1986,6 +2632,165 @@ async function createSite() {
 
 
 /* =========================================================
+   BAUSTELLE AKTIV / ABGESCHLOSSEN
+========================================================= */
+
+async function setSiteActive(
+  siteId,
+  active
+) {
+
+  const site =
+    sites.find(
+      s =>
+        Number(s.id) ===
+        Number(siteId)
+    );
+
+
+  if (!site) {
+    return;
+  }
+
+
+  const message =
+    active
+    ? "Baustelle wieder aktivieren?"
+    : "Baustelle wirklich abschließen?";
+
+
+  if (!confirm(message)) {
+    return;
+  }
+
+
+  try {
+
+    await supabase(
+      `sites?id=eq.${siteId}`,
+      {
+        method: "PATCH",
+
+        body: JSON.stringify({
+          active: active
+        })
+      }
+    );
+
+
+    await loadAll();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Baustelle konnte nicht geändert werden:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
+   RÜCKGÄNGIG
+========================================================= */
+
+async function reverseMovement(
+  movementId
+) {
+
+  const movement =
+    movements.find(
+      m =>
+        Number(m.id) ===
+        Number(movementId)
+    );
+
+
+  if (!movement) {
+    return;
+  }
+
+
+  if (
+    movement.type ===
+    "reversal"
+  ) {
+
+    alert(
+      "Diese Buchung ist bereits eine Rückbuchung."
+    );
+
+    return;
+  }
+
+
+  const material =
+    materials.find(
+      m =>
+        Number(m.id) ===
+        Number(movement.material_id)
+    );
+
+
+  const confirmed =
+    confirm(
+      "Buchung wirklich rückgängig machen?\n\n" +
+
+      (material?.name || "Material") +
+      ": " +
+      formatNumber(
+        movement.amount
+      ) +
+      " " +
+      (material?.unit || "m")
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    await rpc(
+      "reverse_movement",
+      {
+        p_movement_id:
+          movementId,
+
+        p_employee:
+          "App"
+      }
+    );
+
+
+    alert(
+      "↩️ Buchung wurde rückgängig gemacht."
+    );
+
+
+    await loadAll();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Rückbuchung fehlgeschlagen:\n\n" +
+      error.message
+    );
+  }
+}
+
+
+/* =========================================================
    HILFSFUNKTIONEN
 ========================================================= */
 
@@ -2005,7 +2810,6 @@ function getSiteName(id) {
 }
 
 
-
 function formatNumber(value) {
 
   return Number(value || 0)
@@ -2016,7 +2820,6 @@ function formatNumber(value) {
       }
     );
 }
-
 
 
 function escapeHtml(value) {
@@ -2058,6 +2861,7 @@ setInterval(
       await loadSites();
       await loadSiteStocks();
       await loadMovements();
+      await loadEmployees();
 
       renderAll();
 
