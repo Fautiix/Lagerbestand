@@ -22,7 +22,6 @@
 <meta name="apple-mobile-web-app-title"
       content="Material">
 
-
 <style>
 :root {
   --bg: #0b0d10;
@@ -34,7 +33,6 @@
   --accent: #3b82f6;
   --green: #22c55e;
   --red: #ef4444;
-  --orange: #f59e0b;
   --radius: 18px;
 }
 
@@ -151,10 +149,6 @@ h1 {
   margin: 8px 0;
 }
 
-.stock.low {
-  color: var(--red);
-}
-
 .stock.ok {
   color: var(--green);
 }
@@ -187,14 +181,48 @@ h1 {
   background: var(--red);
 }
 
-.btn.orange {
-  background: var(--orange);
-  color: #111;
-}
-
 .btn.full {
   width: 100%;
   margin-top: 10px;
+}
+
+.direction-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.direction-btn {
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 14px;
+  background: var(--card2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 17px;
+  text-align: left;
+}
+
+.direction-btn.active {
+  border-color: var(--accent);
+  background: rgba(59,130,246,.16);
+}
+
+.direction-icon {
+  font-size: 25px;
+  margin-right: 8px;
+}
+
+.route-box {
+  margin-top: 15px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  text-align: center;
+  font-weight: 700;
 }
 
 input,
@@ -268,18 +296,11 @@ label {
   font-size: 12px;
 }
 
-.route {
-  display: grid;
-  grid-template-columns: 1fr 40px 1fr;
-  align-items: center;
-  gap: 7px;
-  margin-top: 10px;
-}
-
 .arrow {
   text-align: center;
   font-size: 22px;
   color: var(--accent);
+  margin: 8px 0;
 }
 
 .empty {
@@ -371,7 +392,6 @@ label {
 </style>
 </head>
 
-
 <body>
 
 <div class="app">
@@ -388,6 +408,7 @@ label {
 <div class="content">
 
   <div class="tabs">
+
     <button class="tab active"
             onclick="showTab('lager', this)">
       📦 Lager
@@ -407,6 +428,7 @@ label {
             onclick="showTab('historie', this)">
       📜 Historie
     </button>
+
   </div>
 
   <section id="lager"></section>
@@ -450,7 +472,7 @@ label {
         </h2>
 
         <div class="subtitle">
-          Von → Nach
+          Nur Lager ↔ Baustelle
         </div>
       </div>
 
@@ -462,68 +484,90 @@ label {
     </div>
 
 
-    <label>Material</label>
+    <label>Richtung</label>
 
-    <select id="bookingMaterial"></select>
+    <div class="direction-buttons">
 
+      <button
+        id="directionWarehouse"
+        class="direction-btn"
+        onclick="selectDirection('warehouse')">
 
-    <label>Menge in Meter</label>
+        <span class="direction-icon">📦</span>
+        VOM LAGER
+        <div class="subtitle">
+          Material auf eine Baustelle bringen
+        </div>
 
-    <input
-      id="bookingAmount"
-      type="number"
-      inputmode="decimal"
-      min="0.01"
-      step="0.01"
-      placeholder="z. B. 25">
-
-
-    <label>Von</label>
-
-    <select id="bookingFrom"></select>
+      </button>
 
 
-    <div class="arrow"
-         style="margin:8px 0">
-      ↓
-    </div>
+      <button
+        id="directionSite"
+        class="direction-btn"
+        onclick="selectDirection('site')">
 
+        <span class="direction-icon">🏗️</span>
+        VON BAUSTELLE
+        <div class="subtitle">
+          Material zurück ins Lager bringen
+        </div>
 
-    <label>Nach</label>
-
-    <select id="bookingTo"></select>
-
-
-    <label>Mitarbeiter</label>
-
-    <input
-      id="bookingEmployee"
-      type="text"
-      placeholder="Name">
-
-
-    <div id="bookingInfo"
-         class="notice">
-
-      Wähle Material, Menge und Quelle/Ziel.
+      </button>
 
     </div>
 
 
-    <button class="btn primary full"
-            onclick="submitBooking()">
-
-      🔄 Material buchen
-
-    </button>
+    <div id="bookingFields"
+         style="display:none">
 
 
-    <button class="btn orange full"
-            onclick="warehouseEntry()">
+      <label>Material</label>
 
-      📥 Zugang ins Lager
+      <select id="bookingMaterial"></select>
 
-    </button>
+
+      <label>Menge in Meter</label>
+
+      <input
+        id="bookingAmount"
+        type="number"
+        inputmode="decimal"
+        min="0.01"
+        step="0.01"
+        placeholder="z. B. 25">
+
+
+      <div id="siteSelectionArea"></div>
+
+
+      <div id="routePreview"
+           class="route-box">
+      </div>
+
+
+      <label>Mitarbeiter</label>
+
+      <input
+        id="bookingEmployee"
+        type="text"
+        placeholder="Name">
+
+
+      <div id="bookingInfo"
+           class="notice">
+
+      </div>
+
+
+      <button class="btn primary full"
+              onclick="submitBooking()">
+
+        🔄 Material buchen
+
+      </button>
+
+    </div>
 
   </div>
 </div>
@@ -685,6 +729,8 @@ let sites = [];
 let siteStocks = [];
 let movements = [];
 
+let bookingDirection = null;
+
 
 /* =========================================================
    START
@@ -740,7 +786,7 @@ async function loadMaterials() {
 
   materials =
     await supabase(
-      "materials?select=id,name,unit,stock,minimum_stock&order=id"
+      "materials?select=id,name,unit,stock&order=id"
     );
 }
 
@@ -823,6 +869,10 @@ function renderAll() {
 
 
 
+/* =========================================================
+   LAGER
+========================================================= */
+
 function renderWarehouse() {
 
   const container =
@@ -846,11 +896,6 @@ function renderWarehouse() {
 
   materials.forEach(material => {
 
-    const low =
-      Number(material.stock) <=
-      Number(material.minimum_stock);
-
-
     html += `
 
       <div class="card">
@@ -860,9 +905,7 @@ function renderWarehouse() {
         </div>
 
 
-        <div class="stock ${
-          low ? "low" : "ok"
-        }">
+        <div class="stock ok">
 
           ${formatNumber(material.stock)}
           ${escapeHtml(
@@ -870,29 +913,6 @@ function renderWarehouse() {
           )}
 
         </div>
-
-
-        <div class="muted">
-
-          Mindestbestand:
-          ${formatNumber(
-            material.minimum_stock
-          )}
-          ${escapeHtml(
-            material.unit || "m"
-          )}
-
-        </div>
-
-
-        ${
-          low
-          ? `<div class="notice">
-               ⚠️ Mindestbestand erreicht
-               oder unterschritten
-             </div>`
-          : ""
-        }
 
       </div>
 
@@ -914,6 +934,10 @@ function renderWarehouse() {
 }
 
 
+
+/* =========================================================
+   BAUSTELLEN
+========================================================= */
 
 function renderSites() {
 
@@ -997,6 +1021,8 @@ function renderSites() {
 
     } else {
 
+      let hasVisibleStock = false;
+
       stocks.forEach(stock => {
 
         const material =
@@ -1013,6 +1039,8 @@ function renderSites() {
         ) {
           return;
         }
+
+        hasVisibleStock = true;
 
 
         html += `
@@ -1039,6 +1067,18 @@ function renderSites() {
 
         `;
       });
+
+      if (!hasVisibleStock) {
+
+        html += `
+
+          <div class="empty">
+            Noch kein Material
+            auf dieser Baustelle.
+          </div>
+
+        `;
+      }
     }
 
 
@@ -1097,45 +1137,48 @@ function renderBookingPage() {
 
       <div class="muted">
 
-        Jede Bewegung läuft über
-        <strong>Von → Nach</strong>.
+        Material wird ausschließlich
+        zwischen Lager und Baustelle bewegt.
 
       </div>
 
 
-      <div class="route">
+      <div class="direction-buttons">
 
-        <div class="badge">
-          📦 Lager
-        </div>
+        <button
+          class="direction-btn"
+          onclick="openBooking('warehouse')">
 
-        <div class="arrow">
-          →
-        </div>
+          <span class="direction-icon">
+            📦
+          </span>
 
-        <div class="badge">
-          🏗️ Baustelle
-        </div>
+          VOM LAGER
+
+          <div class="subtitle">
+            Material auf eine Baustelle bringen
+          </div>
+
+        </button>
+
+
+        <button
+          class="direction-btn"
+          onclick="openBooking('site')">
+
+          <span class="direction-icon">
+            🏗️
+          </span>
+
+          VON BAUSTELLE
+
+          <div class="subtitle">
+            Material zurück ins Lager bringen
+          </div>
+
+        </button>
 
       </div>
-
-
-      <button
-        class="btn primary full"
-        onclick="openBooking()">
-
-        Neue Buchung
-
-      </button>
-
-
-      <button
-        class="btn orange full"
-        onclick="openBookingForEntry()">
-
-        📥 Zugang ins Lager
-
-      </button>
 
     </div>
 
@@ -1150,7 +1193,7 @@ function renderBookingPage() {
       <div class="site-material">
 
         <span>
-          Lager → Baustelle
+          📦 Lager → Baustelle
         </span>
 
         <strong>
@@ -1163,37 +1206,11 @@ function renderBookingPage() {
       <div class="site-material">
 
         <span>
-          Baustelle → Lager
+          🏗️ Baustelle → Lager
         </span>
 
         <strong>
           Material zurück
-        </strong>
-
-      </div>
-
-
-      <div class="site-material">
-
-        <span>
-          Baustelle → Baustelle
-        </span>
-
-        <strong>
-          Umbuchung
-        </strong>
-
-      </div>
-
-
-      <div class="site-material">
-
-        <span>
-          Lieferant → Lager
-        </span>
-
-        <strong>
-          Zugang
         </strong>
 
       </div>
@@ -1359,11 +1376,11 @@ function renderHistory() {
 ========================================================= */
 
 function openBooking(
-  preselectedMaterial = null,
+  direction = null,
   preselectedSite = null
 ) {
 
-  fillBookingSelects();
+  fillMaterialSelect();
 
 
   document.getElementById(
@@ -1371,23 +1388,39 @@ function openBooking(
   ).classList.add("show");
 
 
-  if (preselectedSite) {
+  bookingDirection = null;
 
-    document.getElementById(
-      "bookingFrom"
-    ).value =
-      "site:" + preselectedSite;
 
-  } else {
+  document.getElementById(
+    "bookingFields"
+  ).style.display = "none";
 
-    document.getElementById(
-      "bookingFrom"
-    ).value =
-      "warehouse";
+
+  document.getElementById(
+    "directionWarehouse"
+  ).classList.remove("active");
+
+
+  document.getElementById(
+    "directionSite"
+  ).classList.remove("active");
+
+
+  if (direction === "warehouse") {
+
+    selectDirection(
+      "warehouse",
+      preselectedSite
+    );
+
+  } else if (direction === "site") {
+
+    selectDirection(
+      "site",
+      preselectedSite
+    );
+
   }
-
-
-  updateBookingInfo();
 }
 
 
@@ -1397,27 +1430,17 @@ function closeBooking() {
   document.getElementById(
     "bookingModal"
   ).classList.remove("show");
+
+  bookingDirection = null;
 }
 
 
 
-function fillBookingSelects() {
+function fillMaterialSelect() {
 
   const materialSelect =
     document.getElementById(
       "bookingMaterial"
-    );
-
-
-  const fromSelect =
-    document.getElementById(
-      "bookingFrom"
-    );
-
-
-  const toSelect =
-    document.getElementById(
-      "bookingTo"
     );
 
 
@@ -1433,85 +1456,169 @@ function fillBookingSelects() {
 
       `
     ).join("");
-
-
-  fromSelect.innerHTML = `
-
-    <option value="warehouse">
-      📦 Lager
-    </option>
-
-
-    ${
-      sites.map(
-        site => `
-
-          <option
-            value="site:${site.id}">
-
-            🏗️
-            ${escapeHtml(site.name)}
-
-          </option>
-
-        `
-      ).join("")
-    }
-
-  `;
-
-
-  toSelect.innerHTML = `
-
-    <option value="warehouse">
-      📦 Lager
-    </option>
-
-
-    ${
-      sites.map(
-        site => `
-
-          <option
-            value="site:${site.id}">
-
-            🏗️
-            ${escapeHtml(site.name)}
-
-          </option>
-
-        `
-      ).join("")
-    }
-
-  `;
-
-
-  fromSelect.onchange =
-    updateBookingInfo;
-
-  toSelect.onchange =
-    updateBookingInfo;
-
-  materialSelect.onchange =
-    updateBookingInfo;
 }
 
 
 
+/* =========================================================
+   RICHTUNG AUSWÄHLEN
+========================================================= */
+
+function selectDirection(
+  direction,
+  preselectedSite = null
+) {
+
+  bookingDirection =
+    direction;
+
+
+  document.getElementById(
+    "directionWarehouse"
+  ).classList.toggle(
+    "active",
+    direction === "warehouse"
+  );
+
+
+  document.getElementById(
+    "directionSite"
+  ).classList.toggle(
+    "active",
+    direction === "site"
+  );
+
+
+  document.getElementById(
+    "bookingFields"
+  ).style.display =
+    "block";
+
+
+  const area =
+    document.getElementById(
+      "siteSelectionArea"
+    );
+
+
+  if (direction === "warehouse") {
+
+    area.innerHTML = `
+
+      <label>
+        Ziel-Baustelle
+      </label>
+
+      <select id="bookingSite">
+
+        <option value="">
+          Baustelle auswählen
+        </option>
+
+        ${
+          sites.map(
+            site => `
+
+              <option value="${site.id}">
+
+                🏗️
+                ${escapeHtml(site.name)}
+
+              </option>
+
+            `
+          ).join("")
+        }
+
+      </select>
+
+    `;
+
+
+    const siteSelect =
+      document.getElementById(
+        "bookingSite"
+      );
+
+
+    if (preselectedSite) {
+
+      siteSelect.value =
+        String(preselectedSite);
+
+    }
+
+
+    siteSelect.onchange =
+      updateBookingInfo;
+
+
+    updateBookingInfo();
+
+
+  } else {
+
+    area.innerHTML = `
+
+      <label>
+        Baustelle
+      </label>
+
+      <select id="bookingSite">
+
+        <option value="">
+          Baustelle auswählen
+        </option>
+
+        ${
+          sites.map(
+            site => `
+
+              <option value="${site.id}">
+
+                🏗️
+                ${escapeHtml(site.name)}
+
+              </option>
+
+            `
+          ).join("")
+        }
+
+      </select>
+
+    `;
+
+
+    const siteSelect =
+      document.getElementById(
+        "bookingSite"
+      );
+
+
+    if (preselectedSite) {
+
+      siteSelect.value =
+        String(preselectedSite);
+
+    }
+
+
+    siteSelect.onchange =
+      updateBookingInfo;
+
+
+    updateBookingInfo();
+  }
+}
+
+
+
+/* =========================================================
+   BUCHUNGSINFO
+========================================================= */
+
 function updateBookingInfo() {
-
-  const from =
-    document.getElementById(
-      "bookingFrom"
-    ).value;
-
-
-  const to =
-    document.getElementById(
-      "bookingTo"
-    ).value;
-
 
   const info =
     document.getElementById(
@@ -1519,48 +1626,98 @@ function updateBookingInfo() {
     );
 
 
-  if (
-    from === "warehouse" &&
-    to === "warehouse"
-  ) {
+  const preview =
+    document.getElementById(
+      "routePreview"
+    );
+
+
+  const siteSelect =
+    document.getElementById(
+      "bookingSite"
+    );
+
+
+  if (!bookingDirection) {
 
     info.innerHTML =
-      "📥 Für einen Zugang vom Lieferanten ins Lager bitte „Zugang ins Lager“ verwenden.";
+      "Bitte zuerst die Richtung auswählen.";
 
+    preview.innerHTML =
+      "Noch keine Richtung ausgewählt.";
+
+    return;
   }
 
-  else if (
-    from !== "warehouse" &&
-    to !== "warehouse"
-  ) {
 
-    if (from === to) {
+  if (!siteSelect ||
+      !siteSelect.value) {
 
-      info.innerHTML =
-        "⚠️ Quelle und Ziel dürfen nicht identisch sein.";
+    if (
+      bookingDirection ===
+      "warehouse"
+    ) {
+
+      preview.innerHTML =
+        "📦 Lager → 🏗️ Baustelle";
 
     } else {
 
-      info.innerHTML =
-        "🔄 Baustelle → Baustelle: Bestand wird automatisch umgebucht.";
+      preview.innerHTML =
+        "🏗️ Baustelle → 📦 Lager";
 
     }
 
+
+    info.innerHTML =
+      "Bitte Baustelle auswählen.";
+
+    return;
   }
 
-  else if (
-    from === "warehouse"
+
+  const site =
+    sites.find(
+      s =>
+        Number(s.id) ===
+        Number(siteSelect.value)
+    );
+
+
+  if (
+    bookingDirection ===
+    "warehouse"
   ) {
 
+    preview.innerHTML = `
+
+      📦 Lager
+      &nbsp; → &nbsp;
+      🏗️ ${escapeHtml(
+        site?.name || "Baustelle"
+      )}
+
+    `;
+
+
     info.innerHTML =
-      "📦 → 🏗️ Der Lagerbestand wird reduziert und der Baustellenbestand erhöht.";
+      "📦 Der Lagerbestand wird reduziert und der Bestand der Baustelle erhöht.";
 
-  }
+  } else {
 
-  else {
+    preview.innerHTML = `
+
+      🏗️ ${escapeHtml(
+        site?.name || "Baustelle"
+      )}
+      &nbsp; → &nbsp;
+      📦 Lager
+
+    `;
+
 
     info.innerHTML =
-      "🏗️ → 📦 Der Baustellenbestand wird reduziert und dem Lager gutgeschrieben.";
+      "🏗️ Der Baustellenbestand wird reduziert und dem Lager gutgeschrieben.";
   }
 }
 
@@ -1572,6 +1729,16 @@ function updateBookingInfo() {
 async function submitBooking() {
 
   try {
+
+    if (!bookingDirection) {
+
+      alert(
+        "Bitte zuerst auswählen, ob das Material vom Lager oder von einer Baustelle kommt."
+      );
+
+      return;
+    }
+
 
     const materialId =
       Number(
@@ -1589,16 +1756,12 @@ async function submitBooking() {
       );
 
 
-    const from =
-      document.getElementById(
-        "bookingFrom"
-      ).value;
-
-
-    const to =
-      document.getElementById(
-        "bookingTo"
-      ).value;
+    const siteId =
+      Number(
+        document.getElementById(
+          "bookingSite"
+        ).value
+      );
 
 
     const employee =
@@ -1627,6 +1790,16 @@ async function submitBooking() {
     }
 
 
+    if (!siteId) {
+
+      alert(
+        "Bitte eine Baustelle auswählen."
+      );
+
+      return;
+    }
+
+
     if (!employee) {
 
       alert(
@@ -1637,55 +1810,46 @@ async function submitBooking() {
     }
 
 
+    let fromSiteId = null;
+    let toSiteId = null;
+
+
     if (
-      from === "warehouse" &&
-      to === "warehouse"
+      bookingDirection ===
+      "warehouse"
     ) {
 
-      alert(
-        "Lager → Lager ist nicht möglich.\n\n" +
-        "Für einen Zugang bitte „Zugang ins Lager“ verwenden."
-      );
+      toSiteId =
+        siteId;
 
-      return;
+    } else {
+
+      fromSiteId =
+        siteId;
+
     }
-
-
-    if (from === to) {
-
-      alert(
-        "Quelle und Ziel dürfen nicht identisch sein."
-      );
-
-      return;
-    }
-
-
-    const fromSiteId =
-      from.startsWith("site:")
-      ? Number(
-          from.split(":")[1]
-        )
-      : null;
-
-
-    const toSiteId =
-      to.startsWith("site:")
-      ? Number(
-          to.split(":")[1]
-        )
-      : null;
 
 
     await rpc(
       "book_material",
       {
-        p_material_id: materialId,
-        p_amount: amount,
-        p_type: "auto",
-        p_employee: employee,
-        p_from_site_id: fromSiteId,
-        p_to_site_id: toSiteId
+        p_material_id:
+          materialId,
+
+        p_amount:
+          amount,
+
+        p_type:
+          "auto",
+
+        p_employee:
+          employee,
+
+        p_from_site_id:
+          fromSiteId,
+
+        p_to_site_id:
+          toSiteId
       }
     );
 
@@ -1718,130 +1882,6 @@ async function submitBooking() {
 
     alert(
       "❌ Buchung fehlgeschlagen:\n\n" +
-      error.message
-    );
-  }
-}
-
-
-/* =========================================================
-   ZUGANG
-========================================================= */
-
-function openBookingForEntry() {
-
-  fillBookingSelects();
-
-
-  document.getElementById(
-    "bookingModal"
-  ).classList.add("show");
-
-
-  document.getElementById(
-    "bookingFrom"
-  ).value =
-    "warehouse";
-
-
-  document.getElementById(
-    "bookingTo"
-  ).value =
-    "warehouse";
-
-
-  updateBookingInfo();
-}
-
-
-
-async function warehouseEntry() {
-
-  try {
-
-    const materialId =
-      Number(
-        document.getElementById(
-          "bookingMaterial"
-        ).value
-      );
-
-
-    const amount =
-      Number(
-        document.getElementById(
-          "bookingAmount"
-        ).value
-      );
-
-
-    const employee =
-      document.getElementById(
-        "bookingEmployee"
-      ).value.trim();
-
-
-    if (!materialId) {
-
-      alert(
-        "Bitte Material auswählen."
-      );
-
-      return;
-    }
-
-
-    if (!amount || amount <= 0) {
-
-      alert(
-        "Bitte gültige Menge eingeben."
-      );
-
-      return;
-    }
-
-
-    if (!employee) {
-
-      alert(
-        "Bitte Mitarbeiter eingeben."
-      );
-
-      return;
-    }
-
-
-    await rpc(
-      "book_material",
-      {
-        p_material_id: materialId,
-        p_amount: amount,
-        p_type: "in",
-        p_employee: employee,
-        p_from_site_id: null,
-        p_to_site_id: null
-      }
-    );
-
-
-    closeBooking();
-
-
-    alert(
-      "✅ Zugang ins Lager gebucht!"
-    );
-
-
-    await loadAll();
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    alert(
-      "❌ Zugang konnte nicht gebucht werden:\n\n" +
       error.message
     );
   }
@@ -2077,4 +2117,3 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
-```
