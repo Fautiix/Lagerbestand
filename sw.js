@@ -1,4 +1,4 @@
-const CACHE_NAME = "materialverwaltung-v2";
+const CACHE_NAME = "materialverwaltung-v3";
 
 const FILES = [
   "./",
