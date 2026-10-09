@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -527,6 +526,16 @@ label {
   display: none !important;
 }
 
+
+.site-directory-search { margin-top: 14px; }
+.site-details { display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
+.site-detail { display:flex; gap:9px; align-items:flex-start; color:var(--muted); font-size:14px; overflow-wrap:anywhere; }
+.site-detail strong { color:var(--text); font-weight:700; }
+.site-detail-icon { width:20px; flex:0 0 20px; text-align:center; }
+.site-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.site-card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.site-card-actions .btn { min-width:0; }
+
 @media (min-width: 701px) {
   .modal-bg {
     align-items: center;
@@ -907,7 +916,7 @@ label {
     <div class="modal-head">
 
       <h2 style="margin:0">
-        Neue Baustelle
+        <span id="siteModalTitle">Neue Baustelle</span>
       </h2>
 
       <button class="close"
@@ -936,7 +945,20 @@ label {
       placeholder="Straße, Ort">
 
 
+    <label>Auftragsnummer</label>
+    <input id="siteOrderNumber" placeholder="z. B. 4077858">
+
+    <label>Zusatz-Auftragsnummer (optional)</label>
+    <input id="siteExtraOrderNumber" placeholder="z. B. 4078189">
+
+    <label>Entfernung in km (manuell)</label>
+    <input id="siteDistanceKm" type="number" inputmode="decimal" min="0" step="0.1" placeholder="z. B. 24,5">
+
+    <label>Ansprechpartner / Polier</label>
+    <input id="siteContactPerson" placeholder="z. B. Moritz Cramer">
+
     <button class="btn primary full"
+            id="saveSiteButton"
             onclick="createSite()">
 
       🏗️ Baustelle anlegen
@@ -1705,7 +1727,7 @@ async function loadSites() {
 
   sites =
     await supabase(
-      "sites?select=id,name,address,active,created_at&order=name"
+      "sites?select=id,name,address,active,created_at,order_number,extra_order_number,distance_km,contact_person&order=name"
     );
 }
 
@@ -2085,6 +2107,15 @@ function renderSites() {
       s => !s.active
     );
 
+  const search = (document.getElementById("siteDirectorySearch")?.value || "").trim().toLowerCase();
+  const matchesSearch = site => [
+    site.name, site.address, site.order_number, site.extra_order_number,
+    site.contact_person, site.distance_km
+  ].some(value => String(value ?? "").toLowerCase().includes(search));
+
+  const filteredActiveSites = activeSites.filter(matchesSearch);
+  const filteredClosedSites = closedSites.filter(matchesSearch);
+
 
   let html = `
 
@@ -2095,9 +2126,15 @@ function renderSites() {
       </h2>
 
       <div class="muted">
-        Aktive Baustellen und deren Material
+        Baustellen, Aufträge, Adressen und Ansprechpartner
       </div>
 
+      <div class="search-box site-directory-search">
+        <span class="search-icon">🔎</span>
+        <input id="siteDirectorySearch" type="search"
+          placeholder="Baustelle, Auftrag, Adresse, Polier suchen..."
+          oninput="renderSites()">
+      </div>
 
       ${
         isAdmin
@@ -2125,7 +2162,7 @@ function renderSites() {
   `;
 
 
-  activeSites.forEach(
+  filteredActiveSites.forEach(
     site => {
 
       html += renderSiteCard(
@@ -2137,19 +2174,19 @@ function renderSites() {
   );
 
 
-  if (!activeSites.length) {
+  if (!filteredActiveSites.length) {
 
     html += `
 
       <div class="empty">
-        Keine aktiven Baustellen.
+        ${search ? "Keine passenden aktiven Baustellen gefunden." : "Keine aktiven Baustellen."}
       </div>
 
     `;
   }
 
 
-  if (closedSites.length) {
+  if (filteredClosedSites.length) {
 
     html += `
 
@@ -2168,7 +2205,7 @@ function renderSites() {
     `;
 
 
-    closedSites.forEach(
+    filteredClosedSites.forEach(
       site => {
 
         html += renderSiteCard(
@@ -2183,6 +2220,11 @@ function renderSites() {
 
   container.innerHTML =
     html;
+
+  const restoredSearch = document.getElementById("siteDirectorySearch");
+  if (restoredSearch && restoredSearch.value !== search) {
+    restoredSearch.value = search;
+  }
 }
 
 
@@ -2271,22 +2313,19 @@ function renderSiteCard(
 
     <div class="card">
 
-      <div class="card-title">
-
-        🏗️
-        ${escapeHtml(site.name)}
-
+      <div class="site-card-top">
+        <div class="card-title">
+          🏗️ ${escapeHtml(site.name)}
+        </div>
       </div>
 
-
-      ${
-        site.address
-        ? `<div class="muted">
-             ${escapeHtml(site.address)}
-           </div>`
-        : ""
-      }
-
+      <div class="site-details">
+        ${site.order_number ? `<div class="site-detail"><span class="site-detail-icon">🧾</span><span>Auftrag: <strong>${escapeHtml(site.order_number)}</strong></span></div>` : ""}
+        ${site.extra_order_number ? `<div class="site-detail"><span class="site-detail-icon">➕</span><span>Zusatz: <strong>${escapeHtml(site.extra_order_number)}</strong></span></div>` : ""}
+        ${site.address ? `<div class="site-detail"><span class="site-detail-icon">📍</span><span>${escapeHtml(site.address)}</span></div>` : ""}
+        ${site.distance_km !== null && site.distance_km !== undefined && site.distance_km !== "" ? `<div class="site-detail"><span class="site-detail-icon">🚗</span><span>Entfernung: <strong>${formatNumber(site.distance_km)} km</strong></span></div>` : ""}
+        ${site.contact_person ? `<div class="site-detail"><span class="site-detail-icon">👤</span><span>Ansprechpartner: <strong>${escapeHtml(site.contact_person)}</strong></span></div>` : ""}
+      </div>
 
       <div class="site-status ${
         closed ? "closed" : ""
@@ -2311,6 +2350,7 @@ function renderSiteCard(
         ? (
           isAdmin
           ? `
+            <button class="btn full" onclick="openSiteModal(${site.id})">✏️ Angaben bearbeiten</button>
             <button
               class="btn green full"
               onclick="setSiteActive(${site.id}, true)">
@@ -2323,6 +2363,12 @@ function renderSiteCard(
         )
         : `
           <div class="site-actions">
+
+            ${
+              isAdmin
+              ? `<button class="btn" onclick="openSiteModal(${site.id})">✏️ Bearbeiten</button>`
+              : ""
+            }
 
             <button
               class="btn primary"
@@ -3382,113 +3428,88 @@ async function createEmployee() {
    BAUSTELLEN
 ========================================================= */
 
-function openSiteModal() {
+let siteEditingId = null;
 
+function openSiteModal(siteId = null) {
   if (!isAdmin) {
-
-    alert(
-      "🔒 Nur ein Admin kann Baustellen anlegen."
-    );
-
+    alert("🔒 Nur ein Admin kann Baustellen verwalten.");
     return;
   }
 
+  siteEditingId = siteId;
+  const site = siteId ? sites.find(s => Number(s.id) === Number(siteId)) : null;
+  if (siteId && !site) {
+    alert("Baustelle wurde nicht gefunden.");
+    return;
+  }
 
-  document.getElementById(
-    "siteModal"
-  ).classList.add("show");
-
-
-  document.getElementById(
-    "siteName"
-  ).value = "";
-
-
-  document.getElementById(
-    "siteAddress"
-  ).value = "";
+  document.getElementById("siteModalTitle").textContent = site ? "Baustelle bearbeiten" : "Neue Baustelle";
+  document.getElementById("saveSiteButton").textContent = site ? "💾 Änderungen speichern" : "🏗️ Baustelle anlegen";
+  document.getElementById("siteName").value = site?.name || "";
+  document.getElementById("siteAddress").value = site?.address || "";
+  document.getElementById("siteOrderNumber").value = site?.order_number || "";
+  document.getElementById("siteExtraOrderNumber").value = site?.extra_order_number || "";
+  document.getElementById("siteDistanceKm").value = site?.distance_km ?? "";
+  document.getElementById("siteContactPerson").value = site?.contact_person || "";
+  document.getElementById("siteModal").classList.add("show");
 }
-
 
 function closeSiteModal() {
-
-  document.getElementById(
-    "siteModal"
-  ).classList.remove("show");
+  document.getElementById("siteModal").classList.remove("show");
+  siteEditingId = null;
 }
 
-
 async function createSite() {
-
   if (!isAdmin) {
-
-    alert(
-      "🔒 Nur ein Admin kann Baustellen anlegen."
-    );
-
+    alert("🔒 Nur ein Admin kann Baustellen verwalten.");
     return;
   }
 
-
   try {
-
-    const name =
-      document.getElementById(
-        "siteName"
-      ).value.trim();
-
-
-    const address =
-      document.getElementById(
-        "siteAddress"
-      ).value.trim();
-
+    const name = document.getElementById("siteName").value.trim();
+    const address = document.getElementById("siteAddress").value.trim();
+    const orderNumber = document.getElementById("siteOrderNumber").value.trim();
+    const extraOrderNumber = document.getElementById("siteExtraOrderNumber").value.trim();
+    const distanceRaw = document.getElementById("siteDistanceKm").value.trim().replace(",", ".");
+    const contactPerson = document.getElementById("siteContactPerson").value.trim();
 
     if (!name) {
-
-      alert(
-        "Bitte einen Baustellennamen eingeben."
-      );
-
+      alert("Bitte einen Baustellennamen eingeben.");
       return;
     }
 
+    if (distanceRaw !== "" && (!Number.isFinite(Number(distanceRaw)) || Number(distanceRaw) < 0)) {
+      alert("Bitte eine gültige Entfernung in Kilometern eingeben.");
+      return;
+    }
 
-    await supabase(
-      "sites",
-      {
+    const payload = {
+      name,
+      address: address || null,
+      order_number: orderNumber || null,
+      extra_order_number: extraOrderNumber || null,
+      distance_km: distanceRaw === "" ? null : Number(distanceRaw),
+      contact_person: contactPerson || null
+    };
+
+    if (siteEditingId !== null) {
+      await supabase(`sites?id=eq.${siteEditingId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+    } else {
+      await supabase("sites", {
         method: "POST",
-
-        body: JSON.stringify({
-          name: name,
-          address:
-            address || null,
-          active: true
-        })
-      }
-    );
-
+        body: JSON.stringify({ ...payload, active: true })
+      });
+    }
 
     closeSiteModal();
-
-
-    alert(
-      "✅ Baustelle angelegt!"
-    );
-
-
+    alert(siteEditingId !== null ? "✅ Baustelle aktualisiert!" : "✅ Baustelle angelegt!");
     await loadAll();
-
-  }
-
-  catch (error) {
-
+  } catch (error) {
     console.error(error);
-
-    alert(
-      "❌ Baustelle konnte nicht angelegt werden:\n\n" +
-      error.message
-    );
+    alert("❌ Baustelle konnte nicht gespeichert werden:\n\n" + error.message);
   }
 }
 
