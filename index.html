@@ -679,6 +679,38 @@ label {
   +
 </button>
 
+<!-- MATERIAL MODAL -->
+<div class="modal-bg" id="materialModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">Neues Material anlegen</h2>
+      <button class="close" onclick="closeMaterialModal()">×</button>
+    </div>
+
+    <div class="notice">
+      Füge ein neues Material / Kabel hinzu, falls es noch nicht im System existiert.
+    </div>
+
+    <label>Bezeichnung / Kabeltyp</label>
+    <input id="newMaterialName" placeholder="z. B. NYM-J 5x2,5 mm²">
+
+    <label>Einheit</label>
+    <select id="newMaterialUnit">
+      <option value="m">Meter (m)</option>
+      <option value="Stk">Stück (Stk)</option>
+      <option value="Rolle">Rollen</option>
+      <option value="Kg">Kilogramm (kg)</option>
+    </select>
+
+    <label>Anfangs-Lagerbestand im Zentrallager</label>
+    <input id="newMaterialStock" type="number" inputmode="decimal" value="0" step="0.01">
+
+    <button class="btn primary full" style="margin-top:16px;" onclick="createMaterial()">
+      📦 Material im System speichern
+    </button>
+  </div>
+</div>
+
 <!-- ADMIN MODAL -->
 <div class="modal-bg" id="adminModal">
   <div class="modal">
@@ -768,7 +800,10 @@ label {
 
     <div id="bookingFields" style="display:none">
       <label>Material</label>
-      <select id="bookingMaterial" onchange="updateBookingInfo()"></select>
+      <div style="display:flex; gap:8px;">
+        <select id="bookingMaterial" style="flex:1;" onchange="updateBookingInfo()"></select>
+        <button type="button" class="btn primary small" style="white-space:nowrap;" onclick="openMaterialModal()">+ Neues Material</button>
+      </div>
 
       <label>Menge in Meter (Gesamt)</label>
       <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 40" oninput="updateBookingInfo()">
@@ -1395,8 +1430,13 @@ function renderWarehouse() {
     </div>
 
     <div class="card">
-      <h2>📦 Lagerbestand</h2>
-      <div class="muted">Aktueller zentraler Lagerbestand</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h2 style="margin:0;">📦 Lagerbestand</h2>
+          <div class="muted">Aktueller zentraler Lagerbestand</div>
+        </div>
+        ${isAdmin ? `<button class="btn green small" onclick="openMaterialModal()">➕ Neues Material anlegen</button>` : ''}
+      </div>
       <div class="search-box">
         <span class="search-icon">🔎</span>
         <input id="materialSearch" type="search" placeholder="Material suchen..." oninput="renderWarehouseMaterials()">
@@ -1987,49 +2027,45 @@ function selectDirection(dir) {
     btnWh.classList.remove("active");
     btnSite.classList.add("active");
   }
-
-  document.getElementById("bookingFields").style.display = "block";
-  populateSiteSelectionArea();
-  updateBookingInfo();
+function openMaterialModal() {
+  document.getElementById("newMaterialName").value = "";
+  document.getElementById("newMaterialStock").value = "0";
+  document.getElementById("materialModal").classList.add("show");
 }
 
-function populateSiteSelectionArea() {
-  const container = document.getElementById("siteSelectionArea");
-  if (!container) return;
-
-  const activeSites = sites.filter(s => s.active);
-  const siteOptions = activeSites.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
-
-  if (bookingDirection === 'warehouse') {
-    container.innerHTML = `
-      <label>Ziel-Baustelle</label>
-      <select id="targetSite" onchange="updateBookingInfo()">
-        <option value="">Baustelle auswählen</option>
-        ${siteOptions}
-      </select>
-    `;
-  } else {
-    container.innerHTML = `
-      <label>Quell-Baustelle</label>
-      <select id="sourceSite" onchange="updateBookingInfo()">
-        <option value="">Baustelle auswählen</option>
-        ${siteOptions}
-      </select>
-    `;
-  }
+function closeMaterialModal() {
+  document.getElementById("materialModal").classList.remove("show");
 }
 
-function populateBookingOptions() {
-  const matSelect = document.getElementById("bookingMaterial");
-  if (matSelect) {
-    matSelect.innerHTML = `<option value="">Material auswählen</option>` +
-      materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (Lager: ${formatNumber(m.stock)} ${m.unit||'m'})</option>`).join("");
+async function createMaterial() {
+  const name = document.getElementById("newMaterialName").value.trim();
+  const unit = document.getElementById("newMaterialUnit").value;
+  const stock = parseFloat(document.getElementById("newMaterialStock").value) || 0;
+
+  if (!name) {
+    alert("Bitte eine Materialbezeichnung eingeben.");
+    return;
   }
 
-  const empSelect = document.getElementById("bookingEmployee");
-  if (empSelect) {
-    empSelect.innerHTML = `<option value="">Mitarbeiter auswählen</option>` +
-      employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+  try {
+    const inserted = await supabase("materials", {
+      method: "POST",
+      body: JSON.stringify({ name, unit, stock })
+    });
+
+    closeMaterialModal();
+    await loadMaterials();
+    populateBookingOptions();
+    renderWarehouse();
+
+    if (inserted && inserted[0] && document.getElementById("bookingMaterial")) {
+      document.getElementById("bookingMaterial").value = inserted[0].id;
+      updateBookingInfo();
+    }
+
+    alert("✅ Neues Material wurde erfolgreich im System angelegt!");
+  } catch (error) {
+    alert("Fehler beim Erstellen des Materials: " + error.message);
   }
 }
 
@@ -2056,7 +2092,11 @@ function updateBookingInfo() {
   } else if (bookingDirection === 'site') {
     routeBox.innerHTML = `🏗️ ${site ? escapeHtml(site.name) : '...'} ➔ 📦 LAGER`;
     const siteStock = siteStocks.find(s => s.site_id === siteId && s.material_id === matId);
-    infoBox.innerHTML = siteStock ? `Bestand vor Ort: <strong>${formatNumber(siteStock.stock)} ${escapeHtml(mat?.unit||'m')}</strong>` : 'Kein Bestand auf Baustelle';
+    if (siteStock && Number(siteStock.stock) > 0) {
+      infoBox.innerHTML = `Bestand vor Ort: <strong>${formatNumber(siteStock.stock)} ${escapeHtml(mat?.unit||'m')}</strong>`;
+    } else {
+      infoBox.innerHTML = `<span style="color:var(--orange);">⚠️ Nicht im Baustellenbestand verzeichnet. Rückbuchung ins Zentrallager ist trotzdem möglich!</span>`;
+    }
   }
 }
 
