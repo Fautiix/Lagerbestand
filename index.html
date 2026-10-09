@@ -2015,6 +2015,19 @@ function closeBooking() {
   document.getElementById("bookingModal").classList.remove("show");
 }
 
+function populateBookingOptions() {
+  const matSelect = document.getElementById("bookingMaterial");
+  if (matSelect) {
+    matSelect.innerHTML = materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.unit || 'm')})</option>`).join("");
+  }
+
+  const empSelect = document.getElementById("bookingEmployee");
+  if (empSelect) {
+    empSelect.innerHTML = `<option value="">Mitarbeiter auswählen</option>` +
+      employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+  }
+}
+
 function selectDirection(dir) {
   bookingDirection = dir;
   const btnWh = document.getElementById("directionWarehouse");
@@ -2023,10 +2036,29 @@ function selectDirection(dir) {
   if (dir === 'warehouse') {
     btnWh.classList.add("active");
     btnSite.classList.remove("active");
+    document.getElementById("siteSelectionArea").innerHTML = `
+      <label>Ziel-Baustelle</label>
+      <select id="targetSite" onchange="updateBookingInfo()">
+        <option value="">Baustelle auswählen</option>
+        ${sites.filter(s => s.active).map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+      </select>
+    `;
   } else {
     btnWh.classList.remove("active");
     btnSite.classList.add("active");
+    document.getElementById("siteSelectionArea").innerHTML = `
+      <label>Quell-Baustelle</label>
+      <select id="sourceSite" onchange="updateBookingInfo()">
+        <option value="">Baustelle auswählen</option>
+        ${sites.filter(s => s.active).map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+      </select>
+    `;
   }
+
+  document.getElementById("bookingFields").style.display = "block";
+  updateBookingInfo();
+}
+
 function openMaterialModal() {
   document.getElementById("newMaterialName").value = "";
   document.getElementById("newMaterialStock").value = "0";
