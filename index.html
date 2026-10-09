@@ -8,23 +8,29 @@
 
 <link rel="manifest" href="./manifest.json">
 
-<meta name="theme-color" content="#0b0d10">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
 
 <style>
 :root {
-  --bg: #0b0d10;
-  --card: #15181d;
-  --card2: #1c2026;
+  --bg: #000000;
+  --card: #0c1017;
+  --card2: #141a26;
   --text: #f4f6f8;
-  --muted: #9ba3ad;
-  --border: #2b3038;
-  --accent: #3b82f6;
+  --table-text-color: #f4f6f8;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --accent: #2563eb;
   --green: #22c55e;
   --red: #ef4444;
   --orange: #f59e0b;
+  --table-header-bg: #1e3a8a;
+  --table-header-text: #ffffff;
+  --table-row-even: #080c14;
+  --table-row-odd: #111a2e;
+  --table-row-hover: #1e293b;
   --radius: 18px;
 }
 
@@ -58,7 +64,7 @@ button {
 }
 
 .app {
-  max-width: 700px;
+  max-width: 950px;
   margin: auto;
   padding-bottom: 100px;
 }
@@ -68,7 +74,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(11,13,16,.94);
+  background: rgba(0,0,0,.92);
   backdrop-filter: blur(14px);
 }
 
@@ -151,11 +157,6 @@ h1 {
   font-size: 20px;
 }
 
-.card-title {
-  font-weight: 700;
-  font-size: 18px;
-}
-
 .muted {
   color: var(--muted);
 }
@@ -189,16 +190,6 @@ h1 {
   color: var(--muted);
   font-size: 11px;
   margin-top: 2px;
-}
-
-.stock {
-  font-size: 30px;
-  font-weight: 800;
-  margin: 8px 0;
-}
-
-.stock.ok {
-  color: var(--green);
 }
 
 .material-card {
@@ -258,7 +249,7 @@ h1 {
 .btn {
   border: 0;
   border-radius: 14px;
-  padding: 14px;
+  padding: 12px 14px;
   font-weight: 700;
   color: white;
   background: var(--card2);
@@ -266,6 +257,7 @@ h1 {
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  gap: 6px;
 }
 
 .btn.primary {
@@ -291,8 +283,8 @@ h1 {
 }
 
 .btn.small {
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12px;
 }
 
 .direction-buttons {
@@ -371,32 +363,6 @@ label {
   border-bottom: 1px dashed rgba(255,255,255,0.05);
 }
 
-.site-material:last-child {
-  border-bottom: none;
-}
-
-.site-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.site-status {
-  display: inline-block;
-  padding: 5px 9px;
-  border-radius: 10px;
-  background: rgba(34,197,94,.14);
-  color: var(--green);
-  font-size: 12px;
-  margin-top: 7px;
-}
-
-.site-status.closed {
-  background: rgba(155,163,173,.14);
-  color: var(--muted);
-}
-
 .badge {
   display: inline-block;
   padding: 5px 9px;
@@ -446,12 +412,6 @@ label {
   font-size: 12px;
 }
 
-.movement-reversal {
-  margin-top: 8px;
-  color: var(--orange);
-  font-size: 12px;
-}
-
 .empty {
   text-align: center;
   color: var(--muted);
@@ -470,7 +430,7 @@ label {
   background: var(--accent);
   color: white;
   font-size: 28px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  box-shadow: 0 8px 30px rgba(0,0,0,.6);
 }
 
 .modal-bg {
@@ -478,7 +438,7 @@ label {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0,0,0,.72);
+  background: rgba(0,0,0,.82);
   align-items: flex-end;
   justify-content: center;
 }
@@ -543,11 +503,7 @@ label {
 .site-detail { display:flex; gap:9px; align-items:flex-start; color:var(--muted); font-size:14px; overflow-wrap:anywhere; }
 .site-detail strong { color:var(--text); font-weight:700; }
 .site-detail-icon { width:20px; flex:0 0 20px; text-align:center; }
-.site-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-.site-card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
-.site-card-actions .btn { min-width:0; }
 
-/* Ansichten-Umschalter & Tabellenansicht */
 .view-toggle {
   display: flex;
   gap: 6px;
@@ -575,41 +531,58 @@ label {
   color: white;
 }
 
-.site-table-wrapper {
+/* TABELLE MIT BLAUEN STREIFEN & SCHWARZEM HINTERGRUND */
+.paper-table-container {
   overflow-x: auto;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--card);
+  border-radius: 12px;
+  border: 2px solid #1e3a8a;
+  background: #000000;
   margin-top: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
 }
-.site-table {
+.paper-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 13.5px;
   text-align: left;
-}
-.site-table th {
-  background: var(--card2);
-  padding: 12px;
-  color: var(--muted);
-  font-weight: 700;
-  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
-.site-table td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
-  vertical-align: top;
+.paper-table th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+  padding: 12px 14px;
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid #2563eb;
+  letter-spacing: 0.3px;
 }
-.site-table tr:last-child td {
-  border-bottom: none;
+.paper-table td {
+  padding: 11px 14px;
+  border: 1px solid #1e293b;
+  color: var(--table-text-color, var(--text));
+  font-weight: 600;
+  background-color: var(--table-row-even);
 }
-.site-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+.paper-table tr:nth-child(odd) td {
+  background-color: var(--table-row-odd);
+}
+.paper-table tr:hover td {
+  background-color: var(--table-row-hover);
+}
+.paper-table .highlight-cell {
+  font-weight: 800;
+  color: #60a5fa;
 }
 
-/* Interaktive Baustellenliste */
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
 .site-list-item {
   background: var(--card);
   border: 1px solid var(--border);
@@ -664,9 +637,7 @@ label {
   <div class="header-row">
     <div class="header-title">
       <h1>Materialverwaltung</h1>
-      <div class="subtitle">
-        Lager & Baustellen
-      </div>
+      <div class="subtitle">Lager & Baustellen</div>
     </div>
 
     <button
@@ -708,9 +679,7 @@ label {
   +
 </button>
 
-<!-- =========================================
-     ADMIN-LOGIN-MODAL
-========================================= -->
+<!-- ADMIN MODAL -->
 <div class="modal-bg" id="adminModal">
   <div class="modal">
     <div class="modal-head">
@@ -723,7 +692,7 @@ label {
 
     <div id="adminLoggedOut">
       <div class="notice">
-        Nur Administratoren können Baustellen und Mitarbeiter verwalten.
+        Nur Administratoren können Baustellen, Spalten und Einstellungen verwalten.
       </div>
 
       <label>E-Mail</label>
@@ -746,16 +715,32 @@ label {
         Du bist als Administrator angemeldet. Verwaltungsfunktionen sind freigeschaltet.
       </div>
 
-      <button class="btn red full" onclick="logoutAdmin()">
+      <div style="margin-top:16px; padding:14px; background:var(--card2); border-radius:14px; border:1px solid var(--border);">
+        <h3 style="margin:0 0 10px; font-size:15px;">🎨 Schriftfarbe anpassen</h3>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="color" id="textColorPicker" value="#f4f6f8" onchange="updateTextColor(this.value)" style="width:50px; height:40px; padding:2px; cursor:pointer; border-radius:8px; border:1px solid var(--border); background:none;">
+          <div>
+            <div style="font-size:13px; font-weight:700;">Globale Schriftfarbe</div>
+            <div class="muted" style="font-size:11px;">Farbe wird für alle Texte & Tabellen übernommen</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn small" style="background:#ffffff; color:#000;" onclick="updateTextColor('#ffffff')">Weiß</button>
+          <button class="btn small" style="background:#93c5fd; color:#000;" onclick="updateTextColor('#93c5fd')">Eisblau</button>
+          <button class="btn small" style="background:#fef08a; color:#000;" onclick="updateTextColor('#fef08a')">Gelb</button>
+          <button class="btn small" style="background:#86efac; color:#000;" onclick="updateTextColor('#86efac')">Hellgrün</button>
+          <button class="btn small" style="background:#cbd5e1; color:#000;" onclick="updateTextColor('#cbd5e1')">Silber</button>
+        </div>
+      </div>
+
+      <button class="btn red full" style="margin-top:16px;" onclick="logoutAdmin()">
         🔓 Admin abmelden
       </button>
     </div>
   </div>
 </div>
 
-<!-- =========================================
-     BUCHUNGS-MODAL
-========================================= -->
+<!-- BUCHUNGS MODAL -->
 <div class="modal-bg" id="bookingModal">
   <div class="modal">
     <div class="modal-head">
@@ -785,8 +770,20 @@ label {
       <label>Material</label>
       <select id="bookingMaterial" onchange="updateBookingInfo()"></select>
 
-      <label>Menge in Meter</label>
-      <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 25" oninput="updateBookingInfo()">
+      <label>Menge in Meter (Gesamt)</label>
+      <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 40" oninput="updateBookingInfo()">
+
+      <!-- STÜCKELUNG / KABELLÄNGEN -->
+      <div style="margin-top:14px; padding:12px; background:var(--card); border-radius:14px; border:1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; font-weight:700; color:var(--text);">✂️ Stückelung / Einzelstücke (optional)</span>
+          <button type="button" class="btn small primary" onclick="addBookingPieceRow()">+ Stück/Länge</button>
+        </div>
+        <div id="bookingPieceRows"></div>
+        <div class="muted" style="font-size:11px; margin-top:6px;">
+          Beispiel: 2 Stück à 20m = 40m Gesamt. Die Einzelstücke werden im Lager genau so hinterlegt.
+        </div>
+      </div>
 
       <div id="siteSelectionArea"></div>
 
@@ -809,9 +806,7 @@ label {
   </div>
 </div>
 
-<!-- =========================================
-     MITARBEITER-MODAL
-========================================= -->
+<!-- MITARBEITER MODAL -->
 <div class="modal-bg" id="employeeModal">
   <div class="modal">
     <div class="modal-head">
@@ -830,9 +825,7 @@ label {
   </div>
 </div>
 
-<!-- =========================================
-     BAUSTELLEN-MODAL
-========================================= -->
+<!-- BAUSTELLEN MODAL -->
 <div class="modal-bg" id="siteModal">
   <div class="modal">
     <div class="modal-head">
@@ -845,68 +838,79 @@ label {
     <input type="hidden" id="editSiteId">
 
     <label>Name der Baustelle</label>
-    <input id="siteName" placeholder="z. B. Baustelle Duisburg">
+    <input id="siteName" placeholder="z. B. KMB RRR Rechts">
 
-    <label>Adresse</label>
-    <input id="siteAddress" placeholder="Straße, Ort">
-
-    <label>Auftragsnummer</label>
+    <label>Auftrag (Auftragsnummer)</label>
     <input id="siteOrderNumber" placeholder="z. B. 4077858">
 
-    <label>Zusatz-Auftragsnummer (optional)</label>
-    <input id="siteExtraOrderNumber" placeholder="z. B. 4078189">
+    <label>Zusatz (Zusatz-Auftragsnummer)</label>
+    <input id="siteExtraOrderNumber" placeholder="z. B. 4046060">
 
-    <label>Entfernung in km (manuell)</label>
-    <input id="siteDistanceKm" type="number" inputmode="decimal" min="0" step="0.1" placeholder="z. B. 24,5">
+    <label>Adresse</label>
+    <input id="siteAddress" placeholder="Mühlheimer Freiheit, 51063 Köln">
 
-    <label>Ansprechpartner / Polier</label>
-    <input id="siteContactPerson" placeholder="z. B. Moritz Cramer">
+    <label>KM (Entfernung z. B. C 92, A 38, 24,5)</label>
+    <input id="siteDistanceKm" placeholder="z. B. C 92 oder 24,5">
 
-    <!-- Dynamische eigene Spalten -->
+    <label>Polier / Ansprechpartner</label>
+    <input id="siteContactPerson" placeholder="z. B. Jürgen Kratz">
+
     <div id="dynamicCustomFieldsArea"></div>
 
     <button class="btn primary full" id="saveSiteButton" onclick="saveSite()">
-      🏗️ Speichern
+      💾 Baustelle Speichern
     </button>
   </div>
 </div>
 
-<!-- =========================================
-     SPALTEN-VERWALTUNGS-MODAL (ADMIN)
-========================================= -->
+<!-- SPALTEN VERWALTUNG MODAL -->
 <div class="modal-bg" id="manageColumnsModal">
   <div class="modal">
     <div class="modal-head">
-      <h2 style="margin:0">⚙️ Spalten verwalten</h2>
+      <h2 style="margin:0">⚙️ Tabelle nach rechts erweitern</h2>
       <button class="close" onclick="closeManageColumnsModal()">×</button>
     </div>
 
     <div class="notice">
-      Füge der Baustellentabelle eigene Spalten hinzu (z. B. Projektleiter, Liefertermin, Besonderheiten).
+      Hier kannst du neue Spalten für die Baustellentabelle anlegen (z. B. <i>"Projektleiter"</i>, <i>"Liefertermin"</i>, <i>"Besonderheiten"</i>).
     </div>
 
     <div style="margin-top:14px;">
-      <label>Neue Spalte hinzufügen</label>
+      <label>Neue Spalte rechts hinzufügen</label>
       <div style="display:flex; gap:8px;">
         <input id="newColumnNameInput" placeholder="z. B. Projektleiter">
-        <button class="btn primary" style="white-space:nowrap;" onclick="addNewCustomColumn()">+ Hinzufügen</button>
+        <button class="btn primary" style="white-space:nowrap;" onclick="addNewCustomColumn()">+ Spalte anlegen</button>
       </div>
     </div>
 
-    <h3 style="margin-top:20px; font-size:15px;">Bestehende eigene Spalten</h3>
+    <h3 style="margin-top:20px; font-size:15px;">Bestehende Zusatz-Spalten</h3>
     <div id="customColumnsList"></div>
   </div>
 </div>
 
 <script>
-/* =========================================================
-   SUPABASE CONFIG & AUTH
-========================================================= */
 const SUPABASE_URL = "https://zjomsuqowqgpzodawixw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD";
 
 let authSession = null;
 let isAdmin = false;
+
+let materials = [];
+let sites = [];
+let siteStocks = [];
+let movements = [];
+let employees = [];
+
+let bookingDirection = null;
+
+let historyMaterialFilter = "";
+let historySiteFilter = "";
+let historyEmployeeFilter = "";
+
+let siteViewMode = 'paper_table';
+let selectedSiteId = null;
+
+let customColumns = [];
 
 function saveAuthSession(session) {
   authSession = session;
@@ -930,6 +934,123 @@ function loadStoredAuthSession() {
     console.error("Gespeicherte Anmeldung Fehler:", error);
     clearAuthSession();
   }
+}
+
+function loadStoredTextColor() {
+  const savedColor = localStorage.getItem("materialverwaltung_text_color");
+  if (savedColor) {
+    applyTextColor(savedColor);
+  }
+}
+
+function applyTextColor(color) {
+  document.documentElement.style.setProperty('--text', color);
+  document.documentElement.style.setProperty('--table-text-color', color);
+  const picker = document.getElementById("textColorPicker");
+  if (picker) picker.value = color;
+}
+
+function updateTextColor(color) {
+  applyTextColor(color);
+  localStorage.setItem("materialverwaltung_text_color", color);
+}
+
+function loadStoredCustomColumns() {
+  try {
+    const stored = localStorage.getItem("materialverwaltung_custom_columns");
+    if (stored) {
+      customColumns = JSON.parse(stored);
+    }
+  } catch (e) {
+    customColumns = [];
+  }
+}
+
+function saveCustomColumns() {
+  localStorage.setItem("materialverwaltung_custom_columns", JSON.stringify(customColumns));
+}
+
+function getWarehousePieces(materialId) {
+  try {
+    const data = JSON.parse(localStorage.getItem("materialverwaltung_pieces") || "{}");
+    return data[materialId] || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveWarehousePieces(materialId, pieces) {
+  try {
+    const data = JSON.parse(localStorage.getItem("materialverwaltung_pieces") || "{}");
+    data[materialId] = pieces.filter(p => p.count > 0 && p.length > 0);
+    localStorage.setItem("materialverwaltung_pieces", JSON.stringify(data));
+  } catch (e) {
+    console.error("Fehler beim Speichern der Stückelung:", e);
+  }
+}
+
+function addPiecesToWarehouse(materialId, newPieces) {
+  const current = getWarehousePieces(materialId);
+  newPieces.forEach(np => {
+    const existing = current.find(p => Math.abs(p.length - np.length) < 0.01);
+    if (existing) {
+      existing.count += np.count;
+    } else {
+      current.push({ count: np.count, length: np.length });
+    }
+  });
+  saveWarehousePieces(materialId, current);
+}
+
+function deductPiecesFromWarehouse(materialId, piecesToDeduct, totalMeters) {
+  let current = getWarehousePieces(materialId);
+  
+  if (piecesToDeduct && piecesToDeduct.length > 0) {
+    piecesToDeduct.forEach(dp => {
+      const existing = current.find(p => Math.abs(p.length - dp.length) < 0.01);
+      if (existing) {
+        existing.count = Math.max(0, existing.count - dp.count);
+      }
+    });
+  } else if (totalMeters > 0) {
+    let remainingToDeduct = totalMeters;
+    current.sort((a, b) => b.length - a.length);
+    for (let p of current) {
+      while (p.count > 0 && remainingToDeduct >= p.length) {
+        p.count--;
+        remainingToDeduct -= p.length;
+      }
+    }
+  }
+
+  saveWarehousePieces(materialId, current);
+}
+
+function openPieceEditor(materialId) {
+  const mat = materials.find(m => m.id === materialId);
+  if (!mat) return;
+
+  const currentPieces = getWarehousePieces(materialId);
+  let promptText = `Einzelstücke für "${mat.name}" bearbeiten:\n\nFormat: Anzahl x Länge (z. B. "2x20, 1x50")\nAktuell: ${currentPieces.map(p => `${p.count}x${p.length}`).join(", ") || "Keine"}`;
+  
+  const input = prompt(promptText, currentPieces.map(p => `${p.count}x${p.length}`).join(", "));
+  if (input === null) return;
+
+  const newPieces = [];
+  const parts = input.split(",");
+  parts.forEach(part => {
+    const match = part.trim().match(/^(\d+)\s*x\s*([\d\.\,]+)$/i);
+    if (match) {
+      const count = parseInt(match[1]);
+      const length = parseFloat(match[2].replace(",", "."));
+      if (count > 0 && length > 0) {
+        newPieces.push({ count, length });
+      }
+    }
+  });
+
+  saveWarehousePieces(materialId, newPieces);
+  renderWarehouseMaterials();
 }
 
 async function refreshAuthSession() {
@@ -984,6 +1105,48 @@ async function authFetch(path, options = {}) {
       ...(options.headers || {})
     }
   });
+}
+
+async function supabase(path, options = {}) {
+  const token = await getAuthToken();
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Supabase Fehler");
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function rpc(functionName, body) {
+  const token = await getAuthToken();
+  const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "RPC Fehler");
+  }
+
+  return response.json();
 }
 
 async function loginAdmin() {
@@ -1118,54 +1281,6 @@ function updateAdminUI() {
   }
 }
 
-/* =========================================================
-   API HELPERS
-========================================================= */
-async function supabase(path, options = {}) {
-  const token = await getAuthToken();
-  const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
-    ...options,
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json",
-      "Prefer": "return=representation",
-      ...(options.headers || {})
-    }
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "Supabase Fehler");
-  }
-
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
-}
-
-async function rpc(functionName, body) {
-  const token = await getAuthToken();
-  const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "RPC Fehler");
-  }
-
-  return response.json();
-}
-
-/* =========================================================
-   MODAL CONTROLLERS
-========================================================= */
 function openAdminModal() {
   updateAdminUI();
   document.getElementById("adminModal").classList.add("show");
@@ -1175,47 +1290,9 @@ function closeAdminModal() {
   document.getElementById("adminModal").classList.remove("show");
 }
 
-/* =========================================================
-   DATA STATE
-========================================================= */
-let materials = [];
-let sites = [];
-let siteStocks = [];
-let movements = [];
-let employees = [];
-
-let bookingDirection = null;
-
-let historyMaterialFilter = "";
-let historySiteFilter = "";
-let historyEmployeeFilter = "";
-
-let siteViewMode = 'list'; // 'list' (1. Baustellenliste), 'table' (2. Baustellentabelle)
-let selectedSiteId = null;
-
-// Dynamische eigene Spalten für die Baustellentabelle
-let customColumns = [];
-
-function loadStoredCustomColumns() {
-  try {
-    const stored = localStorage.getItem("materialverwaltung_custom_columns");
-    if (stored) {
-      customColumns = JSON.parse(stored);
-    }
-  } catch (e) {
-    customColumns = [];
-  }
-}
-
-function saveCustomColumns() {
-  localStorage.setItem("materialverwaltung_custom_columns", JSON.stringify(customColumns));
-}
-
-/* =========================================================
-   APP INITIALIZATION
-========================================================= */
 document.addEventListener("DOMContentLoaded", async () => {
   loadStoredAuthSession();
+  loadStoredTextColor();
   loadStoredCustomColumns();
   await verifyAdminSession();
   await loadAll();
@@ -1250,7 +1327,6 @@ async function loadMaterials() {
 
 async function loadSites() {
   sites = await supabase("sites?select=id,name,address,active,created_at,order_number,extra_order_number,distance_km,contact_person,custom_fields&order=name");
-  // Normalize custom_fields if string or JSON
   sites.forEach(s => {
     if (typeof s.custom_fields === 'string') {
       try { s.custom_fields = JSON.parse(s.custom_fields); } catch (e) { s.custom_fields = {}; }
@@ -1272,9 +1348,6 @@ async function loadEmployees() {
   employees = await supabase("employees?select=id,name,active&active=eq.true&order=name");
 }
 
-/* =========================================================
-   TABS & NAVIGATION
-========================================================= */
 function showTab(tab, button) {
   document.querySelectorAll(".content section").forEach(section => section.style.display = "none");
   document.getElementById(tab).style.display = "block";
@@ -1289,9 +1362,6 @@ function renderAll() {
   updateAdminUI();
 }
 
-/* =========================================================
-   LAGER TAB
-========================================================= */
 function renderWarehouse() {
   const container = document.getElementById("lager");
   const totalMaterials = materials.length;
@@ -1351,23 +1421,44 @@ function renderWarehouseMaterials() {
     return;
   }
 
-  container.innerHTML = filtered.map(m => `
-    <div class="card material-card">
-      <div class="material-info">
-        <div class="material-name">${escapeHtml(m.name)}</div>
-        <div class="material-unit">Einheit: ${escapeHtml(m.unit || "m")}</div>
+  container.innerHTML = filtered.map(m => {
+    const pieces = getWarehousePieces(m.id);
+    const hasPieces = pieces.length > 0;
+    const piecesSummary = pieces.map(p => `${p.count}× ${formatNumber(p.length)}m`).join(", ");
+
+    return `
+      <div class="card material-card" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="material-info">
+            <div class="material-name">${escapeHtml(m.name)}</div>
+            <div class="material-unit">Einheit: ${escapeHtml(m.unit || "m")}</div>
+          </div>
+          <div class="material-stock">
+            <div class="material-stock-number">${formatNumber(m.stock)}</div>
+            <div class="material-stock-unit">Gesamt in ${escapeHtml(m.unit || "m")}</div>
+          </div>
+        </div>
+
+        ${hasPieces ? `
+          <div style="margin-top:6px; padding:8px 12px; background:var(--card2); border-radius:10px; border:1px solid var(--border); font-size:12.5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <div>
+              <strong style="color:#60a5fa;">✂️ Einzelstücke im Lager:</strong>
+              <span style="font-weight:700; margin-left:4px; color:var(--text);">${escapeHtml(piecesSummary)}</span>
+            </div>
+            <button class="btn small" onclick="openPieceEditor(${m.id})" style="padding:3px 8px; font-size:11px;">✏️ Stücke anpassen</button>
+          </div>
+        ` : `
+          <div style="margin-top:2px;">
+            <button class="btn small" onclick="openPieceEditor(${m.id})" style="padding:3px 8px; font-size:11px; background:transparent; border:1px dashed var(--border); color:var(--muted);">
+              + Einzelstücke/Längen hinterlegen
+            </button>
+          </div>
+        `}
       </div>
-      <div class="material-stock">
-        <div class="material-stock-number">${formatNumber(m.stock)}</div>
-        <div class="material-stock-unit">${escapeHtml(m.unit || "m")}</div>
-      </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
-/* =========================================================
-   BAUSTELLEN TAB
-========================================================= */
 function renderSites() {
   const container = document.getElementById("baustellen");
   if (!container) return;
@@ -1382,7 +1473,6 @@ function renderSites() {
 
     if (baseMatch) return true;
 
-    // Auch in dynamischen benutzerdefinierten Feldern suchen
     if (site.custom_fields) {
       return Object.values(site.custom_fields).some(val => String(val ?? "").toLowerCase().includes(search));
     }
@@ -1395,31 +1485,33 @@ function renderSites() {
     <div class="card">
       <div class="site-card-top">
         <div>
-          <h2>🏗️ Baustellen</h2>
-          <div class="subtitle">Übersicht & Tabelle</div>
-        </div>
-        <div style="display:flex; gap:6px;">
-          ${isAdmin ? `<button class="btn primary small" onclick="openSiteModal()">+ Baustelle</button>` : ''}
-          ${isAdmin ? `<button class="btn small" style="background:var(--card2);" onclick="openManageColumnsModal()">⚙️ Spalten</button>` : ''}
+          <h2>🏗️ Baustellen-Übersicht</h2>
+          <div class="subtitle">Übersicht & Detailverwaltung</div>
         </div>
       </div>
 
-      <!-- Ansichten-Umschalter -->
       <div class="view-toggle">
+        <button class="view-toggle-btn ${siteViewMode === 'paper_table' ? 'active' : ''}" onclick="setSiteViewMode('paper_table')">
+          📊 Tabelle
+        </button>
         <button class="view-toggle-btn ${siteViewMode === 'list' ? 'active' : ''}" onclick="setSiteViewMode('list')">
-          📋 1. Baustellenliste
+          📋 Einzelansicht
         </button>
-        <button class="view-toggle-btn ${siteViewMode === 'table' ? 'active' : ''}" onclick="setSiteViewMode('table')">
-          📊 2. Baustellentabelle
-        </button>
+      </div>
+
+      <div class="table-toolbar">
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${isAdmin ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle (nach unten)</button>` : ''}
+          ${isAdmin ? `<button class="btn primary small" onclick="openManageColumnsModal()">⚙️ Spalte (nach rechts)</button>` : ''}
+        </div>
       </div>
     </div>
   `;
 
-  if (siteViewMode === 'list') {
-    html += renderSiteListView(filtered);
+  if (siteViewMode === 'paper_table') {
+    html += renderPaperTableView(filtered);
   } else {
-    html += renderSiteTableView(filtered);
+    html += renderSiteListView(filtered);
   }
 
   container.innerHTML = html;
@@ -1439,7 +1531,70 @@ function toggleSiteListExpand(siteId) {
   renderSites();
 }
 
-/* 1. BAUSTELLENLISTE (Nur Namen + Suche, Klick öffnet Details) */
+function renderPaperTableView(filteredSites) {
+  let html = `
+    <div class="search-box site-directory-search">
+      <span class="search-icon">🔎</span>
+      <input id="siteDirectorySearch" type="search" placeholder="Baustelle, Auftrag, Ort, Polier suchen..." oninput="renderSites()" value="${escapeHtml(document.getElementById("siteDirectorySearch")?.value || "")}">
+    </div>
+
+    <div class="paper-table-container">
+      <table class="paper-table">
+        <thead>
+          <tr>
+            <th>Baustellen</th>
+            <th>Auftrag</th>
+            <th>Zusatz</th>
+            <th>Adresse</th>
+            <th>KM</th>
+            <th>Polier</th>
+            ${customColumns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
+            <th>Material vor Ort</th>
+            ${isAdmin ? '<th>Aktionen</th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  if (!filteredSites.length) {
+    html += `<tr><td colspan="${7 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
+  } else {
+    filteredSites.forEach(site => {
+      const currentStocks = siteStocks.filter(s => s.site_id === site.id && Number(s.stock) > 0);
+      const stockSummary = currentStocks.length ? currentStocks.map(st => {
+        const mat = materials.find(m => m.id === st.material_id);
+        return `${formatNumber(st.stock)} ${mat?.unit || 'm'} ${mat ? mat.name : '#' + st.material_id}`;
+      }).join(', ') : '<span style="color:#94a3b8; font-weight:normal;">Kein Material</span>';
+
+      html += `
+        <tr>
+          <td class="highlight-cell">${escapeHtml(site.name)}</td>
+          <td>${escapeHtml(site.order_number || '')}</td>
+          <td>${escapeHtml(site.extra_order_number || '')}</td>
+          <td>${escapeHtml(site.address || '')}</td>
+          <td>${escapeHtml(site.distance_km != null ? String(site.distance_km) : '')}</td>
+          <td>${escapeHtml(site.contact_person || '')}</td>
+          ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '')}</td>`).join('')}
+          <td style="font-size:12px;">${stockSummary}</td>
+          ${isAdmin ? `
+            <td>
+              <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️ Bearbeiten</button>
+            </td>
+          ` : ''}
+        </tr>
+      `;
+    });
+  }
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return html;
+}
+
 function renderSiteListView(filteredSites) {
   const activeSites = filteredSites.filter(s => s.active);
   const closedSites = filteredSites.filter(s => !s.active);
@@ -1483,77 +1638,20 @@ function renderSiteListView(filteredSites) {
   return html;
 }
 
-/* 2. BAUSTELLENTABELLE (Flexibel mit benutzerdefinierten Spalten) */
-function renderSiteTableView(filteredSites) {
-  let html = `
-    <div class="search-box site-directory-search">
-      <span class="search-icon">🔎</span>
-      <input id="siteDirectorySearch" type="search" placeholder="Tabelle durchsuchen..." oninput="renderSites()" value="${escapeHtml(document.getElementById("siteDirectorySearch")?.value || "")}">
-    </div>
-
-    <div class="site-table-wrapper">
-      <table class="site-table">
-        <thead>
-          <tr>
-            <th>Baustelle</th>
-            <th>Status</th>
-            <th>Adresse</th>
-            <th>Ansprechpartner</th>
-            ${customColumns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
-            <th>Materialbestand vor Ort</th>
-            ${isAdmin ? '<th>Aktionen</th>' : ''}
-          </tr>
-        </thead>
-        <tbody>
-  `;
-
-  if (!filteredSites.length) {
-    html += `<tr><td colspan="${6 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen vorhanden</td></tr>`;
-  } else {
-    filteredSites.forEach(site => {
-      const currentStocks = siteStocks.filter(s => s.site_id === site.id && Number(s.stock) > 0);
-      const stockSummary = currentStocks.length ? currentStocks.map(st => {
-        const mat = materials.find(m => m.id === st.material_id);
-        return `${formatNumber(st.stock)} ${mat?.unit || 'm'} ${mat ? mat.name : '#' + st.material_id}`;
-      }).join(', ') : '<span class="muted">Kein Material</span>';
-
-      html += `
-        <tr>
-          <td><strong>${escapeHtml(site.name)}</strong></td>
-          <td>
-            <span class="site-status ${site.active ? '' : 'closed'}" style="font-size:11px;">
-              ${site.active ? '🟢 Aktiv' : '⚪ Zu'}
-            </span>
-          </td>
-          <td>${escapeHtml(site.address || '-')}</td>
-          <td>${escapeHtml(site.contact_person || '-')}</td>
-          ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '-')}</td>`).join('')}
-          <td>${stockSummary}</td>
-          ${isAdmin ? `
-            <td>
-              <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️</button>
-            </td>
-          ` : ''}
-        </tr>
-      `;
-    });
-  }
-
-  html += `
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  return html;
-}
-
 function renderSiteCardContent(site) {
   const currentStocks = siteStocks.filter(s => s.site_id === site.id && Number(s.stock) > 0);
 
   return `
     <div style="border-top:1px solid var(--border); padding-top:12px;">
       <div class="site-details">
+        ${site.order_number ? `
+          <div class="site-detail">
+            <span class="site-detail-icon">📄</span>
+            <span><strong>Auftrag:</strong> ${escapeHtml(site.order_number)}
+            ${site.extra_order_number ? ` (Zusatz: ${escapeHtml(site.extra_order_number)})` : ''}</span>
+          </div>
+        ` : ''}
+
         ${site.address ? `
           <div class="site-detail">
             <span class="site-detail-icon">📍</span>
@@ -1561,25 +1659,17 @@ function renderSiteCardContent(site) {
           </div>
         ` : ''}
 
-        ${site.order_number ? `
-          <div class="site-detail">
-            <span class="site-detail-icon">📄</span>
-            <span><strong>Auftrag:</strong> ${escapeHtml(site.order_number)}
-            ${site.extra_order_number ? ` (${escapeHtml(site.extra_order_number)})` : ''}</span>
-          </div>
-        ` : ''}
-
         ${site.distance_km != null ? `
           <div class="site-detail">
             <span class="site-detail-icon">🚗</span>
-            <span><strong>Entfernung:</strong> ${formatNumber(site.distance_km)} km</span>
+            <span><strong>KM:</strong> ${escapeHtml(String(site.distance_km))}</span>
           </div>
         ` : ''}
 
         ${site.contact_person ? `
           <div class="site-detail">
             <span class="site-detail-icon">👷</span>
-            <span><strong>Ansprechpartner:</strong> ${escapeHtml(site.contact_person)}</span>
+            <span><strong>Polier / Ansprechpartner:</strong> ${escapeHtml(site.contact_person)}</span>
           </div>
         ` : ''}
 
@@ -1609,7 +1699,7 @@ function renderSiteCardContent(site) {
       </div>
 
       ${isAdmin ? `
-        <div class="site-card-actions">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
           <button class="btn small" onclick="openEditSiteModal(${site.id})">✏️ Bearbeiten</button>
           <button class="btn small ${site.active ? 'orange' : 'green'}" onclick="toggleSiteActive(${site.id}, ${!site.active})">
             ${site.active ? '📁 Schließen' : '🟢 Aktivieren'}
@@ -1620,9 +1710,6 @@ function renderSiteCardContent(site) {
   `;
 }
 
-/* =========================================================
-   BAUSTELLEN CREATION & EDITING
-========================================================= */
 function renderDynamicCustomFieldsInModal(existingCustomFields = {}) {
   const container = document.getElementById("dynamicCustomFieldsArea");
   if (!container) return;
@@ -1633,7 +1720,7 @@ function renderDynamicCustomFieldsInModal(existingCustomFields = {}) {
   }
 
   container.innerHTML = customColumns.map(col => `
-    <label>${escapeHtml(col.label)}</label>
+    <label>${escapeHtml(col.label)} (Zusatzspalte rechts)</label>
     <input class="custom-field-input" data-key="${escapeHtml(col.key)}" value="${escapeHtml(existingCustomFields[col.key] || '')}" placeholder="Angabe für ${escapeHtml(col.label)}">
   `).join('');
 }
@@ -1654,19 +1741,19 @@ function openSiteModal(siteId = null) {
     title.textContent = "Baustelle bearbeiten";
     editIdInput.value = site.id;
     document.getElementById("siteName").value = site.name || "";
-    document.getElementById("siteAddress").value = site.address || "";
     document.getElementById("siteOrderNumber").value = site.order_number || "";
     document.getElementById("siteExtraOrderNumber").value = site.extra_order_number || "";
+    document.getElementById("siteAddress").value = site.address || "";
     document.getElementById("siteDistanceKm").value = site.distance_km ?? "";
     document.getElementById("siteContactPerson").value = site.contact_person || "";
     renderDynamicCustomFieldsInModal(site.custom_fields || {});
   } else {
-    title.textContent = "Neue Baustelle";
+    title.textContent = "Neue Baustelle hinzufügen";
     editIdInput.value = "";
     document.getElementById("siteName").value = "";
-    document.getElementById("siteAddress").value = "";
     document.getElementById("siteOrderNumber").value = "";
     document.getElementById("siteExtraOrderNumber").value = "";
+    document.getElementById("siteAddress").value = "";
     document.getElementById("siteDistanceKm").value = "";
     document.getElementById("siteContactPerson").value = "";
     renderDynamicCustomFieldsInModal({});
@@ -1691,10 +1778,10 @@ async function saveSite() {
 
   const siteId = document.getElementById("editSiteId").value;
   const name = document.getElementById("siteName").value.trim();
-  const address = document.getElementById("siteAddress").value.trim();
   const order_number = document.getElementById("siteOrderNumber").value.trim();
   const extra_order_number = document.getElementById("siteExtraOrderNumber").value.trim();
-  const distance_km_str = document.getElementById("siteDistanceKm").value;
+  const address = document.getElementById("siteAddress").value.trim();
+  const distance_km_val = document.getElementById("siteDistanceKm").value.trim();
   const contact_person = document.getElementById("siteContactPerson").value.trim();
 
   if (!name) {
@@ -1702,9 +1789,6 @@ async function saveSite() {
     return;
   }
 
-  const distance_km = distance_km_str !== "" ? parseFloat(distance_km_str) : null;
-
-  // Auslesen der benutzerdefinierten Felder
   const custom_fields = {};
   document.querySelectorAll(".custom-field-input").forEach(input => {
     const key = input.getAttribute("data-key");
@@ -1718,7 +1802,7 @@ async function saveSite() {
     address,
     order_number,
     extra_order_number,
-    distance_km,
+    distance_km: distance_km_val || null,
     contact_person,
     custom_fields
   };
@@ -1745,9 +1829,20 @@ async function saveSite() {
   }
 }
 
-/* =========================================================
-   BENUTZERDEFINIERTE SPALTEN VERWALTEN (ADMIN)
-========================================================= */
+async function toggleSiteActive(siteId, active) {
+  if (!isAdmin) return;
+  try {
+    await supabase(`sites?id=eq.${siteId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ active })
+    });
+    await loadSites();
+    renderAll();
+  } catch (error) {
+    alert("Fehler beim Ändern des Baustellen-Status: " + error.message);
+  }
+}
+
 function openManageColumnsModal() {
   if (!isAdmin) {
     alert("Nur Admins können Tabellenspalten verwalten.");
@@ -1768,7 +1863,7 @@ function renderCustomColumnsList() {
   if (!container) return;
 
   if (!customColumns.length) {
-    container.innerHTML = `<div class="muted" style="padding:10px 0;">Noch keine eigenen Spalten angelegt.</div>`;
+    container.innerHTML = `<div class="muted" style="padding:10px 0;">Noch keine Zusatzspalten angelegt.</div>`;
     return;
   }
 
@@ -1798,136 +1893,79 @@ function addNewCustomColumn() {
 }
 
 function deleteCustomColumn(key) {
+  if (!confirm("Spalte wirklich entfernen?")) return;
   customColumns = customColumns.filter(c => c.key !== key);
   saveCustomColumns();
   renderCustomColumnsList();
   renderSites();
 }
 
-async function toggleSiteActive(siteId, newActiveStatus) {
-  if (!isAdmin) return;
-  try {
-    await supabase(`sites?id=eq.${siteId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ active: newActiveStatus })
-    });
-    await loadSites();
-    renderAll();
-  } catch (error) {
-    alert("Fehler beim Ändern des Status: " + error.message);
-  }
-}
-
-/* =========================================================
-   HISTORIE TAB
-========================================================= */
-function renderHistory() {
-  const container = document.getElementById("historie");
+function addBookingPieceRow(count = 1, length = '') {
+  const container = document.getElementById("bookingPieceRows");
   if (!container) return;
 
-  const activeSites = sites.filter(s => s.active);
-
-  let html = `
-    <div class="card">
-      <h2>📜 Historie</h2>
-      <div class="muted">Aktivitäten & Materialbewegungen</div>
-
-      <div class="filter-grid">
-        <select id="historyMaterialFilter" onchange="filterHistory()">
-          <option value="">Alle Materialien</option>
-          ${materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join("")}
-        </select>
-
-        <select id="historySiteFilter" onchange="filterHistory()">
-          <option value="">Alle Baustellen</option>
-          ${sites.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
-        </select>
-      </div>
-
-      <div style="margin-top:8px;">
-        <select id="historyEmployeeFilter" onchange="filterHistory()">
-          <option value="">Alle Mitarbeiter</option>
-          ${employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("")}
-        </select>
-      </div>
+  const rowId = 'piece_row_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+  const rowHtml = `
+    <div id="${rowId}" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+      <input type="number" min="1" step="1" value="${count}" placeholder="Anzahl" style="width:80px; padding:8px;" oninput="calculateBookingPiecesTotal()">
+      <span style="font-weight:700;">×</span>
+      <input type="number" min="0.01" step="0.01" value="${length}" placeholder="Länge (m)" style="flex:1; padding:8px;" oninput="calculateBookingPiecesTotal()">
+      <span style="font-size:12px; font-weight:700;" class="row-subtotal">m</span>
+      <button type="button" class="btn red small" style="padding:6px 10px;" onclick="document.getElementById('${rowId}').remove(); calculateBookingPiecesTotal();">×</button>
     </div>
-
-    <div id="historyList"></div>
   `;
-
-  container.innerHTML = html;
-  renderHistoryList();
+  container.insertAdjacentHTML('beforeend', rowHtml);
+  calculateBookingPiecesTotal();
 }
 
-function filterHistory() {
-  historyMaterialFilter = document.getElementById("historyMaterialFilter")?.value || "";
-  historySiteFilter = document.getElementById("historySiteFilter")?.value || "";
-  historyEmployeeFilter = document.getElementById("historyEmployeeFilter")?.value || "";
-  renderHistoryList();
-}
+function getBookingPiecesFromUI() {
+  const container = document.getElementById("bookingPieceRows");
+  if (!container) return [];
 
-function renderHistoryList() {
-  const container = document.getElementById("historyList");
-  if (!container) return;
-
-  let filtered = movements;
-
-  if (historyMaterialFilter) {
-    filtered = filtered.filter(m => m.material_id == historyMaterialFilter);
-  }
-
-  if (historySiteFilter) {
-    filtered = filtered.filter(m => m.from_site_id == historySiteFilter || m.to_site_id == historySiteFilter);
-  }
-
-  if (historyEmployeeFilter) {
-    filtered = filtered.filter(m => m.employee === historyEmployeeFilter);
-  }
-
-  if (!filtered.length) {
-    container.innerHTML = `<div class="empty">Keine Buchungen gefunden.</div>`;
-    return;
-  }
-
-  container.innerHTML = filtered.map(m => {
-    const mat = materials.find(item => item.id === m.material_id);
-    const fromSite = sites.find(s => s.id === m.from_site_id);
-    const toSite = sites.find(s => s.id === m.to_site_id);
-
-    let routeText = "";
-    if (m.type === "warehouse_to_site") {
-      routeText = `📦 Lager ➔ 🏗️ ${toSite ? escapeHtml(toSite.name) : 'Baustelle'}`;
-    } else if (m.type === "site_to_warehouse") {
-      routeText = `🏗️ ${fromSite ? escapeHtml(fromSite.name) : 'Baustelle'} ➔ 📦 Lager`;
-    } else {
-      routeText = `🏗️ ${fromSite ? escapeHtml(fromSite.name) : 'Baustelle'} ➔ 🏗️ ${toSite ? escapeHtml(toSite.name) : 'Baustelle'}`;
+  const pieces = [];
+  const rows = container.querySelectorAll("div[id^='piece_row_']");
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll("input");
+    const count = parseInt(inputs[0].value) || 0;
+    const length = parseFloat(inputs[1].value) || 0;
+    if (count > 0 && length > 0) {
+      pieces.push({ count, length });
     }
-
-    return `
-      <div class="card movement">
-        <div class="movement-main">
-          <strong>${mat ? escapeHtml(mat.name) : 'Material #' + m.material_id}</strong>
-          <span style="font-weight:800; color:var(--accent);">
-            ${formatNumber(m.amount)} ${escapeHtml(mat?.unit || 'm')}
-          </span>
-        </div>
-        <div class="movement-route">${routeText}</div>
-        <div class="movement-meta">
-          👷 ${escapeHtml(m.employee || 'Unbekannt')} | 🕒 ${formatDate(m.created_at)}
-        </div>
-      </div>
-    `;
-  }).join("");
+  });
+  return pieces;
 }
 
-/* =========================================================
-   BOOKING MODAL & LOGIC
-========================================================= */
+function calculateBookingPiecesTotal() {
+  const pieces = getBookingPiecesFromUI();
+  const total = pieces.reduce((sum, p) => sum + (p.count * p.length), 0);
+
+  const container = document.getElementById("bookingPieceRows");
+  if (container) {
+    const rows = container.querySelectorAll("div[id^='piece_row_']");
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll("input");
+      const c = parseInt(inputs[0].value) || 0;
+      const l = parseFloat(inputs[1].value) || 0;
+      const sub = row.querySelector(".row-subtotal");
+      if (sub) sub.textContent = `= ${formatNumber(c * l)}m`;
+    });
+  }
+
+  if (total > 0) {
+    const amountInput = document.getElementById("bookingAmount");
+    if (amountInput) {
+      amountInput.value = total;
+      updateBookingInfo();
+    }
+  }
+}
+
 function openBooking() {
   bookingDirection = null;
   document.getElementById("directionWarehouse").classList.remove("active");
   document.getElementById("directionSite").classList.remove("active");
   document.getElementById("bookingFields").style.display = "none";
+  document.getElementById("bookingPieceRows").innerHTML = "";
 
   populateBookingOptions();
   document.getElementById("bookingModal").classList.add("show");
@@ -1939,7 +1977,6 @@ function closeBooking() {
 
 function selectDirection(dir) {
   bookingDirection = dir;
-
   const btnWh = document.getElementById("directionWarehouse");
   const btnSite = document.getElementById("directionSite");
 
@@ -1951,77 +1988,75 @@ function selectDirection(dir) {
     btnSite.classList.add("active");
   }
 
-  renderSiteSelectionArea();
   document.getElementById("bookingFields").style.display = "block";
+  populateSiteSelectionArea();
   updateBookingInfo();
 }
 
-function populateBookingOptions() {
-  const matSelect = document.getElementById("bookingMaterial");
-  matSelect.innerHTML = materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (Lager: ${formatNumber(m.stock)} ${escapeHtml(m.unit || 'm')})</option>`).join("");
+function populateSiteSelectionArea() {
+  const container = document.getElementById("siteSelectionArea");
+  if (!container) return;
 
-  const empSelect = document.getElementById("bookingEmployee");
-  empSelect.innerHTML = `<option value="">Mitarbeiter auswählen</option>` +
-    employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
-}
-
-function renderSiteSelectionArea() {
-  const area = document.getElementById("siteSelectionArea");
   const activeSites = sites.filter(s => s.active);
+  const siteOptions = activeSites.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
 
   if (bookingDirection === 'warehouse') {
-    area.innerHTML = `
+    container.innerHTML = `
       <label>Ziel-Baustelle</label>
       <select id="targetSite" onchange="updateBookingInfo()">
-        ${activeSites.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        <option value="">Baustelle auswählen</option>
+        ${siteOptions}
       </select>
     `;
   } else {
-    area.innerHTML = `
+    container.innerHTML = `
       <label>Quell-Baustelle</label>
       <select id="sourceSite" onchange="updateBookingInfo()">
-        ${activeSites.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        <option value="">Baustelle auswählen</option>
+        ${siteOptions}
       </select>
     `;
   }
 }
 
-function updateBookingInfo() {
-  const routeBox = document.getElementById("routePreview");
-  const infoBox = document.getElementById("bookingInfo");
+function populateBookingOptions() {
+  const matSelect = document.getElementById("bookingMaterial");
+  if (matSelect) {
+    matSelect.innerHTML = `<option value="">Material auswählen</option>` +
+      materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (Lager: ${formatNumber(m.stock)} ${m.unit||'m'})</option>`).join("");
+  }
 
-  const matId = parseInt(document.getElementById("bookingMaterial").value);
-  const amount = parseFloat(document.getElementById("bookingAmount").value) || 0;
+  const empSelect = document.getElementById("bookingEmployee");
+  if (empSelect) {
+    empSelect.innerHTML = `<option value="">Mitarbeiter auswählen</option>` +
+      employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+  }
+}
+
+function updateBookingInfo() {
+  const matId = parseInt(document.getElementById("bookingMaterial")?.value);
   const mat = materials.find(m => m.id === matId);
+  const infoBox = document.getElementById("bookingInfo");
+  const routeBox = document.getElementById("routePreview");
+
+  if (!infoBox || !routeBox) return;
+
+  let siteId = null;
+  if (bookingDirection === 'warehouse') {
+    siteId = parseInt(document.getElementById("targetSite")?.value);
+  } else if (bookingDirection === 'site') {
+    siteId = parseInt(document.getElementById("sourceSite")?.value);
+  }
+
+  const site = sites.find(s => s.id === siteId);
 
   if (bookingDirection === 'warehouse') {
-    const siteId = parseInt(document.getElementById("targetSite")?.value);
-    const site = sites.find(s => s.id === siteId);
-
-    routeBox.innerHTML = `📦 Lager ➔ 🏗️ ${site ? escapeHtml(site.name) : 'Baustelle'}`;
-
-    if (mat) {
-      const avail = mat.stock;
-      if (amount > avail) {
-        infoBox.innerHTML = `⚠️ <span style="color:var(--red);">Nicht genügend Bestand im Lager (${formatNumber(avail)} ${escapeHtml(mat.unit || 'm')} verfügbar).</span>`;
-      } else {
-        infoBox.innerHTML = `Verfügbar im Lager: <strong>${formatNumber(avail)} ${escapeHtml(mat.unit || 'm')}</strong>`;
-      }
-    }
+    routeBox.innerHTML = `📦 LAGER ➔ 🏗️ ${site ? escapeHtml(site.name) : '...'}`;
+    infoBox.innerHTML = mat ? `Lagerbestand: <strong>${formatNumber(mat.stock)} ${escapeHtml(mat.unit||'m')}</strong>` : '';
   } else if (bookingDirection === 'site') {
-    const siteId = parseInt(document.getElementById("sourceSite")?.value);
-    const site = sites.find(s => s.id === siteId);
-
-    routeBox.innerHTML = `🏗️ ${site ? escapeHtml(site.name) : 'Baustelle'} ➔ 📦 Lager`;
-
-    const siteSt = siteStocks.find(s => s.site_id === siteId && s.material_id === matId);
-    const avail = siteSt ? siteSt.stock : 0;
-
-    if (amount > avail) {
-      infoBox.innerHTML = `⚠️ <span style="color:var(--red);">Nicht genügend Bestand auf der Baustelle (${formatNumber(avail)} ${escapeHtml(mat?.unit || 'm')} vorhanden).</span>`;
-    } else {
-      infoBox.innerHTML = `Vorhanden auf Baustelle: <strong>${formatNumber(avail)} ${escapeHtml(mat?.unit || 'm')}</strong>`;
-    }
+    routeBox.innerHTML = `🏗️ ${site ? escapeHtml(site.name) : '...'} ➔ 📦 LAGER`;
+    const siteStock = siteStocks.find(s => s.site_id === siteId && s.material_id === matId);
+    infoBox.innerHTML = siteStock ? `Bestand vor Ort: <strong>${formatNumber(siteStock.stock)} ${escapeHtml(mat?.unit||'m')}</strong>` : 'Kein Bestand auf Baustelle';
   }
 }
 
@@ -2029,6 +2064,7 @@ async function submitBooking() {
   const matId = parseInt(document.getElementById("bookingMaterial").value);
   const amount = parseFloat(document.getElementById("bookingAmount").value);
   const employee = document.getElementById("bookingEmployee").value;
+  const pieces = getBookingPiecesFromUI();
 
   if (!matId || isNaN(amount) || amount <= 0) {
     alert("Bitte ein Material und eine gültige Menge eingeben.");
@@ -2045,6 +2081,10 @@ async function submitBooking() {
 
   if (bookingDirection === 'warehouse') {
     const siteId = parseInt(document.getElementById("targetSite").value);
+    if (!siteId) {
+      alert("Bitte Baustelle auswählen.");
+      return;
+    }
     rpcName = "book_warehouse_to_site";
     payload = {
       p_material_id: matId,
@@ -2054,6 +2094,10 @@ async function submitBooking() {
     };
   } else if (bookingDirection === 'site') {
     const siteId = parseInt(document.getElementById("sourceSite").value);
+    if (!siteId) {
+      alert("Bitte Baustelle auswählen.");
+      return;
+    }
     rpcName = "book_site_to_warehouse";
     payload = {
       p_material_id: matId,
@@ -2065,6 +2109,17 @@ async function submitBooking() {
 
   try {
     await rpc(rpcName, payload);
+
+    if (bookingDirection === 'site') {
+      if (pieces.length > 0) {
+        addPiecesToWarehouse(matId, pieces);
+      } else {
+        addPiecesToWarehouse(matId, [{ count: 1, length: amount }]);
+      }
+    } else if (bookingDirection === 'warehouse') {
+      deductPiecesFromWarehouse(matId, pieces, amount);
+    }
+
     closeBooking();
     await loadAll();
     alert("✅ Buchung erfolgreich durchgeführt!");
@@ -2074,9 +2129,6 @@ async function submitBooking() {
   }
 }
 
-/* =========================================================
-   EMPLOYEE MODAL
-========================================================= */
 function openEmployeeModal() {
   if (!isAdmin) {
     alert("Nur Administratoren können Mitarbeiter hinzufügen.");
@@ -2112,9 +2164,81 @@ async function createEmployee() {
   }
 }
 
-/* =========================================================
-   FORMATTING & UTILS
-========================================================= */
+function renderHistory() {
+  const container = document.getElementById("historie");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="card">
+      <h2>📜 Buchungs-Historie</h2>
+      <div class="muted">Protokoll aller Materialbewegungen</div>
+      <div class="filter-grid">
+        <select id="histMatFilter" onchange="applyHistoryFilters()">
+          <option value="">Alle Materialien</option>
+          ${materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join("")}
+        </select>
+        <select id="histEmpFilter" onchange="applyHistoryFilters()">
+          <option value="">Alle Mitarbeiter</option>
+          ${employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div id="historyMovements"></div>
+  `;
+
+  renderHistoryList();
+}
+
+function applyHistoryFilters() {
+  historyMaterialFilter = document.getElementById("histMatFilter")?.value || "";
+  historyEmployeeFilter = document.getElementById("histEmpFilter")?.value || "";
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const container = document.getElementById("historyMovements");
+  if (!container) return;
+
+  let filtered = movements;
+  if (historyMaterialFilter) {
+    filtered = filtered.filter(m => m.material_id === parseInt(historyMaterialFilter));
+  }
+  if (historyEmployeeFilter) {
+    filtered = filtered.filter(m => m.employee === historyEmployeeFilter);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty">Keine Buchungen vorhanden.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const mat = materials.find(x => x.id === m.material_id);
+    const fromSite = sites.find(s => s.id === m.from_site_id);
+    const toSite = sites.find(s => s.id === m.to_site_id);
+
+    let routeText = "";
+    if (m.type === "OUT" || m.from_site_id === null) {
+      routeText = `📦 Lager ➔ 🏗️ ${toSite ? escapeHtml(toSite.name) : "Baustelle"}`;
+    } else {
+      routeText = `🏗️ ${fromSite ? escapeHtml(fromSite.name) : "Baustelle"} ➔ 📦 Lager`;
+    }
+
+    return `
+      <div class="card movement">
+        <div class="movement-main">
+          <strong>${escapeHtml(mat ? mat.name : "Material #" + m.material_id)}</strong>
+          <span style="font-weight:800; color:var(--accent);">${formatNumber(m.amount)} ${escapeHtml(mat?.unit || "m")}</span>
+        </div>
+        <div class="movement-route">${routeText}</div>
+        <div class="movement-meta">
+          👷 ${escapeHtml(m.employee || "Unbekannt")} • 📅 ${formatDate(m.created_at)}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
 function formatNumber(num) {
   if (num == null || isNaN(num)) return "0";
   return Number(num).toLocaleString("de-DE", {
