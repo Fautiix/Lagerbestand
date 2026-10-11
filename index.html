@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-11-kabel-detail-02">
+<meta name="app-version" content="2026-10-11-kabel-schnitt-03">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -717,6 +717,23 @@ label {
   font-weight: 800;
   font-size: 14px;
 }
+.piece-split-controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--card2);
+}
+.piece-split-controls label { margin-top: 0; }
+.piece-split-controls input { font-size: 17px; font-weight: 700; }
+.piece-split-controls .btn { min-height: 46px; white-space: nowrap; }
+@media (max-width: 420px) {
+  .piece-split-controls { gap: 7px; padding: 9px; }
+  .piece-split-controls .btn { padding: 10px 11px; font-size: 13px; }
+}
 .piece-manager-summary {
   margin-top: 12px;
   padding: 12px;
@@ -857,7 +874,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-detail-02</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-schnitt-03</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -1029,28 +1046,34 @@ label {
       <label>Menge in Meter (Gesamt)</label>
       <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 40" oninput="updateBookingInfo()">
 
-      <!-- ÜBERSICHT UND EDITOR FÜR EINZELSTÜCKE -->
+      <!-- DIREKTE KABELAUFTEILUNG: Stücke ohne zusätzliches Overlay bearbeiten -->
       <div class="piece-manager-card">
         <div class="piece-manager-top">
           <div>
-            <div class="piece-manager-title">✂️ Einzelstücke / Kabellängen</div>
-            <div class="muted" style="font-size:12px; margin-top:4px;">Stücke einzeln erfassen, bearbeiten oder entfernen</div>
-          </div>
-          <button type="button" class="btn primary" onclick="openBookingPiecesModal()">Bearbeiten</button>
-        </div>
-        <div class="piece-manager-summary">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <span class="muted" style="font-size:12px;">Erfasste Stücke</span>
-            <strong id="pieceManagerCount">Noch keine</strong>
-          </div>
-          <div id="pieceManagerPreview" class="piece-manager-preview">
-            <div class="muted" style="font-size:13px;">Optional: Einzelstücke hinzufügen, damit ihre Längen separat gespeichert werden.</div>
-          </div>
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-            <span style="font-weight:700;">Gesamtlänge</span>
-            <strong id="pieceManagerTotal" style="font-size:18px;">0 m</strong>
+            <div class="piece-manager-title">✂️ Kabel direkt aufteilen</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;">Gesamtmeter eingeben, Stückzahl wählen und jede Länge direkt anpassen.</div>
           </div>
         </div>
+        <div class="piece-editor-total" style="margin-top:12px;">
+          <div>
+            <div class="muted" style="font-size:12px;">Summe aller Stücke</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;"><span id="pieceEditorCount">0 Stück</span></div>
+          </div>
+          <strong id="pieceEditorTotal">0 m</strong>
+        </div>
+        <div class="piece-split-controls">
+          <div style="flex:1; min-width:100px;">
+            <label for="bookingSplitCount">Aufteilen in Stücke</label>
+            <input id="bookingSplitCount" type="number" min="1" max="500" step="1" value="3" inputmode="numeric">
+          </div>
+          <button type="button" class="btn primary" onclick="splitBookingAmountIntoPieces()">✂️ Aufteilen</button>
+        </div>
+        <div id="bookingPieceRows"></div>
+        <button type="button" class="btn full" style="margin-top:8px; border:1px dashed var(--accent); background:rgba(37,99,235,.10); color:var(--text);" onclick="addBookingPieceRow(1, '')">＋ Einzelstück hinzufügen</button>
+        <div class="muted" style="font-size:12px; margin-top:8px;">Die Längen sind direkt bearbeitbar. Die Gesamtmenge oben passt sich automatisch an.</div>
+        <div id="pieceManagerPreview" style="display:none;"></div>
+        <span id="pieceManagerCount" style="display:none;"></span>
+        <span id="pieceManagerTotal" style="display:none;">0 m</span>
       </div>
 
       <div id="siteSelectionArea"></div>
@@ -1074,38 +1097,7 @@ label {
   </div>
 </div>
 
-<!-- EINZELSTÜCKE EDITOR MODAL -->
-<div class="modal-bg piece-manager-layer" id="bookingPiecesModal" onclick="if(event.target===this) closeBookingPiecesModal()">
-  <div class="modal piece-manager-modal">
-    <div class="modal-head">
-      <div>
-        <h2 style="margin:0">✂️ Einzelstücke</h2>
-        <div class="subtitle">Längen einfach erfassen und korrigieren</div>
-      </div>
-      <button class="close" onclick="closeBookingPiecesModal()" aria-label="Einzelstücke schließen">×</button>
-    </div>
-
-    <div class="piece-editor-intro">
-      Trage die Anzahl gleicher Stücke und die Länge eines Stücks ein. Beispiel: 3 Stück × 12,5 m ergeben zusammen 37,5 m. Änderungen werden direkt übernommen.
-    </div>
-
-    <div class="piece-editor-total">
-      <div>
-        <div class="muted" style="font-size:12px;">Gesamtlänge aller Einzelstücke</div>
-        <div class="muted" style="font-size:12px; margin-top:4px;"><span id="pieceEditorCount">0 Stück</span></div>
-      </div>
-      <strong id="pieceEditorTotal">0 m</strong>
-    </div>
-
-    <div id="bookingPieceRows"></div>
-    <button type="button" class="btn full" style="border:1px dashed var(--accent); background:rgba(37,99,235,.12); color:var(--text);" onclick="addBookingPieceRow()">＋ Weiteres Stück / weitere Länge</button>
-
-    <div class="piece-editor-actions">
-      <button type="button" class="btn" onclick="closeBookingPiecesModal()">Fertig</button>
-      <button type="button" class="btn primary" onclick="addBookingPieceRow(); document.getElementById('bookingPiecesModal').querySelector('.modal').scrollTop=document.getElementById('bookingPiecesModal').querySelector('.modal').scrollHeight;">＋ Stück hinzufügen</button>
-    </div>
-  </div>
-</div>
+<!-- Die Buchungs-Stückelung ist direkt im Buchungsfenster integriert. -->
 
 <!-- LAGER-KABELDETAILS / EINZELSTÜCKE -->
 <div class="modal-bg piece-manager-layer" id="warehousePieceModal" onclick="if(event.target===this) closeWarehousePieceModal()">
@@ -2378,6 +2370,39 @@ function removeBookingPieceRow(rowId) {
   calculateBookingPiecesTotal();
 }
 
+function splitBookingAmountIntoPieces() {
+  const amountInput = document.getElementById('bookingAmount');
+  const countInput = document.getElementById('bookingSplitCount');
+  const total = Number(String(amountInput?.value || '').replace(',', '.'));
+  const count = parseInt(countInput?.value, 10);
+
+  if (!Number.isFinite(total) || total <= 0) {
+    alert('Bitte zuerst oben eine gültige Gesamtlänge in Metern eingeben.');
+    amountInput?.focus();
+    return;
+  }
+  if (!Number.isInteger(count) || count < 1 || count > 500) {
+    alert('Bitte eine Stückzahl zwischen 1 und 500 eingeben.');
+    countInput?.focus();
+    return;
+  }
+  const container = document.getElementById('bookingPieceRows');
+  if (!container) return;
+  const hasExistingRows = container.querySelectorAll("div[id^='piece_row_']").length > 0;
+  if (hasExistingRows && !confirm(`Die vorhandene Aufteilung durch ${count} Stücke ersetzen und insgesamt ${formatNumber(total)} m verteilen?`)) return;
+  container.innerHTML = '';
+
+  // Auf Cent genau verteilen, damit die Summe trotz Rundung exakt gleich bleibt.
+  const totalCents = Math.round(total * 100);
+  const baseCents = Math.floor(totalCents / count);
+  const extraCents = totalCents - baseCents * count;
+  for (let i = 0; i < count; i++) {
+    const cents = baseCents + (i < extraCents ? 1 : 0);
+    addBookingPieceRow(1, (cents / 100).toFixed(2));
+  }
+  calculateBookingPiecesTotal();
+}
+
 function getBookingPiecesFromUI() {
   const container = document.getElementById("bookingPieceRows");
   if (!container) return [];
@@ -2452,13 +2477,12 @@ function openBookingPiecesModal() {
   const container = document.getElementById('bookingPieceRows');
   if (!container) return;
   if (!container.querySelector("div[id^='piece_row_']")) addBookingPieceRow();
-  document.getElementById('bookingPiecesModal').classList.add('show');
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   calculateBookingPiecesTotal();
 }
 
 function closeBookingPiecesModal() {
-  const modal = document.getElementById('bookingPiecesModal');
-  if (modal) modal.classList.remove('show');
+  // Rückwärtskompatibilität: Die Stückelung liegt jetzt direkt im Buchungsfenster.
   calculateBookingPiecesTotal();
 }
 
