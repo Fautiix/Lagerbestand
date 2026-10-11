@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-11-version-check-01">
+<meta name="app-version" content="2026-10-11-kabel-detail-02">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -663,6 +663,42 @@ label {
   border-color: var(--accent);
 }
 
+/* Kabelkarten und übersichtliches Lager-Stücke-Overlay */
+.material-card-clickable {
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease;
+  border: 1px solid var(--border);
+}
+.material-card-clickable:hover, .material-card-clickable:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+.material-card-hint {
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  color:var(--muted); font-size:12px; padding-top:9px; border-top:1px solid var(--border);
+}
+.warehouse-piece-modal { max-width:620px; }
+.warehouse-piece-summary {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;
+}
+.warehouse-piece-stat {
+  padding:14px; border-radius:14px; background:var(--card2); border:1px solid var(--border);
+}
+.warehouse-piece-stat strong { display:block; font-size:23px; margin-top:4px; }
+.warehouse-piece-row {
+  display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:9px; align-items:center;
+  padding:10px; margin:8px 0; border:1px solid var(--border); border-radius:13px; background:var(--card2);
+}
+.warehouse-piece-number { color:var(--muted); font-weight:800; text-align:center; }
+.warehouse-piece-row input { padding:10px; }
+.warehouse-piece-row .btn { padding:9px 10px; }
+.warehouse-piece-empty { text-align:center; padding:22px 12px; color:var(--muted); border:1px dashed var(--border); border-radius:13px; }
+@media (max-width:420px) {
+  .warehouse-piece-row { grid-template-columns:26px minmax(0,1fr) auto; gap:6px; padding:8px; }
+  .warehouse-piece-row .btn { padding:8px; }
+}
+
 /* Komfortables Overlay für Einzelstücke */
 .piece-manager-card {
   margin-top: 14px;
@@ -821,7 +857,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-version-check-01</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-detail-02</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -1071,6 +1107,36 @@ label {
   </div>
 </div>
 
+<!-- LAGER-KABELDETAILS / EINZELSTÜCKE -->
+<div class="modal-bg piece-manager-layer" id="warehousePieceModal" onclick="if(event.target===this) closeWarehousePieceModal()">
+  <div class="modal warehouse-piece-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="warehousePieceTitle" style="margin:0">Kabelbestand</h2>
+        <div id="warehousePieceSubtitle" class="subtitle">Einzelstücke und Kabellängen</div>
+      </div>
+      <button class="close" onclick="closeWarehousePieceModal()" aria-label="Kabeldetails schließen">×</button>
+    </div>
+    <div class="warehouse-piece-summary">
+      <div class="warehouse-piece-stat">
+        <div class="muted" style="font-size:12px;">Einzelstücke</div>
+        <strong id="warehousePieceCount">0</strong>
+      </div>
+      <div class="warehouse-piece-stat">
+        <div class="muted" style="font-size:12px;">Gesamtlänge</div>
+        <strong id="warehousePieceTotal">0 m</strong>
+      </div>
+    </div>
+    <div class="muted" style="font-size:13px; margin-bottom:10px;">Jede Zeile ist ein einzelnes Kabelstück. Länge ändern oder einzelne Stücke löschen. Änderungen erst mit „Speichern“ übernehmen.</div>
+    <div id="warehousePieceRows"></div>
+    <button type="button" class="btn full" style="border:1px dashed var(--accent); background:rgba(37,99,235,.12); color:var(--text);" onclick="addWarehousePieceRow()">＋ Kabelstück hinzufügen</button>
+    <div class="piece-editor-actions">
+      <button type="button" class="btn" onclick="closeWarehousePieceModal()">Abbrechen</button>
+      <button type="button" class="btn primary" onclick="saveWarehousePieceModal()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
 <!-- MITARBEITER MODAL -->
 <div class="modal-bg" id="employeeModal">
   <div class="modal">
@@ -1315,6 +1381,100 @@ function openPieceEditor(materialId) {
   });
 
   saveWarehousePieces(materialId, newPieces);
+  renderWarehouseMaterials();
+}
+
+let warehousePieceMaterialId = null;
+let warehousePieceDraft = [];
+
+function openWarehousePieceModal(materialId) {
+  const mat = materials.find(m => String(m.id) === String(materialId));
+  if (!mat) return;
+  warehousePieceMaterialId = mat.id;
+  warehousePieceDraft = [];
+  getWarehousePieces(mat.id).forEach(group => {
+    const count = Math.max(0, parseInt(group.count, 10) || 0);
+    const length = Number(group.length) || 0;
+    for (let i = 0; i < count; i++) warehousePieceDraft.push({ length });
+  });
+  document.getElementById('warehousePieceTitle').textContent = mat.name;
+  document.getElementById('warehousePieceSubtitle').textContent = 'Einzelstücke im Lager verwalten';
+  renderWarehousePieceRows();
+  document.getElementById('warehousePieceModal').classList.add('show');
+}
+
+function closeWarehousePieceModal() {
+  document.getElementById('warehousePieceModal')?.classList.remove('show');
+  warehousePieceMaterialId = null;
+  warehousePieceDraft = [];
+}
+
+function renderWarehousePieceRows() {
+  const rows = document.getElementById('warehousePieceRows');
+  if (!rows) return;
+  if (!warehousePieceDraft.length) {
+    rows.innerHTML = '<div class="warehouse-piece-empty">Noch keine Kabelstücke vorhanden.<br>Tippe auf „Kabelstück hinzufügen“, um das erste Stück einzutragen.</div>';
+  } else {
+    rows.innerHTML = warehousePieceDraft.map((piece, index) => `
+      <div class="warehouse-piece-row">
+        <div class="warehouse-piece-number">${index + 1}</div>
+        <div>
+          <label for="warehousePieceLength${index}" style="font-size:12px; margin:0 0 5px;">Länge in Metern</label>
+          <input id="warehousePieceLength${index}" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="z. B. 12,5" value="${piece.length > 0 ? piece.length : ''}" oninput="updateWarehousePieceLength(${index}, this.value)">
+        </div>
+        <button type="button" class="btn red small" onclick="removeWarehousePieceRow(${index})" aria-label="Kabelstück ${index + 1} löschen">🗑</button>
+      </div>
+    `).join('');
+  }
+  updateWarehousePieceSummary();
+}
+
+function updateWarehousePieceLength(index, value) {
+  if (!warehousePieceDraft[index]) return;
+  warehousePieceDraft[index].length = Number(String(value).replace(',', '.')) || 0;
+  updateWarehousePieceSummary();
+}
+
+function addWarehousePieceRow() {
+  warehousePieceDraft.push({ length: 0 });
+  renderWarehousePieceRows();
+  const input = document.getElementById(`warehousePieceLength${warehousePieceDraft.length - 1}`);
+  input?.focus();
+}
+
+function removeWarehousePieceRow(index) {
+  warehousePieceDraft.splice(index, 1);
+  renderWarehousePieceRows();
+}
+
+function updateWarehousePieceSummary() {
+  const valid = warehousePieceDraft.filter(p => Number(p.length) > 0);
+  const total = valid.reduce((sum, p) => sum + Number(p.length), 0);
+  const count = document.getElementById('warehousePieceCount');
+  const length = document.getElementById('warehousePieceTotal');
+  if (count) count.textContent = String(valid.length);
+  if (length) length.textContent = `${formatNumber(total)} m`;
+}
+
+function saveWarehousePieceModal() {
+  if (warehousePieceMaterialId === null) return;
+  const invalid = warehousePieceDraft.findIndex(p => !(Number(p.length) > 0));
+  if (invalid !== -1) {
+    alert(`Bitte gib für Kabelstück ${invalid + 1} eine Länge größer als 0 ein oder lösche die Zeile.`);
+    document.getElementById(`warehousePieceLength${invalid}`)?.focus();
+    return;
+  }
+  // Die bestehende Speicherstruktur (Anzahl + Länge) bleibt erhalten,
+  // damit Buchungen und bisherige Daten weiterhin funktionieren.
+  const grouped = [];
+  warehousePieceDraft.forEach(piece => {
+    const length = Number(Number(piece.length).toFixed(2));
+    const existing = grouped.find(p => Math.abs(p.length - length) < 0.001);
+    if (existing) existing.count++;
+    else grouped.push({ count: 1, length });
+  });
+  saveWarehousePieces(warehousePieceMaterialId, grouped);
+  closeWarehousePieceModal();
   renderWarehouseMaterials();
 }
 
@@ -1703,12 +1863,14 @@ function renderWarehouseMaterials() {
 
   container.innerHTML = filtered.map(m => {
     const pieces = getWarehousePieces(m.id);
-    const hasPieces = pieces.length > 0;
-    const piecesSummary = pieces.map(p => `${p.count}× ${formatNumber(p.length)}m`).join(", ");
-
+    const pieceCount = pieces.reduce((sum, p) => sum + (Number(p.count) || 0), 0);
+    const pieceLength = pieces.reduce((sum, p) => sum + ((Number(p.count) || 0) * (Number(p.length) || 0)), 0);
     return `
-      <div class="card material-card" style="flex-direction: column; align-items: stretch; gap: 8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="card material-card material-card-clickable" role="button" tabindex="0"
+           aria-label="${escapeHtml(m.name)} öffnen und Kabellängen verwalten"
+           onclick="openWarehousePieceModal(${m.id})"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openWarehousePieceModal(${m.id});}">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%;">
           <div class="material-info">
             <div class="material-name">${escapeHtml(m.name)}</div>
             <div class="material-unit">Einheit: ${escapeHtml(m.unit || "m")}</div>
@@ -1718,22 +1880,10 @@ function renderWarehouseMaterials() {
             <div class="material-stock-unit">Gesamt in ${escapeHtml(m.unit || "m")}</div>
           </div>
         </div>
-
-        ${hasPieces ? `
-          <div style="margin-top:6px; padding:8px 12px; background:var(--card2); border-radius:10px; border:1px solid var(--border); font-size:12.5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-            <div>
-              <strong style="color:#60a5fa;">✂️ Einzelstücke im Lager:</strong>
-              <span style="font-weight:700; margin-left:4px; color:var(--text);">${escapeHtml(piecesSummary)}</span>
-            </div>
-            <button class="btn small" onclick="openPieceEditor(${m.id})" style="padding:3px 8px; font-size:11px;">✏️ Stücke anpassen</button>
-          </div>
-        ` : `
-          <div style="margin-top:2px;">
-            <button class="btn small" onclick="openPieceEditor(${m.id})" style="padding:3px 8px; font-size:11px; background:transparent; border:1px dashed var(--border); color:var(--muted);">
-              + Einzelstücke/Längen hinterlegen
-            </button>
-          </div>
-        `}
+        <div class="material-card-hint">
+          <span>✂️ ${pieceCount ? `${pieceCount} Einzelstücke · ${formatNumber(pieceLength)} m erfasst` : 'Noch keine Einzelstücke erfasst'}</span>
+          <strong style="color:var(--accent); white-space:nowrap;">Öffnen ›</strong>
+        </div>
       </div>
     `;
   }).join("");
@@ -2313,6 +2463,7 @@ function closeBookingPiecesModal() {
 }
 
 function openBooking() {
+  closeWarehousePieceModal();
   bookingDirection = null;
   document.getElementById("directionWarehouse").classList.remove("active");
   document.getElementById("directionSite").classList.remove("active");
