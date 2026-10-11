@@ -596,6 +596,117 @@ label {
 .site-list-item:hover {
   border-color: var(--accent);
 }
+
+/* Komfortables Overlay für Einzelstücke */
+.piece-manager-card {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.piece-manager-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.piece-manager-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+.piece-manager-summary {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+.piece-manager-preview {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+.piece-preview-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.piece-preview-row strong { color: var(--text); }
+.piece-manager-layer { z-index: 130; }
+.piece-manager-modal {
+  max-width: 620px;
+}
+.piece-editor-intro {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.piece-editor-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 15px;
+  border-radius: 14px;
+  background: rgba(37,99,235,.16);
+  border: 1px solid rgba(37,99,235,.55);
+}
+.piece-editor-total strong { font-size: 23px; }
+.piece-entry {
+  margin: 10px 0;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--card2);
+}
+.piece-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.piece-entry-fields {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+.piece-entry label {
+  margin: 2px 0 6px;
+  font-size: 12px;
+}
+.piece-entry input {
+  padding: 13px 11px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.piece-entry-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.piece-entry-footer strong { color: var(--text); }
+.piece-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.piece-editor-actions .btn { min-height: 48px; }
 .site-list-header {
   display: flex;
   justify-content: space-between;
@@ -809,15 +920,27 @@ label {
       <label>Menge in Meter (Gesamt)</label>
       <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 40" oninput="updateBookingInfo()">
 
-      <!-- STÜCKELUNG / KABELLÄNGEN -->
-      <div style="margin-top:14px; padding:12px; background:var(--card); border-radius:14px; border:1px solid var(--border);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:13px; font-weight:700; color:var(--text);">✂️ Stückelung / Einzelstücke (optional)</span>
-          <button type="button" class="btn small primary" onclick="addBookingPieceRow()">+ Stück/Länge</button>
+      <!-- ÜBERSICHT UND EDITOR FÜR EINZELSTÜCKE -->
+      <div class="piece-manager-card">
+        <div class="piece-manager-top">
+          <div>
+            <div class="piece-manager-title">✂️ Einzelstücke / Kabellängen</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;">Stücke einzeln erfassen, bearbeiten oder entfernen</div>
+          </div>
+          <button type="button" class="btn primary" onclick="openBookingPiecesModal()">Bearbeiten</button>
         </div>
-        <div id="bookingPieceRows"></div>
-        <div class="muted" style="font-size:11px; margin-top:6px;">
-          Beispiel: 2 Stück à 20m = 40m Gesamt. Die Einzelstücke werden im Lager genau so hinterlegt.
+        <div class="piece-manager-summary">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span class="muted" style="font-size:12px;">Erfasste Stücke</span>
+            <strong id="pieceManagerCount">Noch keine</strong>
+          </div>
+          <div id="pieceManagerPreview" class="piece-manager-preview">
+            <div class="muted" style="font-size:13px;">Optional: Einzelstücke hinzufügen, damit ihre Längen separat gespeichert werden.</div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+            <span style="font-weight:700;">Gesamtlänge</span>
+            <strong id="pieceManagerTotal" style="font-size:18px;">0 m</strong>
+          </div>
         </div>
       </div>
 
@@ -838,6 +961,39 @@ label {
       <button class="btn primary full" onclick="submitBooking()">
         🔄 Material buchen
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- EINZELSTÜCKE EDITOR MODAL -->
+<div class="modal-bg piece-manager-layer" id="bookingPiecesModal" onclick="if(event.target===this) closeBookingPiecesModal()">
+  <div class="modal piece-manager-modal">
+    <div class="modal-head">
+      <div>
+        <h2 style="margin:0">✂️ Einzelstücke</h2>
+        <div class="subtitle">Längen einfach erfassen und korrigieren</div>
+      </div>
+      <button class="close" onclick="closeBookingPiecesModal()" aria-label="Einzelstücke schließen">×</button>
+    </div>
+
+    <div class="piece-editor-intro">
+      Trage die Anzahl gleicher Stücke und die Länge eines Stücks ein. Beispiel: 3 Stück × 12,5 m ergeben zusammen 37,5 m. Änderungen werden direkt übernommen.
+    </div>
+
+    <div class="piece-editor-total">
+      <div>
+        <div class="muted" style="font-size:12px;">Gesamtlänge aller Einzelstücke</div>
+        <div class="muted" style="font-size:12px; margin-top:4px;"><span id="pieceEditorCount">0 Stück</span></div>
+      </div>
+      <strong id="pieceEditorTotal">0 m</strong>
+    </div>
+
+    <div id="bookingPieceRows"></div>
+    <button type="button" class="btn full" style="border:1px dashed var(--accent); background:rgba(37,99,235,.12); color:var(--text);" onclick="addBookingPieceRow()">＋ Weiteres Stück / weitere Länge</button>
+
+    <div class="piece-editor-actions">
+      <button type="button" class="btn" onclick="closeBookingPiecesModal()">Fertig</button>
+      <button type="button" class="btn primary" onclick="addBookingPieceRow(); document.getElementById('bookingPiecesModal').querySelector('.modal').scrollTop=document.getElementById('bookingPiecesModal').querySelector('.modal').scrollHeight;">＋ Stück hinzufügen</button>
     </div>
   </div>
 </div>
@@ -1956,16 +2112,46 @@ function addBookingPieceRow(count = 1, length = '') {
   if (!container) return;
 
   const rowId = 'piece_row_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+  const rowNumber = container.querySelectorAll("div[id^='piece_row_']").length + 1;
   const rowHtml = `
-    <div id="${rowId}" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
-      <input type="number" min="1" step="1" value="${count}" placeholder="Anzahl" style="width:80px; padding:8px;" oninput="calculateBookingPiecesTotal()">
-      <span style="font-weight:700;">×</span>
-      <input type="number" min="0.01" step="0.01" value="${length}" placeholder="Länge (m)" style="flex:1; padding:8px;" oninput="calculateBookingPiecesTotal()">
-      <span style="font-size:12px; font-weight:700;" class="row-subtotal">m</span>
-      <button type="button" class="btn red small" style="padding:6px 10px;" onclick="document.getElementById('${rowId}').remove(); calculateBookingPiecesTotal();">×</button>
+    <div id="${rowId}" class="piece-entry">
+      <div class="piece-entry-head">
+        <span>Einzelstück ${rowNumber}</span>
+        <button type="button" class="btn red small" onclick="removeBookingPieceRow('${rowId}')" aria-label="Einzelstück ${rowNumber} löschen">🗑 Löschen</button>
+      </div>
+      <div class="piece-entry-fields">
+        <div>
+          <label for="${rowId}_count">Anzahl gleicher Stücke</label>
+          <input id="${rowId}_count" type="number" min="1" step="1" value="${count}" inputmode="numeric" placeholder="z. B. 2" oninput="calculateBookingPiecesTotal()">
+        </div>
+        <div>
+          <label for="${rowId}_length">Länge pro Stück (m)</label>
+          <input id="${rowId}_length" type="number" min="0.01" step="0.01" value="${length}" inputmode="decimal" placeholder="z. B. 12,5" oninput="calculateBookingPiecesTotal()">
+        </div>
+      </div>
+      <div class="piece-entry-footer">
+        <span>Zwischensumme</span>
+        <strong class="row-subtotal">0 m</strong>
+      </div>
     </div>
   `;
   container.insertAdjacentHTML('beforeend', rowHtml);
+  calculateBookingPiecesTotal();
+}
+
+function removeBookingPieceRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (row) row.remove();
+  // Nummern nach dem Löschen sauber neu vergeben.
+  const container = document.getElementById("bookingPieceRows");
+  if (container) {
+    container.querySelectorAll("div[id^='piece_row_']").forEach((row, index) => {
+      const title = row.querySelector('.piece-entry-head span');
+      if (title) title.textContent = `Einzelstück ${index + 1}`;
+      const button = row.querySelector('.piece-entry-head button');
+      if (button) button.setAttribute('aria-label', `Einzelstück ${index + 1} löschen`);
+    });
+  }
   calculateBookingPiecesTotal();
 }
 
@@ -1977,38 +2163,80 @@ function getBookingPiecesFromUI() {
   const rows = container.querySelectorAll("div[id^='piece_row_']");
   rows.forEach(row => {
     const inputs = row.querySelectorAll("input");
-    const count = parseInt(inputs[0].value) || 0;
-    const length = parseFloat(inputs[1].value) || 0;
-    if (count > 0 && length > 0) {
-      pieces.push({ count, length });
-    }
+    const count = parseInt(inputs[0]?.value, 10) || 0;
+    const length = parseFloat(inputs[1]?.value) || 0;
+    if (count > 0 && length > 0) pieces.push({ count, length });
   });
   return pieces;
 }
 
 function calculateBookingPiecesTotal() {
-  const pieces = getBookingPiecesFromUI();
-  const total = pieces.reduce((sum, p) => sum + (p.count * p.length), 0);
-
   const container = document.getElementById("bookingPieceRows");
-  if (container) {
-    const rows = container.querySelectorAll("div[id^='piece_row_']");
-    rows.forEach(row => {
-      const inputs = row.querySelectorAll("input");
-      const c = parseInt(inputs[0].value) || 0;
-      const l = parseFloat(inputs[1].value) || 0;
-      const sub = row.querySelector(".row-subtotal");
-      if (sub) sub.textContent = `= ${formatNumber(c * l)}m`;
-    });
-  }
+  const rows = container ? container.querySelectorAll("div[id^='piece_row_']") : [];
+  let total = 0;
+  let totalCount = 0;
 
-  if (total > 0) {
-    const amountInput = document.getElementById("bookingAmount");
-    if (amountInput) {
-      amountInput.value = total;
-      updateBookingInfo();
+  rows.forEach((row, index) => {
+    const inputs = row.querySelectorAll("input");
+    const count = parseInt(inputs[0]?.value, 10) || 0;
+    const length = parseFloat(inputs[1]?.value) || 0;
+    const subtotal = count > 0 && length > 0 ? count * length : 0;
+    total += subtotal;
+    if (count > 0 && length > 0) totalCount += count;
+
+    const sub = row.querySelector(".row-subtotal");
+    if (sub) sub.textContent = `${formatNumber(subtotal)} m`;
+    const title = row.querySelector('.piece-entry-head span');
+    if (title) title.textContent = `Einzelstück ${index + 1}`;
+  });
+
+  const totalText = `${formatNumber(total)} m`;
+  const countText = totalCount === 1 ? '1 Stück' : `${totalCount} Stück`;
+  const editorTotal = document.getElementById('pieceEditorTotal');
+  const editorCount = document.getElementById('pieceEditorCount');
+  if (editorTotal) editorTotal.textContent = totalText;
+  if (editorCount) editorCount.textContent = countText;
+
+  const managerTotal = document.getElementById('pieceManagerTotal');
+  const managerCount = document.getElementById('pieceManagerCount');
+  const managerPreview = document.getElementById('pieceManagerPreview');
+  if (managerTotal) managerTotal.textContent = totalText;
+  if (managerCount) managerCount.textContent = totalCount ? countText : 'Noch keine';
+  if (managerPreview) {
+    const validPieces = getBookingPiecesFromUI();
+    if (!validPieces.length) {
+      managerPreview.innerHTML = '<div class="muted" style="font-size:13px;">Optional: Einzelstücke hinzufügen, damit ihre Längen separat gespeichert werden.</div>';
+    } else {
+      managerPreview.innerHTML = validPieces.map((piece, index) =>
+        `<div class="piece-preview-row"><span>${index + 1}. ${piece.count} × ${formatNumber(piece.length)} m</span><strong>${formatNumber(piece.count * piece.length)} m</strong></div>`
+      ).join('');
     }
   }
+
+  const amountInput = document.getElementById("bookingAmount");
+  if (amountInput && total > 0) {
+    amountInput.value = Number(total.toFixed(2));
+    amountInput.dataset.piecesCalculated = 'true';
+    updateBookingInfo();
+  } else if (amountInput && amountInput.dataset.piecesCalculated === 'true') {
+    amountInput.value = '';
+    delete amountInput.dataset.piecesCalculated;
+    updateBookingInfo();
+  }
+}
+
+function openBookingPiecesModal() {
+  const container = document.getElementById('bookingPieceRows');
+  if (!container) return;
+  if (!container.querySelector("div[id^='piece_row_']")) addBookingPieceRow();
+  document.getElementById('bookingPiecesModal').classList.add('show');
+  calculateBookingPiecesTotal();
+}
+
+function closeBookingPiecesModal() {
+  const modal = document.getElementById('bookingPiecesModal');
+  if (modal) modal.classList.remove('show');
+  calculateBookingPiecesTotal();
 }
 
 function openBooking() {
@@ -2017,6 +2245,10 @@ function openBooking() {
   document.getElementById("directionSite").classList.remove("active");
   document.getElementById("bookingFields").style.display = "none";
   document.getElementById("bookingPieceRows").innerHTML = "";
+  const amountInput = document.getElementById("bookingAmount");
+  if (amountInput) delete amountInput.dataset.piecesCalculated;
+  document.getElementById("bookingPiecesModal")?.classList.remove("show");
+  calculateBookingPiecesTotal();
 
   populateBookingOptions();
   document.getElementById("bookingModal").classList.add("show");
@@ -2024,6 +2256,7 @@ function openBooking() {
 
 function closeBooking() {
   document.getElementById("bookingModal").classList.remove("show");
+  document.getElementById("bookingPiecesModal")?.classList.remove("show");
 }
 
 function populateBookingOptions() {
