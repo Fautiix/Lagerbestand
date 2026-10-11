@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-11-rpc-fix">
+<meta name="app-version" content="2026-10-11-version-check-01">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -116,6 +116,72 @@ h1 {
   border-color: var(--green);
   background: rgba(34,197,94,.14);
   color: var(--green);
+}
+
+.header-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.version-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 175px;
+}
+.version-status {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.version-status.online {
+  color: #86efac;
+  border-color: rgba(34,197,94,.45);
+  background: rgba(22,163,74,.12);
+}
+.version-status.update {
+  color: #fcd34d;
+  border-color: rgba(245,158,11,.5);
+  background: rgba(245,158,11,.12);
+}
+.version-status.offline {
+  color: #fca5a5;
+  border-color: rgba(239,68,68,.45);
+  background: rgba(239,68,68,.10);
+}
+.app-version-label {
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.reload-app-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  header { padding: 12px 10px 9px; }
+  .header-row { gap: 7px; }
+  h1 { font-size: 21px; }
+  .subtitle { font-size: 12px; }
+  .header-actions { gap: 5px; }
+  .version-box { max-width: 125px; }
+  .version-status { padding: 6px 7px; font-size: 10px; }
+  .app-version-label { font-size: 8px; }
+  .admin-button { padding: 8px 9px; font-size: 12px; }
 }
 
 .content {
@@ -752,12 +818,19 @@ label {
       <div class="subtitle">Lager & Baustellen</div>
     </div>
 
-    <button
-      id="adminButton"
-      class="admin-button"
-      onclick="openAdminModal()">
-      🔐 Admin
-    </button>
+    <div class="header-actions">
+      <div class="version-box">
+        <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-version-check-01</div>
+        <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
+      </div>
+      <button
+        id="adminButton"
+        class="admin-button"
+        onclick="openAdminModal()">
+        🔐 Admin
+      </button>
+    </div>
   </div>
 </header>
 
@@ -2585,6 +2658,67 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// Diese Kennung steht für genau diese ausgelieferte index.html.
+const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || "unbekannt";
+
+function setVersionStatus(state, message) {
+  const badge = document.getElementById("versionStatus");
+  if (!badge) return;
+  badge.classList.remove("online", "update", "offline");
+  if (state) badge.classList.add(state);
+  badge.textContent = message;
+}
+
+async function checkAppVersion() {
+  const reloadButton = document.getElementById("reloadAppButton");
+  const versionLabel = document.getElementById("appVersionLabel");
+  if (reloadButton) reloadButton.hidden = true;
+  if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION;
+
+  if (!navigator.onLine) {
+    setVersionStatus("offline", "📴 Offline");
+    return;
+  }
+
+  setVersionStatus("", "⏳ Prüfe Online-Version …");
+  let checkUrl;
+  try {
+    // Ein wechselnder Parameter umgeht Browser- und Service-Worker-Cache-Treffer.
+    checkUrl = new URL("./index.html", location.href);
+    checkUrl.searchParams.set("__version_check", String(Date.now()));
+    const response = await fetch(checkUrl.href, { cache: "no-store", credentials: "same-origin" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const html = await response.text();
+    const match = html.match(/<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i);
+    if (!match) throw new Error("Versionskennung fehlt in der Online-Datei");
+    const onlineVersion = match[1];
+
+    if (onlineVersion === APP_VERSION) {
+      setVersionStatus("online", "🟢 Online · aktuell");
+      if (versionLabel) versionLabel.textContent = "Version: " + APP_VERSION;
+    } else {
+      setVersionStatus("update", "🟡 Update verfügbar");
+      if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION + " · Online: " + onlineVersion;
+      if (reloadButton) reloadButton.hidden = false;
+    }
+  } catch (error) {
+    setVersionStatus("offline", "⚠️ Version ungeprüft");
+    if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION + " · Online-Prüfung fehlgeschlagen";
+  } finally {
+    // Verhindert, dass der Service Worker pro Prüfung einen Cache-Eintrag behält.
+    if (checkUrl && window.caches) {
+      caches.keys().then(names => Promise.all(names.map(async name => {
+        try { await (await caches.open(name)).delete(checkUrl.href); } catch (_) {}
+      }))).catch(() => {});
+    }
+  }
+}
+
+window.addEventListener("online", checkAppVersion);
+window.addEventListener("offline", () => setVersionStatus("offline", "📴 Offline"));
+checkAppVersion();
 </script>
 
 </body>
