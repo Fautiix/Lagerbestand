@@ -9,6 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
+<meta name="app-version" content="2026-10-11-rpc-fix">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -1178,10 +1179,20 @@ async function rpc(functionName, body) {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || "RPC Fehler");
+    throw new Error(text || `RPC-Fehler (${response.status})`);
   }
 
-  return response.json();
+  // PostgreSQL-Funktionen mit RETURNS void antworten oft mit HTTP 204
+  // und einem leeren Body. response.json() würde dann einen Fehler werfen,
+  // obwohl die Buchung in Supabase bereits erfolgreich war.
+  const responseText = await response.text();
+  if (!responseText.trim()) return null;
+
+  try {
+    return JSON.parse(responseText);
+  } catch (_) {
+    return responseText;
+  }
 }
 
 async function loginAdmin() {
