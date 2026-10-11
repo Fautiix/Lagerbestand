@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-11-kabel-schnitt-03">
+<meta name="app-version" content="2026-10-11-kabel-schnitt-04">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -857,6 +857,13 @@ label {
     max-height: 85vh;
   }
 }
+
+.booking-amount-overflow {
+  color: #dc2626 !important;
+  border: 2px solid #dc2626 !important;
+  font-weight: 700 !important;
+}
+
 </style>
 </head>
 
@@ -874,7 +881,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-schnitt-03</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-schnitt-04</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -2461,15 +2468,17 @@ function calculateBookingPiecesTotal() {
     }
   }
 
+  // Die eingegebene Gesamtlänge bleibt unverändert. Nur warnen, wenn die
+  // Summe der Einzelstücke größer ist als die festgelegte Gesamtmenge.
   const amountInput = document.getElementById("bookingAmount");
-  if (amountInput && total > 0) {
-    amountInput.value = Number(total.toFixed(2));
-    amountInput.dataset.piecesCalculated = 'true';
-    updateBookingInfo();
-  } else if (amountInput && amountInput.dataset.piecesCalculated === 'true') {
-    amountInput.value = '';
-    delete amountInput.dataset.piecesCalculated;
-    updateBookingInfo();
+  if (amountInput) {
+    const enteredTotal = Number(String(amountInput.value || '').replace(',', '.'));
+    const exceedsTotal = Number.isFinite(enteredTotal) && enteredTotal > 0 && total > enteredTotal + 0.0001;
+    amountInput.classList.toggle('booking-amount-overflow', exceedsTotal);
+    amountInput.setAttribute('aria-invalid', exceedsTotal ? 'true' : 'false');
+    amountInput.title = exceedsTotal
+      ? `Achtung: Die Stücke ergeben ${formatNumber(total)} m, eingegeben sind aber nur ${formatNumber(enteredTotal)} m.`
+      : '';
   }
 }
 
@@ -2632,6 +2641,13 @@ async function submitBooking() {
 
   if (!matId || isNaN(amount) || amount <= 0) {
     alert("Bitte ein Material und eine gültige Menge eingeben.");
+    return;
+  }
+
+  const piecesTotal = pieces.reduce((sum, piece) => sum + (Number(piece.count) || 0) * (Number(piece.length) || 0), 0);
+  if (pieces.length && piecesTotal > amount + 0.0001) {
+    document.getElementById("bookingAmount")?.classList.add('booking-amount-overflow');
+    alert(`Die Einzelstücke ergeben ${formatNumber(piecesTotal)} m, die Gesamtlänge beträgt aber nur ${formatNumber(amount)} m. Bitte korrigiere die Stücklängen oder die Gesamtlänge.`);
     return;
   }
 
