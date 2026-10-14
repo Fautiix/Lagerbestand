@@ -878,6 +878,13 @@ label {
 .vehicle-item-amount { color:var(--accent); font-weight:800; }
 .vehicle-item-note { font-size:12px; margin-top:3px; }
 .vehicle-item-actions { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+.note-card { border:1px solid var(--border); background:var(--card); border-radius:15px; padding:15px; margin:10px 0; }
+.note-card.note-done { opacity:.7; }
+.note-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.note-card-title { font-weight:800; font-size:17px; overflow-wrap:anywhere; }
+.note-card-body { white-space:pre-wrap; overflow-wrap:anywhere; margin-top:9px; line-height:1.45; }
+.site-order-actions { display:flex; flex-direction:column; gap:4px; }
+.site-order-actions .btn { min-width:36px; padding:5px 8px; }
 @media (max-width:600px) { .vehicle-item { align-items:flex-start; flex-direction:column; } .vehicle-item-actions { width:100%; justify-content:flex-start; } }
 </style>
 </head>
@@ -930,6 +937,10 @@ label {
             onclick="showTab('fahrzeuge', this); loadAndRenderVehicles()">
       🚐 Fahrzeuge
     </button>
+    <button class="tab"
+            onclick="showTab('notizen', this); loadAndRenderNotes()">
+      📝 Notizen
+    </button>
   </div>
 
   <section id="lager"></section>
@@ -939,6 +950,7 @@ label {
   <section id="historie" style="display:none"></section>
 
   <section id="fahrzeuge" style="display:none"></section>
+  <section id="notizen" style="display:none"></section>
 </div>
 </div>
 
@@ -1006,12 +1018,41 @@ label {
     <input id="vehicleItemMaterialName" placeholder="z. B. NYM-J 3x1,5 mm² oder Schrauben">
     <label>Einheit</label>
     <select id="vehicleItemUnit"><option value="Stk">Stück (Stk)</option><option value="m">Meter (m)</option><option value="Rolle">Rollen</option><option value="Kg">Kilogramm (kg)</option><option value="Pack">Packung</option><option value="Sonstiges">Sonstiges</option></select>
+    <label>Welcher Kollege entnimmt das Material?</label>
+    <select id="vehicleItemTakenBy"></select>
     <label>Menge</label>
     <input id="vehicleItemAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Menge">
     <label>Notiz (optional)</label>
     <input id="vehicleItemNote" placeholder="z. B. bei Einsatz verbraucht">
     <div class="muted" style="font-size:12px; margin-top:8px;">Diese Liste dient der Nachlade-Erinnerung. Der Lagerbestand wird dadurch nicht automatisch verändert.</div>
     <button class="btn primary full" style="margin-top:16px;" onclick="createVehicleItem()">➕ Zur Nachlade-Liste hinzufügen</button>
+  </div>
+</div>
+
+<!-- WIEDERAUFFÜLLEN BESTÄTIGEN -->
+<div class="modal-bg" id="vehicleReloadModal">
+  <div class="modal">
+    <div class="modal-head"><h2 style="margin:0">✅ Wieder aufgefüllt</h2><button class="close" onclick="closeVehicleReloadModal()">×</button></div>
+    <div class="notice" id="vehicleReloadItemLabel"></div>
+    <label>Welcher Kollege hat aufgefüllt?</label>
+    <select id="vehicleReloadedBy"></select>
+    <button class="btn green full" onclick="confirmVehicleReloaded()">Auffüllen speichern</button>
+  </div>
+</div>
+
+<!-- NOTIZEN / ARBEITSAUFGABEN -->
+<div class="modal-bg" id="noteModal">
+  <div class="modal">
+    <div class="modal-head"><h2 style="margin:0">📝 Neue Notiz / Arbeit</h2><button class="close" onclick="closeNoteModal()">×</button></div>
+    <label>Überschrift</label>
+    <input id="noteTitle" placeholder="z. B. Kabelkanal im Keller fertigstellen">
+    <label>Beschreibung / Was ist zu tun?</label>
+    <textarea id="noteBody" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:13px;padding:14px;font:inherit;resize:vertical" placeholder="Details für die Kollegen ..."></textarea>
+    <label>Notiz von</label>
+    <select id="noteAuthor"></select>
+    <label>Baustelle (optional)</label>
+    <select id="noteSite"><option value="">Keine bestimmte Baustelle</option></select>
+    <button class="btn primary full" onclick="createNote()">📝 Notiz teilen</button>
   </div>
 </div>
 
@@ -1291,6 +1332,8 @@ let movements = [];
 let employees = [];
 let vehicles = [];
 let vehicleRestockItems = [];
+let sharedNotes = [];
+let pendingReloadItemId = null;
 let selectedVehicleId = null;
 
 let bookingDirection = null;
@@ -1804,7 +1847,8 @@ async function loadAll() {
       loadMovements(),
       loadEmployees(),
       loadVehicles(),
-      loadVehicleRestockItems()
+      loadVehicleRestockItems(),
+      loadNotes().catch(error => { sharedNotes = []; console.warn("Notizen noch nicht verfügbar:", error.message); })
     ]);
 
     await loadSiteStocks();
@@ -1824,7 +1868,7 @@ async function loadMaterials() {
 }
 
 async function loadSites() {
-  sites = await supabase("sites?select=id,name,address,active,created_at,order_number,extra_order_number,distance_km,contact_person,custom_fields&order=name");
+  sites = await supabase("sites?select=id,name,address,active,created_at,order_number,extra_order_number,distance_km,contact_person,custom_fields,sort_order&order=sort_order.asc.nullslast,name.asc");
   sites.forEach(s => {
     if (typeof s.custom_fields === 'string') {
       try { s.custom_fields = JSON.parse(s.custom_fields); } catch (e) { s.custom_fields = {}; }
@@ -1847,11 +1891,20 @@ async function loadEmployees() {
 }
 
 async function loadVehicles() {
-  vehicles = await supabase("vehicles?select=id,name,plate,active,created_at&active=eq.true&order=name");
+  vehicles = await supabase("vehicles?select=id,name,plate,active,created_at&order=name");
 }
 
 async function loadVehicleRestockItems() {
-  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,material_name,unit,amount,note,status,created_at,reloaded_at&order=created_at.desc");
+  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,material_name,unit,amount,note,status,created_at,reloaded_at,taken_by,reloaded_by&order=created_at.desc");
+}
+
+async function loadNotes() {
+  sharedNotes = await supabase("work_notes?select=id,title,body,author,site_id,status,created_at,completed_at,completed_by&order=status.asc,created_at.desc");
+}
+
+async function loadAndRenderNotes() {
+  try { await loadNotes(); renderNotes(); }
+  catch (error) { const c=document.getElementById("notizen"); if(c) c.innerHTML=`<div class="card"><h2>Notizen nicht verfügbar</h2><p>Bitte führe die neue SQL-Erweiterung in Supabase aus.</p><div class="muted">${escapeHtml(error.message)}</div></div>`; }
 }
 
 async function loadAndRenderVehicles() {
@@ -1876,6 +1929,7 @@ function renderAll() {
   renderSites();
   renderHistory();
   renderVehicles();
+  renderNotes();
   updateAdminUI();
 }
 
@@ -2013,7 +2067,7 @@ function renderSites() {
 
       <div class="table-toolbar">
         <div style="display:flex; gap:8px; align-items:center;">
-          ${isAdmin ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle (nach unten)</button>` : ''}
+          ${isAdmin ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle hinzufügen</button>` : ''}
           ${isAdmin ? `<button class="btn primary small" onclick="openManageColumnsModal()">⚙️ Spalte (nach rechts)</button>` : ''}
         </div>
       </div>
@@ -2027,6 +2081,23 @@ function renderSites() {
   }
 
   container.innerHTML = html;
+}
+
+async function moveSite(siteId, direction) {
+  if (!isAdmin) { alert("Nur Admins können die Reihenfolge ändern."); return; }
+  const ordered = [...sites].sort((a,b) => (Number(a.sort_order ?? 999999) - Number(b.sort_order ?? 999999)) || String(a.name).localeCompare(String(b.name), "de"));
+  const from = ordered.findIndex(site => Number(site.id) === Number(siteId));
+  const to = from + Number(direction);
+  if (from < 0 || to < 0 || to >= ordered.length) return;
+  [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
+  try {
+    for (let i=0; i<ordered.length; i++) {
+      await supabase(`sites?id=eq.${ordered[i].id}`, { method:"PATCH", body:JSON.stringify({sort_order:i+1}) });
+      ordered[i].sort_order = i+1;
+    }
+    sites = ordered;
+    renderSites();
+  } catch (error) { alert("Reihenfolge konnte nicht gespeichert werden: " + error.message); }
 }
 
 function setSiteViewMode(mode) {
@@ -2082,7 +2153,11 @@ function renderPaperTableView(filteredSites) {
           ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '')}</td>`).join('')}
           ${isAdmin ? `
             <td>
-              <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️ Bearbeiten</button>
+              <div class="site-order-actions">
+                <button class="btn small" onclick="moveSite(${site.id}, -1)" title="Eine Zeile nach oben">⬆️</button>
+                <button class="btn small" onclick="moveSite(${site.id}, 1)" title="Eine Zeile nach unten">⬇️</button>
+                <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️ Bearbeiten</button>
+              </div>
             </td>
           ` : ''}
         </tr>
@@ -2319,6 +2394,7 @@ async function saveSite() {
       });
     } else {
       payload.active = true;
+      payload.sort_order = Math.max(0, ...sites.map(site => Number(site.sort_order) || 0)) + 1;
       await supabase("sites", {
         method: "POST",
         body: JSON.stringify(payload)
@@ -2824,33 +2900,34 @@ function renderVehicles() {
   if (!container) return;
   if (selectedVehicleId && !vehicles.some(v => Number(v.id) === Number(selectedVehicleId))) selectedVehicleId = null;
 
+  const activeVehicles = vehicles.filter(v => v.active !== false);
   const pending = vehicleRestockItems.filter(item => item.status === "needs_restock");
   const pendingForVehicle = selectedVehicleId ? pending.filter(item => Number(item.vehicle_id) === Number(selectedVehicleId)) : [];
-  const selectedVehicle = vehicles.find(v => Number(v.id) === Number(selectedVehicleId));
+  const selectedVehicle = activeVehicles.find(v => Number(v.id) === Number(selectedVehicleId));
 
   let html = `
     <div class="card">
       <div class="site-card-top">
         <div><h2>🚐 Einsatzfahrzeuge</h2><div class="subtitle">Entnommenes Material erfassen und späteres Nachladen nicht vergessen.</div></div>
-        <button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>
+        ${isAdmin ? `<button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>` : ''}
       </div>
       <div class="stats-grid" style="margin-top:14px;">
-        <div class="stat-card"><div class="stat-number">${vehicles.length}</div><div class="stat-label">Fahrzeuge</div></div>
+        <div class="stat-card"><div class="stat-number">${activeVehicles.length}</div><div class="stat-label">Fahrzeuge</div></div>
         <div class="stat-card"><div class="stat-number">${pending.length}</div><div class="stat-label">Offene Nachladungen</div></div>
       </div>
     </div>
   `;
 
-  if (!vehicles.length) {
-    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong><p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button></div>`;
+  if (!activeVehicles.length) {
+    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong>${isAdmin ? `<p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button>` : `<p>Ein Administrator kann hier Fahrzeuge hinzufügen.</p>`}</div>`;
     container.innerHTML = html;
     return;
   }
 
-  html += `<div class="card"><h3 style="margin-top:0;">Fahrzeug auswählen</h3><div class="filter-grid"><select id="selectedVehicleSelect" onchange="selectVehicle(this.value)"><option value="">Alle Fahrzeuge anzeigen</option>${vehicles.map(v => `<option value="${v.id}" ${Number(v.id) === Number(selectedVehicleId) ? 'selected' : ''}>${escapeHtml(v.name)}${v.plate ? ' · ' + escapeHtml(v.plate) : ''}</option>`).join('')}</select></div><div class="vehicle-grid">`;
-  vehicles.forEach(vehicle => {
+  html += `<div class="card"><h3 style="margin-top:0;">Fahrzeug auswählen</h3><div class="filter-grid"><select id="selectedVehicleSelect" onchange="selectVehicle(this.value)"><option value="">Alle Fahrzeuge anzeigen</option>${activeVehicles.map(v => `<option value="${v.id}" ${Number(v.id) === Number(selectedVehicleId) ? 'selected' : ''}>${escapeHtml(v.name)}${v.plate ? ' · ' + escapeHtml(v.plate) : ''}</option>`).join('')}</select></div><div class="vehicle-grid">`;
+  activeVehicles.forEach(vehicle => {
     const count = pending.filter(item => Number(item.vehicle_id) === Number(vehicle.id)).length;
-    html += `<button class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>`;
+    html += `<div class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}"><button style="width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>${isAdmin ? `<button class="btn red small" style="margin-top:8px;" onclick="archiveVehicle(${vehicle.id})">Fahrzeug entfernen</button>` : ''}</div>`;
   });
   html += `</div></div>`;
 
@@ -2869,7 +2946,7 @@ function renderVehicles() {
       const materialName = item.material_name || material?.name || 'Material #' + item.material_id;
       const materialUnit = item.unit || material?.unit || 'Stk';
       const done = item.status === 'reloaded';
-      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(materialName)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(materialUnit)}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div>${item.note ? `<div class="vehicle-item-note">${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
+      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(materialName)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(materialUnit)}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div><div class="vehicle-item-note">👷 Entnommen von: ${escapeHtml(item.taken_by || 'Nicht angegeben')}</div>${item.note ? `<div class="vehicle-item-note">Notiz: ${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen von: ${escapeHtml(item.reloaded_by || 'Nicht angegeben')}${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
     }).join('') + `</div>`;
   }
   html += `</div>`;
@@ -2882,6 +2959,7 @@ function selectVehicle(vehicleId) {
 }
 
 function openVehicleModal() {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge hinzufügen.'); return; }
   document.getElementById('newVehicleName').value = '';
   document.getElementById('newVehiclePlate').value = '';
   document.getElementById('vehicleModal').classList.add('show');
@@ -2889,6 +2967,7 @@ function openVehicleModal() {
 function closeVehicleModal() { document.getElementById('vehicleModal').classList.remove('show'); }
 
 async function createVehicle() {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge hinzufügen.'); return; }
   const name = document.getElementById('newVehicleName').value.trim();
   const plate = document.getElementById('newVehiclePlate').value.trim();
   if (!name) { alert('Bitte einen Fahrzeugnamen eingeben.'); return; }
@@ -2901,6 +2980,18 @@ async function createVehicle() {
   } catch (error) { alert('Fahrzeug konnte nicht gespeichert werden: ' + error.message); }
 }
 
+async function archiveVehicle(vehicleId) {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge entfernen.'); return; }
+  const vehicle = vehicles.find(v => Number(v.id) === Number(vehicleId));
+  if (!vehicle) return;
+  if (!confirm(`Fahrzeug „${vehicle.name}“ aus der aktiven Liste entfernen? Die bisherige Nachlade-Historie bleibt erhalten.`)) return;
+  try {
+    await supabase(`vehicles?id=eq.${vehicleId}`, {method:'PATCH', body:JSON.stringify({active:false})});
+    if (Number(selectedVehicleId) === Number(vehicleId)) selectedVehicleId = null;
+    await loadVehicles(); renderVehicles();
+  } catch(error) { alert('Fahrzeug konnte nicht entfernt werden: ' + error.message); }
+}
+
 function openVehicleItemModal(vehicleId) {
   const vehicle = vehicles.find(v => Number(v.id) === Number(vehicleId));
   if (!vehicle) return;
@@ -2908,6 +2999,7 @@ function openVehicleItemModal(vehicleId) {
   document.getElementById('vehicleItemVehicleLabel').textContent = 'Fahrzeug: ' + vehicle.name + (vehicle.plate ? ' · ' + vehicle.plate : '');
   document.getElementById('vehicleItemMaterialName').value = '';
   document.getElementById('vehicleItemUnit').value = 'Stk';
+  document.getElementById('vehicleItemTakenBy').innerHTML = employeeOptionsHtml();
   document.getElementById('vehicleItemAmount').value = '';
   document.getElementById('vehicleItemNote').value = '';
   document.getElementById('vehicleItemModal').classList.add('show');
@@ -2919,25 +3011,43 @@ async function createVehicleItem() {
   const unit = document.getElementById('vehicleItemUnit').value || 'Stk';
   const amount = Number(String(document.getElementById('vehicleItemAmount').value || '').replace(',', '.'));
   const note = document.getElementById('vehicleItemNote').value.trim();
+  const takenBy = document.getElementById('vehicleItemTakenBy').value;
   if (!selectedVehicleId) { alert('Bitte zuerst ein Fahrzeug auswählen.'); return; }
   if (!materialName || !Number.isFinite(amount) || amount <= 0) { alert('Bitte Materialbezeichnung und eine gültige Menge eingeben.'); return; }
+  if (!takenBy) { alert('Bitte den Kollegen auswählen, der das Material entnommen hat.'); return; }
   try {
-    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: null, material_name: materialName, unit, amount, note: note || null, status: 'needs_restock' }) });
+    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: null, material_name: materialName, unit, amount, note: note || null, taken_by: takenBy, status: 'needs_restock' }) });
     closeVehicleItemModal();
     await loadVehicleRestockItems();
     renderVehicles();
   } catch (error) { alert('Materialentnahme konnte nicht gespeichert werden: ' + error.message); }
 }
 
-async function markVehicleItemReloaded(itemId) {
+function employeeOptionsHtml() {
+  return `<option value="">Kollege auswählen</option>` + employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join('');
+}
+
+function markVehicleItemReloaded(itemId) {
+  const item = vehicleRestockItems.find(x => Number(x.id) === Number(itemId));
+  if (!item) return;
+  pendingReloadItemId = Number(itemId);
+  document.getElementById('vehicleReloadItemLabel').textContent = `${item.material_name || 'Material'} · ${formatNumber(item.amount)} ${item.unit || ''}`;
+  document.getElementById('vehicleReloadedBy').innerHTML = employeeOptionsHtml();
+  document.getElementById('vehicleReloadModal').classList.add('show');
+}
+function closeVehicleReloadModal() { document.getElementById('vehicleReloadModal').classList.remove('show'); pendingReloadItemId = null; }
+async function confirmVehicleReloaded() {
+  const reloadedBy = document.getElementById('vehicleReloadedBy').value;
+  if (!pendingReloadItemId) return;
+  if (!reloadedBy) { alert('Bitte den Kollegen auswählen, der aufgefüllt hat.'); return; }
   try {
-    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'reloaded', reloaded_at: new Date().toISOString() }) });
-    await loadVehicleRestockItems(); renderVehicles();
+    await supabase(`vehicle_restock_items?id=eq.${pendingReloadItemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'reloaded', reloaded_at: new Date().toISOString(), reloaded_by: reloadedBy }) });
+    closeVehicleReloadModal(); await loadVehicleRestockItems(); renderVehicles();
   } catch (error) { alert('Status konnte nicht geändert werden: ' + error.message); }
 }
 async function reopenVehicleItem(itemId) {
   try {
-    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'needs_restock', reloaded_at: null }) });
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'needs_restock', reloaded_at: null, reloaded_by: null }) });
     await loadVehicleRestockItems(); renderVehicles();
   } catch (error) { alert('Eintrag konnte nicht wieder geöffnet werden: ' + error.message); }
 }
@@ -2947,6 +3057,55 @@ async function deleteVehicleItem(itemId) {
     await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'DELETE' });
     await loadVehicleRestockItems(); renderVehicles();
   } catch (error) { alert('Eintrag konnte nicht gelöscht werden: ' + error.message); }
+}
+
+function openNoteModal() {
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteBody').value = '';
+  document.getElementById('noteAuthor').innerHTML = employeeOptionsHtml();
+  document.getElementById('noteSite').innerHTML = `<option value="">Keine bestimmte Baustelle</option>` + sites.filter(s=>s.active).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+  document.getElementById('noteModal').classList.add('show');
+}
+function closeNoteModal() { document.getElementById('noteModal').classList.remove('show'); }
+async function createNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  const body = document.getElementById('noteBody').value.trim();
+  const author = document.getElementById('noteAuthor').value;
+  const siteValue = document.getElementById('noteSite').value;
+  if (!title || !body) { alert('Bitte Überschrift und Beschreibung eingeben.'); return; }
+  if (!author) { alert('Bitte auswählen, welcher Kollege die Notiz erstellt.'); return; }
+  try {
+    await supabase('work_notes', {method:'POST', body:JSON.stringify({title, body, author, site_id:siteValue ? Number(siteValue) : null, status:'open'})});
+    closeNoteModal(); await loadNotes(); renderNotes();
+  } catch(error) { alert('Notiz konnte nicht gespeichert werden: ' + error.message); }
+}
+async function toggleNoteDone(noteId) {
+  const note = sharedNotes.find(n=>Number(n.id)===Number(noteId));
+  if (!note) return;
+  if (note.status === 'done') {
+    try { await supabase(`work_notes?id=eq.${noteId}`, {method:'PATCH',body:JSON.stringify({status:'open',completed_at:null,completed_by:null})}); await loadNotes(); renderNotes(); }
+    catch(error) { alert('Notiz konnte nicht geöffnet werden: '+error.message); }
+    return;
+  }
+  const completedBy = prompt('Welcher Kollege hat die Arbeit erledigt?');
+  if (!completedBy || !completedBy.trim()) return;
+  try { await supabase(`work_notes?id=eq.${noteId}`, {method:'PATCH',body:JSON.stringify({status:'done',completed_at:new Date().toISOString(),completed_by:completedBy.trim()})}); await loadNotes(); renderNotes(); }
+  catch(error) { alert('Notiz konnte nicht abgeschlossen werden: '+error.message); }
+}
+async function deleteNote(noteId) {
+  if (!confirm('Diese Notiz wirklich löschen?')) return;
+  try { await supabase(`work_notes?id=eq.${noteId}`, {method:'DELETE'}); await loadNotes(); renderNotes(); }
+  catch(error) { alert('Notiz konnte nicht gelöscht werden: '+error.message); }
+}
+function renderNotes() {
+  const c=document.getElementById('notizen'); if(!c) return;
+  const open=sharedNotes.filter(n=>n.status!=='done');
+  const done=sharedNotes.filter(n=>n.status==='done');
+  const noteCard = n => {
+    const site=sites.find(s=>Number(s.id)===Number(n.site_id));
+    return `<div class="note-card ${n.status==='done'?'note-done':''}"><div class="note-card-top"><div><div class="note-card-title">${n.status==='done'?'✅ ': '📝 '}${escapeHtml(n.title)}</div><div class="movement-meta">Von ${escapeHtml(n.author||'Unbekannt')} · ${formatDate(n.created_at)}${site?' · 🏗️ '+escapeHtml(site.name):''}</div></div><span class="badge">${n.status==='done'?'Erledigt':'Offen'}</span></div><div class="note-card-body">${escapeHtml(n.body)}</div>${n.status==='done'?`<div class="movement-meta">Erledigt von ${escapeHtml(n.completed_by||'Unbekannt')}${n.completed_at?' · '+formatDate(n.completed_at):''}</div>`:''}<div class="vehicle-item-actions" style="margin-top:12px;"><button class="btn ${n.status==='done'?'small':'green small'}" onclick="toggleNoteDone(${n.id})">${n.status==='done'?'Wieder öffnen':'✓ Als erledigt markieren'}</button>${isAdmin?`<button class="btn red small" onclick="deleteNote(${n.id})">Löschen</button>`:''}</div></div>`;
+  };
+  c.innerHTML=`<div class="card"><div class="site-card-top"><div><h2>📝 Notizen & anstehende Arbeiten</h2><div class="subtitle">Für alle Kollegen sichtbar, damit keine Aufgabe untergeht.</div></div><button class="btn primary" onclick="openNoteModal()">➕ Notiz erstellen</button></div><div class="stats-grid" style="margin-top:14px;"><div class="stat-card"><div class="stat-number">${open.length}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-number">${done.length}</div><div class="stat-label">Erledigt</div></div></div></div>${open.length?open.map(noteCard).join(''):'<div class="empty">Aktuell stehen keine Arbeiten an. 🎉</div>'}${done.length?`<h3 style="margin:22px 4px 8px;">Erledigte Arbeiten</h3>${done.map(noteCard).join('')}`:''}`;
 }
 
 function renderHistory() {
