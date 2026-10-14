@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-14-fahrzeuge-01">
+<meta name="app-version" content="2026-10-14-fahrzeuge-02">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -896,7 +896,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-14-fahrzeuge-01</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-14-fahrzeuge-02</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -1002,8 +1002,10 @@ label {
       <button class="close" onclick="closeVehicleItemModal()">×</button>
     </div>
     <div id="vehicleItemVehicleLabel" class="notice"></div>
-    <label>Material</label>
-    <select id="vehicleItemMaterial"></select>
+    <label>Material frei eingeben</label>
+    <input id="vehicleItemMaterialName" placeholder="z. B. NYM-J 3x1,5 mm² oder Schrauben">
+    <label>Einheit</label>
+    <select id="vehicleItemUnit"><option value="Stk">Stück (Stk)</option><option value="m">Meter (m)</option><option value="Rolle">Rollen</option><option value="Kg">Kilogramm (kg)</option><option value="Pack">Packung</option><option value="Sonstiges">Sonstiges</option></select>
     <label>Menge</label>
     <input id="vehicleItemAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Menge">
     <label>Notiz (optional)</label>
@@ -1849,7 +1851,7 @@ async function loadVehicles() {
 }
 
 async function loadVehicleRestockItems() {
-  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,amount,note,status,created_at,reloaded_at&order=created_at.desc");
+  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,material_name,unit,amount,note,status,created_at,reloaded_at&order=created_at.desc");
 }
 
 async function loadAndRenderVehicles() {
@@ -2864,8 +2866,10 @@ function renderVehicles() {
     html += `<div class="vehicle-item-list">` + itemsToShow.map(item => {
       const vehicle = vehicles.find(v => Number(v.id) === Number(item.vehicle_id));
       const material = materials.find(m => Number(m.id) === Number(item.material_id));
+      const materialName = item.material_name || material?.name || 'Material #' + item.material_id;
+      const materialUnit = item.unit || material?.unit || 'Stk';
       const done = item.status === 'reloaded';
-      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(material?.name || 'Material #' + item.material_id)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(material?.unit || '')}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div>${item.note ? `<div class="vehicle-item-note">${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
+      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(materialName)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(materialUnit)}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div>${item.note ? `<div class="vehicle-item-note">${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
     }).join('') + `</div>`;
   }
   html += `</div>`;
@@ -2902,7 +2906,8 @@ function openVehicleItemModal(vehicleId) {
   if (!vehicle) return;
   selectedVehicleId = Number(vehicleId);
   document.getElementById('vehicleItemVehicleLabel').textContent = 'Fahrzeug: ' + vehicle.name + (vehicle.plate ? ' · ' + vehicle.plate : '');
-  document.getElementById('vehicleItemMaterial').innerHTML = materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.unit || 'Stk')})</option>`).join('');
+  document.getElementById('vehicleItemMaterialName').value = '';
+  document.getElementById('vehicleItemUnit').value = 'Stk';
   document.getElementById('vehicleItemAmount').value = '';
   document.getElementById('vehicleItemNote').value = '';
   document.getElementById('vehicleItemModal').classList.add('show');
@@ -2910,13 +2915,14 @@ function openVehicleItemModal(vehicleId) {
 function closeVehicleItemModal() { document.getElementById('vehicleItemModal').classList.remove('show'); }
 
 async function createVehicleItem() {
-  const materialId = Number(document.getElementById('vehicleItemMaterial').value);
+  const materialName = document.getElementById('vehicleItemMaterialName').value.trim();
+  const unit = document.getElementById('vehicleItemUnit').value || 'Stk';
   const amount = Number(String(document.getElementById('vehicleItemAmount').value || '').replace(',', '.'));
   const note = document.getElementById('vehicleItemNote').value.trim();
   if (!selectedVehicleId) { alert('Bitte zuerst ein Fahrzeug auswählen.'); return; }
-  if (!materialId || !Number.isFinite(amount) || amount <= 0) { alert('Bitte Material und eine gültige Menge eingeben.'); return; }
+  if (!materialName || !Number.isFinite(amount) || amount <= 0) { alert('Bitte Materialbezeichnung und eine gültige Menge eingeben.'); return; }
   try {
-    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: materialId, amount, note: note || null, status: 'needs_restock' }) });
+    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: null, material_name: materialName, unit, amount, note: note || null, status: 'needs_restock' }) });
     closeVehicleItemModal();
     await loadVehicleRestockItems();
     renderVehicles();
