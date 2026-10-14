@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-11-kabel-schnitt-04">
+<meta name="app-version" content="2026-10-14-fahrzeuge-01">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -864,6 +864,21 @@ label {
   font-weight: 700 !important;
 }
 
+
+.vehicle-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:14px; }
+.vehicle-card { display:flex; flex-direction:column; align-items:flex-start; gap:5px; text-align:left; border:1px solid var(--border); background:var(--card2); color:var(--text); border-radius:14px; padding:14px; cursor:pointer; }
+.vehicle-card.selected { border:2px solid var(--accent); }
+.vehicle-card-icon { font-size:25px; }
+.vehicle-card-name { font-weight:800; }
+.vehicle-card strong { color:var(--accent); font-size:13px; }
+.vehicle-item-list { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.vehicle-item { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--border); background:var(--card2); border-radius:12px; padding:13px; }
+.vehicle-item-done { opacity:.72; }
+.vehicle-item-main { min-width:0; display:flex; flex-direction:column; gap:5px; }
+.vehicle-item-amount { color:var(--accent); font-weight:800; }
+.vehicle-item-note { font-size:12px; margin-top:3px; }
+.vehicle-item-actions { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+@media (max-width:600px) { .vehicle-item { align-items:flex-start; flex-direction:column; } .vehicle-item-actions { width:100%; justify-content:flex-start; } }
 </style>
 </head>
 
@@ -881,7 +896,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-11-kabel-schnitt-04</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-14-fahrzeuge-01</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -910,6 +925,11 @@ label {
             onclick="showTab('historie', this)">
       📜 Historie
     </button>
+
+    <button class="tab"
+            onclick="showTab('fahrzeuge', this); loadAndRenderVehicles()">
+      🚐 Fahrzeuge
+    </button>
   </div>
 
   <section id="lager"></section>
@@ -917,6 +937,8 @@ label {
   <section id="baustellen" style="display:none"></section>
 
   <section id="historie" style="display:none"></section>
+
+  <section id="fahrzeuge" style="display:none"></section>
 </div>
 </div>
 
@@ -953,6 +975,41 @@ label {
     <button class="btn primary full" style="margin-top:16px;" onclick="createMaterial()">
       📦 Material im System speichern
     </button>
+  </div>
+</div>
+
+<!-- FAHRZEUG ANLEGEN MODAL -->
+<div class="modal-bg" id="vehicleModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">🚐 Einsatzfahrzeug hinzufügen</h2>
+      <button class="close" onclick="closeVehicleModal()">×</button>
+    </div>
+    <div class="notice">Lege jedes Einsatzfahrzeug einmal an. Danach kannst du pro Fahrzeug festhalten, welches Material entnommen wurde und wieder eingeladen werden muss.</div>
+    <label>Fahrzeugname</label>
+    <input id="newVehicleName" placeholder="z. B. Sprinter 1">
+    <label>Kennzeichen (optional)</label>
+    <input id="newVehiclePlate" placeholder="z. B. DIN-AB 123">
+    <button class="btn primary full" style="margin-top:16px;" onclick="createVehicle()">🚐 Fahrzeug speichern</button>
+  </div>
+</div>
+
+<!-- MATERIAL-ENTNAHME AUS FAHRZEUG MODAL -->
+<div class="modal-bg" id="vehicleItemModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">📦 Material als entnommen erfassen</h2>
+      <button class="close" onclick="closeVehicleItemModal()">×</button>
+    </div>
+    <div id="vehicleItemVehicleLabel" class="notice"></div>
+    <label>Material</label>
+    <select id="vehicleItemMaterial"></select>
+    <label>Menge</label>
+    <input id="vehicleItemAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Menge">
+    <label>Notiz (optional)</label>
+    <input id="vehicleItemNote" placeholder="z. B. bei Einsatz verbraucht">
+    <div class="muted" style="font-size:12px; margin-top:8px;">Diese Liste dient der Nachlade-Erinnerung. Der Lagerbestand wird dadurch nicht automatisch verändert.</div>
+    <button class="btn primary full" style="margin-top:16px;" onclick="createVehicleItem()">➕ Zur Nachlade-Liste hinzufügen</button>
   </div>
 </div>
 
@@ -1230,6 +1287,9 @@ let sites = [];
 let siteStocks = [];
 let movements = [];
 let employees = [];
+let vehicles = [];
+let vehicleRestockItems = [];
+let selectedVehicleId = null;
 
 let bookingDirection = null;
 
@@ -1740,7 +1800,9 @@ async function loadAll() {
       loadMaterials(),
       loadSites(),
       loadMovements(),
-      loadEmployees()
+      loadEmployees(),
+      loadVehicles(),
+      loadVehicleRestockItems()
     ]);
 
     await loadSiteStocks();
@@ -1782,6 +1844,24 @@ async function loadEmployees() {
   employees = await supabase("employees?select=id,name,active&active=eq.true&order=name");
 }
 
+async function loadVehicles() {
+  vehicles = await supabase("vehicles?select=id,name,plate,active,created_at&active=eq.true&order=name");
+}
+
+async function loadVehicleRestockItems() {
+  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,amount,note,status,created_at,reloaded_at&order=created_at.desc");
+}
+
+async function loadAndRenderVehicles() {
+  try {
+    await Promise.all([loadVehicles(), loadVehicleRestockItems()]);
+    renderVehicles();
+  } catch (error) {
+    const container = document.getElementById("fahrzeuge");
+    if (container) container.innerHTML = `<div class="card"><h2>Fahrzeugliste nicht verfügbar</h2><p>Bitte zuerst die Fahrzeug-Tabellen in Supabase anlegen. Die benötigte SQL-Datei ist separat bereitgestellt.</p><div class="muted">${escapeHtml(error.message)}</div></div>`;
+  }
+}
+
 function showTab(tab, button) {
   document.querySelectorAll(".content section").forEach(section => section.style.display = "none");
   document.getElementById(tab).style.display = "block";
@@ -1793,6 +1873,7 @@ function renderAll() {
   renderWarehouse();
   renderSites();
   renderHistory();
+  renderVehicles();
   updateAdminUI();
 }
 
@@ -1978,7 +2059,6 @@ function renderPaperTableView(filteredSites) {
             <th>KM</th>
             <th>Polier</th>
             ${customColumns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
-            <th>Material vor Ort</th>
             ${isAdmin ? '<th>Aktionen</th>' : ''}
           </tr>
         </thead>
@@ -1986,15 +2066,9 @@ function renderPaperTableView(filteredSites) {
   `;
 
   if (!filteredSites.length) {
-    html += `<tr><td colspan="${7 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
+    html += `<tr><td colspan="${6 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
   } else {
     filteredSites.forEach(site => {
-      const currentStocks = siteStocks.filter(s => s.site_id === site.id && Number(s.stock) > 0);
-      const stockSummary = currentStocks.length ? currentStocks.map(st => {
-        const mat = materials.find(m => m.id === st.material_id);
-        return `${formatNumber(st.stock)} ${mat?.unit || 'm'} ${mat ? mat.name : '#' + st.material_id}`;
-      }).join(', ') : '<span style="color:#94a3b8; font-weight:normal;">Kein Material</span>';
-
       html += `
         <tr>
           <td class="highlight-cell">${escapeHtml(site.name)}</td>
@@ -2004,7 +2078,6 @@ function renderPaperTableView(filteredSites) {
           <td>${escapeHtml(site.distance_km != null ? String(site.distance_km) : '')}</td>
           <td>${escapeHtml(site.contact_person || '')}</td>
           ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '')}</td>`).join('')}
-          <td style="font-size:12px;">${stockSummary}</td>
           ${isAdmin ? `
             <td>
               <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️ Bearbeiten</button>
@@ -2742,6 +2815,132 @@ async function createEmployee() {
   } catch (error) {
     alert("Fehler beim Erstellen des Mitarbeiters: " + error.message);
   }
+}
+
+function renderVehicles() {
+  const container = document.getElementById("fahrzeuge");
+  if (!container) return;
+  if (selectedVehicleId && !vehicles.some(v => Number(v.id) === Number(selectedVehicleId))) selectedVehicleId = null;
+
+  const pending = vehicleRestockItems.filter(item => item.status === "needs_restock");
+  const pendingForVehicle = selectedVehicleId ? pending.filter(item => Number(item.vehicle_id) === Number(selectedVehicleId)) : [];
+  const selectedVehicle = vehicles.find(v => Number(v.id) === Number(selectedVehicleId));
+
+  let html = `
+    <div class="card">
+      <div class="site-card-top">
+        <div><h2>🚐 Einsatzfahrzeuge</h2><div class="subtitle">Entnommenes Material erfassen und späteres Nachladen nicht vergessen.</div></div>
+        <button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>
+      </div>
+      <div class="stats-grid" style="margin-top:14px;">
+        <div class="stat-card"><div class="stat-number">${vehicles.length}</div><div class="stat-label">Fahrzeuge</div></div>
+        <div class="stat-card"><div class="stat-number">${pending.length}</div><div class="stat-label">Offene Nachladungen</div></div>
+      </div>
+    </div>
+  `;
+
+  if (!vehicles.length) {
+    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong><p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button></div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  html += `<div class="card"><h3 style="margin-top:0;">Fahrzeug auswählen</h3><div class="filter-grid"><select id="selectedVehicleSelect" onchange="selectVehicle(this.value)"><option value="">Alle Fahrzeuge anzeigen</option>${vehicles.map(v => `<option value="${v.id}" ${Number(v.id) === Number(selectedVehicleId) ? 'selected' : ''}>${escapeHtml(v.name)}${v.plate ? ' · ' + escapeHtml(v.plate) : ''}</option>`).join('')}</select></div><div class="vehicle-grid">`;
+  vehicles.forEach(vehicle => {
+    const count = pending.filter(item => Number(item.vehicle_id) === Number(vehicle.id)).length;
+    html += `<button class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>`;
+  });
+  html += `</div></div>`;
+
+  const displayedItems = selectedVehicleId ? vehicleRestockItems.filter(item => Number(item.vehicle_id) === Number(selectedVehicleId)) : vehicleRestockItems;
+  html += `<div class="card"><div class="site-card-top"><div><h2 style="margin:0;">${selectedVehicle ? '📋 ' + escapeHtml(selectedVehicle.name) : '📋 Nachlade-Liste'}</h2><div class="subtitle">${selectedVehicle ? 'Material, das für dieses Fahrzeug wieder eingeladen werden muss.' : 'Offene und erledigte Einträge aller Fahrzeuge.'}</div></div>${selectedVehicle ? `<button class="btn green" onclick="openVehicleItemModal(${selectedVehicle.id})">➕ Material entnommen</button>` : ''}</div>`;
+  if (!selectedVehicleId) {
+    html += `<p class="muted" style="margin-bottom:0;">Wähle ein Fahrzeug aus, um Materialentnahmen einzutragen. Die offenen Nachladungen aller Fahrzeuge werden unten zusammengefasst.</p>`;
+  }
+  const itemsToShow = selectedVehicleId ? displayedItems : displayedItems.filter(item => item.status === 'needs_restock');
+  if (!itemsToShow.length) {
+    html += `<div class="empty">${selectedVehicleId ? 'Für dieses Fahrzeug gibt es keine Einträge.' : 'Aktuell muss bei keinem Fahrzeug Material nachgeladen werden.'}</div>`;
+  } else {
+    html += `<div class="vehicle-item-list">` + itemsToShow.map(item => {
+      const vehicle = vehicles.find(v => Number(v.id) === Number(item.vehicle_id));
+      const material = materials.find(m => Number(m.id) === Number(item.material_id));
+      const done = item.status === 'reloaded';
+      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(material?.name || 'Material #' + item.material_id)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(material?.unit || '')}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div>${item.note ? `<div class="vehicle-item-note">${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
+    }).join('') + `</div>`;
+  }
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function selectVehicle(vehicleId) {
+  selectedVehicleId = vehicleId ? Number(vehicleId) : null;
+  renderVehicles();
+}
+
+function openVehicleModal() {
+  document.getElementById('newVehicleName').value = '';
+  document.getElementById('newVehiclePlate').value = '';
+  document.getElementById('vehicleModal').classList.add('show');
+}
+function closeVehicleModal() { document.getElementById('vehicleModal').classList.remove('show'); }
+
+async function createVehicle() {
+  const name = document.getElementById('newVehicleName').value.trim();
+  const plate = document.getElementById('newVehiclePlate').value.trim();
+  if (!name) { alert('Bitte einen Fahrzeugnamen eingeben.'); return; }
+  try {
+    const inserted = await supabase('vehicles', { method: 'POST', body: JSON.stringify({ name, plate: plate || null, active: true }) });
+    closeVehicleModal();
+    await loadVehicles();
+    if (inserted?.[0]) selectedVehicleId = Number(inserted[0].id);
+    renderVehicles();
+  } catch (error) { alert('Fahrzeug konnte nicht gespeichert werden: ' + error.message); }
+}
+
+function openVehicleItemModal(vehicleId) {
+  const vehicle = vehicles.find(v => Number(v.id) === Number(vehicleId));
+  if (!vehicle) return;
+  selectedVehicleId = Number(vehicleId);
+  document.getElementById('vehicleItemVehicleLabel').textContent = 'Fahrzeug: ' + vehicle.name + (vehicle.plate ? ' · ' + vehicle.plate : '');
+  document.getElementById('vehicleItemMaterial').innerHTML = materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.unit || 'Stk')})</option>`).join('');
+  document.getElementById('vehicleItemAmount').value = '';
+  document.getElementById('vehicleItemNote').value = '';
+  document.getElementById('vehicleItemModal').classList.add('show');
+}
+function closeVehicleItemModal() { document.getElementById('vehicleItemModal').classList.remove('show'); }
+
+async function createVehicleItem() {
+  const materialId = Number(document.getElementById('vehicleItemMaterial').value);
+  const amount = Number(String(document.getElementById('vehicleItemAmount').value || '').replace(',', '.'));
+  const note = document.getElementById('vehicleItemNote').value.trim();
+  if (!selectedVehicleId) { alert('Bitte zuerst ein Fahrzeug auswählen.'); return; }
+  if (!materialId || !Number.isFinite(amount) || amount <= 0) { alert('Bitte Material und eine gültige Menge eingeben.'); return; }
+  try {
+    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: materialId, amount, note: note || null, status: 'needs_restock' }) });
+    closeVehicleItemModal();
+    await loadVehicleRestockItems();
+    renderVehicles();
+  } catch (error) { alert('Materialentnahme konnte nicht gespeichert werden: ' + error.message); }
+}
+
+async function markVehicleItemReloaded(itemId) {
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'reloaded', reloaded_at: new Date().toISOString() }) });
+    await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Status konnte nicht geändert werden: ' + error.message); }
+}
+async function reopenVehicleItem(itemId) {
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'needs_restock', reloaded_at: null }) });
+    await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Eintrag konnte nicht wieder geöffnet werden: ' + error.message); }
+}
+async function deleteVehicleItem(itemId) {
+  if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'DELETE' });
+    await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Eintrag konnte nicht gelöscht werden: ' + error.message); }
 }
 
 function renderHistory() {
