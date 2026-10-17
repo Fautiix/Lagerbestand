@@ -32,7 +32,7 @@ main{max-width:1320px;margin:auto;padding:16px;display:grid;grid-template-column
  <div id="editor"></div>
  <p class="notice">Deine Eingaben werden zurzeit nur auf diesem Gerät gespeichert, nicht in Supabase synchronisiert. Das PDF enthält die neue scharfe Originalvorlage mit deinen Eintragungen. Für ein vollständig scharfes, druckidentisches Original benötigen wir später einen Scan oder die Original-PDF.</p>
 </section>
-<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png" alt="Original-Implenia-Monteurbericht, scharfe Originalvorlage"><div id="stamps"></div></div></div><p class="notice">Alle Felder links ausfüllen. Die Eintragungen erscheinen direkt auf dem Original. Du kannst auch einen Eintrag in der Vorschau antippen, um ihn links zu bearbeiten.</p></section>
+<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=3" alt="Original-Implenia-Monteurbericht, scharfe Originalvorlage"><div id="stamps"></div></div></div><p class="notice">Alle Felder links ausfüllen. Die Eintragungen erscheinen direkt auf dem Original. Du kannst auch einen Eintrag in der Vorschau antippen, um ihn links zu bearbeiten.</p></section>
 </main>
 <div id="sigOverlay" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigdialog"><h2 id="sigTitle">Unterschrift</h2><p class="notice">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigCanvas" width="900" height="285"></canvas><div class="toolbar" style="margin-top:10px"><button id="sigClear">Löschen</button><button id="sigCancel">Abbrechen</button><button class="btn primary" id="sigSave">Unterschrift übernehmen</button></div></div></div>
 <script>
@@ -43,42 +43,42 @@ const templateImg = document.querySelector('.template');
 const fieldSpecs = [];
 const sectionSpecs = [
  {title:'Baustelle / Einsatz', rows:[
-  ['Standort','standort',22,12.5,27.3,1.5],['Einsatz angeordnet von','angeordnet',22,14.35,27.3,1.5],['Einsatzort / Kunde','kunde',22,16.2,27.3,1.5],['Einsatzkostenstelle','kostenstelle',22,18.05,27.3,1.5],['Auftragsnummer','auftragsnummer',22,19.9,27.3,1.5]]},
+  ['Standort','standort',19,10.85,28.5,1.18],['Einsatz angeordnet von','angeordnet',19,12.97,28.5,1.18],['Einsatzort / Kunde','kunde',19,15.12,28.5,1.18],['Einsatzkostenstelle','kostenstelle',19,17.26,28.5,1.18],['Auftragsnummer','auftragsnummer',19,19.4,28.5,1.18]]},
  {title:'Gerät / Technik', rows:[
-  ['Gerät','geraet',72,10.6,22,1.5],['Geräteeigentümer','eigentuemer',72,12.45,22,1.5],['Equipment-Nr.','equipment',72,14.3,22,1.5],['Fabrikat','fabrikat',72,16.15,22,1.5],['Typ','typ',72,18,22,1.5],['Betriebsstunden','betriebsstunden',72,19.85,22,1.5]]},
+  ['Gerät','geraet',72.2,9.25,22.3,1.1],['Geräteeigentümer','eigentuemer',72.2,11.35,22.3,1.1],['Equipment-Nr.','equipment',72.2,13.42,22.3,1.1],['Fabrikat','fabrikat',72.2,15.52,22.3,1.1],['Typ','typ',72.2,17.58,22.3,1.1],['Betriebsstunden','betriebsstunden',72.2,19.7,22.3,1.1]]},
  {title:'Fahrzeuge und Fahrtzeiten', rows:[
-  ['KFZ 1 Kennzeichen','kfz1',17.5,22.25,24,1.6],['Gefahrene KM 1','km1',75,22.2,16.5,1.6],
-  ['KFZ 2 Kennzeichen','kfz2',17.5,24.7,24,1.6],['Gefahrene KM 2','km2',75,24.6,16.5,1.6],
-  ['Abfahrt 1','abfahrt1',61.0,27.65,8,1.3],['Rückkehr 1','rueckkehr1',84.0,27.65,7,1.3],
-  ['Abfahrt 2','abfahrt2',61.0,29.7,8,1.3],['Rückkehr 2','rueckkehr2',84.0,29.7,7,1.3]]}
+  ['KFZ 1 Kennzeichen','kfz1',14,23.15,22,1.15],['Gefahrene KM 1','km1',75,23.15,17,1.15],
+  ['KFZ 2 Kennzeichen','kfz2',14,25.9,22,1.15],['Gefahrene KM 2','km2',75,25.9,17,1.15],
+  ['Abfahrt 1','abfahrt1',61,28.6,8,1.05],['Rückkehr 1','rueckkehr1',84,28.6,7,1.05],
+  ['Abfahrt 2','abfahrt2',61,30.9,8,1.05],['Rückkehr 2','rueckkehr2',84,30.9,7,1.05]]}
 ];
 const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const SUMS=['Gesamt','Fahrstd.','Rüstzeit','Pause','Überstd.','Nacht'];
-const FIELD_FONT=1.13;
+const FIELD_FONT=1.05;
 function addSpec(spec){fieldSpecs.push(spec);return spec}
 sectionSpecs.forEach(sec=>sec.rows.forEach(([label,key,x,y,w,h])=>addSpec({label,key,x,y,w,h,font:FIELD_FONT})));
-addSpec({label:'Datum',key:'datum',x:15,y:32.8,w:6,h:1.4,font:.9});
+addSpec({label:'Datum',key:'datum',x:14,y:34.9,w:4,h:1.05,font:.9});
 for(let r=0;r<4;r++){
- const rowY = 35.0+r*2.35;
- addSpec({label:`Monteur ${r+1} Name`,key:`monteur${r+1}`,x:9.3,y:rowY,w:12,h:1.7,font:1.0});
- for(let d=0;d<7;d++) addSpec({label:`Monteur ${r+1} ${DAYS[d]}`,key:`m${r+1}_${DAYS[d]}`,x:22+d*5.55,y:rowY,w:5.35,h:1.7,font:.95});
- for(let t=0;t<6;t++) addSpec({label:`Monteur ${r+1} ${SUMS[t]}`,key:`m${r+1}_sum${t}`,x:61.6+t*5.65,y:rowY,w:5.3,h:1.7,font:.9});
+ const rowY = 37.65+r*2.68;
+ addSpec({label:`Monteur ${r+1} Name`,key:`monteur${r+1}`,x:5,y:rowY,w:12.7,h:1.35,font:1.0});
+ for(let d=0;d<7;d++) addSpec({label:`Monteur ${r+1} ${DAYS[d]}`,key:`m${r+1}_${DAYS[d]}`,x:18.8+d*5.93,y:rowY,w:5.6,h:1.35,font:.95});
+ for(let t=0;t<6;t++) addSpec({label:`Monteur ${r+1} ${SUMS[t]}`,key:`m${r+1}_sum${t}`,x:60.1+t*6.03,y:rowY,w:5.7,h:1.35,font:.9});
 }
-addSpec({label:'Gewaltschaden Ja',key:'gewaltJa',x:41.1,y:45.6,w:2.4,h:1.7,kind:'check',font:1.1});
-addSpec({label:'Gewaltschaden Nein',key:'gewaltNein',x:46,y:45.6,w:2.4,h:1.7,kind:'check',font:1.1});
-addSpec({label:'Inspektion Ja',key:'inspektionJa',x:61.9,y:45.6,w:2.4,h:1.7,kind:'check',font:1.1});
-addSpec({label:'Inspektion Nein',key:'inspektionNein',x:66,y:45.6,w:2.4,h:1.7,kind:'check',font:1.1});
-addSpec({label:'Ausgeführte Arbeiten',key:'arbeiten',x:8.2,y:47.2,w:85,h:15.3,font:1.12,kind:'multiline'});
-addSpec({label:'Weitere Mängel am Gerät',key:'maengel',x:8.2,y:64.8,w:84.5,h:3.2,font:1.1,kind:'multiline'});
+addSpec({label:'Gewaltschaden Ja',key:'gewaltJa',x:39.8,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
+addSpec({label:'Gewaltschaden Nein',key:'gewaltNein',x:46.1,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
+addSpec({label:'Inspektion Ja',key:'inspektionJa',x:60.6,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
+addSpec({label:'Inspektion Nein',key:'inspektionNein',x:67.2,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
+addSpec({label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.6,y:52.2,w:89.5,h:12.9,font:1.12,kind:'multiline'});
+addSpec({label:'Weitere Mängel am Gerät',key:'maengel',x:4.6,y:67.5,w:89.5,h:3.15,font:1.1,kind:'multiline'});
 for(let i=0;i<10;i++){
- const y=70.75+i*1.87;
- addSpec({label:`Material ${i+1} Menge`,key:`mat${i+1}_menge`,x:8.1,y,w:7.6,h:1.6,font:1.0});
- addSpec({label:`Material ${i+1} Bezeichnung`,key:`mat${i+1}_name`,x:17.3,y,w:75,h:1.6,font:1.0});
+ const y=74.2+i*1.94;
+ addSpec({label:`Material ${i+1} Menge`,key:`mat${i+1}_menge`,x:4.6,y,w:8.5,h:1.25,font:1.0});
+ addSpec({label:`Material ${i+1} Bezeichnung`,key:`mat${i+1}_name`,x:14.5,y,w:79.5,h:1.25,font:1.0});
 }
 const SIG_FIELDS=[
- {key:'sign_monteur',label:'Unterschrift Monteur',x:7.5,y:91,w:24.5,h:3.7},
- {key:'sign_bauleitung',label:'Unterschrift Bauleitung',x:34,y:91,w:25.5,h:3.7},
- {key:'sign_meister',label:'Unterschrift Meister / MI',x:62,y:91,w:30,h:3.7}
+ {key:'sign_monteur',label:'Unterschrift Monteur',x:4.8,y:91,w:25.8,h:3.25},
+ {key:'sign_bauleitung',label:'Unterschrift Bauleitung',x:31.7,y:91,w:26.3,h:3.25},
+ {key:'sign_meister',label:'Unterschrift Meister / MI',x:60.5,y:91,w:32.5,h:3.25}
 ];
 let reports={};let activeId='';let data={};let activeSig=null;let unsaved=false;
 const $ = id=>document.getElementById(id);
