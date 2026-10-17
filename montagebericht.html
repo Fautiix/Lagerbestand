@@ -17,18 +17,13 @@ main{max-width:1450px;margin:auto;padding:16px;display:grid;grid-template-column
 .editor-title{font-weight:800;margin:0 0 10px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field-grid.one{grid-template-columns:1fr}.field-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{min-width:0}.field label{color:#b2bed0;font-size:12px;display:block;margin:0 0 4px}.field input,.field textarea,.field select{background:#06090f;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 11px;width:100%;min-height:40px;outline:none}.field textarea{resize:vertical;min-height:88px}.field input:focus,.field textarea:focus,.field select:focus{border-color:#60a5fa}
 details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}summary{font-weight:750;padding:12px 13px;cursor:pointer;background:#111723}.inner{padding:12px}
 .notice{color:#b9c6d9;font-size:12px;line-height:1.55;margin-top:10px}.status{font-size:12px;color:#86efac}.muted{color:var(--muted)}
-.preview-panel{position:sticky;top:80px}.preview-panel h2{font-size:16px;margin:0 0 12px}.paper-frame{overflow:auto;background:#202a36;padding:12px;border-radius:10px;text-align:center}.paper{container-type:inline-size;position:relative;width:100%;max-width:1020px;margin:auto;aspect-ratio:1054/1492;background:#bad1d6;box-shadow:0 12px 30px #0008;overflow:hidden}.paper>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}.paper>img.template{display:none}
+.preview-panel{position:sticky;top:80px}.preview-panel h2{font-size:16px;margin:0 0 12px}.paper-frame{overflow:auto;background:#202a36;padding:12px;border-radius:10px;text-align:center}.paper{container-type:inline-size;position:relative;width:100%;max-width:1020px;margin:auto;aspect-ratio:1054/1492;background:#bad1d6;box-shadow:0 12px 30px #0008;overflow:hidden}.paper>img.template{position:absolute;inset:0;width:100%;height:100%;display:block}
 .stamp{position:absolute;color:#091524;font-family:Arial,sans-serif;white-space:pre-line;overflow:hidden;line-height:1.12;pointer-events:auto;cursor:pointer;font-weight:700;word-break:break-word;padding:0 1px}.stamp:hover{outline:1px dashed #2563eb;background:#ffffff35}.stamp.check{font-weight:900;text-align:center;display:flex;align-items:center;justify-content:center}.stamp.center{text-align:center}.stamp.signature{object-fit:contain;object-position:center center;pointer-events:none}
 .report-controls{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px}.report-controls select{border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--surface);color:var(--fg);max-width:100%;min-width:140px}
 .hintbox{background:#101725;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0 0;color:#d9e1ec;font-size:12px}
 .day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:8px}.day-box{background:#0b111a;border:1px solid var(--line);border-radius:10px;padding:8px}.day-box h4{margin:0 0 8px;font-size:12px;text-align:center;color:#d6deea}.day-box input{margin-bottom:6px}
 .employee-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:#0d131e}.employee-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.employee-head strong{font-size:14px}.hours-grid{display:grid;grid-template-columns:1.2fr repeat(7,minmax(42px,1fr));gap:6px;align-items:end}.hours-grid .mini-label{font-size:11px;color:var(--muted);text-align:center}.hours-grid input{min-width:0;text-align:center;padding:9px 6px;border:1px solid var(--line);background:#06090f;color:#fff;border-radius:8px}.totals-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}
 .flexrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.range-wrap{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.range-wrap output{min-width:44px;text-align:right;color:#dbe6f3}.inline-toggle{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.inline-toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:#d6deea}
-.weight-group{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}
-.weight-group legend{color:#dbeafe;font-size:14px;font-weight:700;padding:0 5px}
-.weight-choices{display:flex;flex-wrap:wrap;gap:12px}
-.weight-choices label{display:flex;align-items:center;gap:8px;color:#e4eaf3;font-size:14px;cursor:pointer;user-select:none}
-.weight-choices input{accent-color:var(--accent);width:19px;height:19px;cursor:pointer}
 #sigOverlay{position:fixed;inset:0;background:#000c;display:none;z-index:20;align-items:center;justify-content:center;padding:20px}#sigOverlay.visible{display:flex}.sigdialog{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:16px;width:100%;max-width:620px}.sigdialog canvas{touch-action:none;background:#fff;border:2px solid #8290a0;border-radius:6px;width:100%;height:190px}
 @media(max-width:900px){main{grid-template-columns:1fr}.preview-panel{position:static}.paper-frame{padding:6px}.paper{max-width:760px}}
 @media(max-width:520px){main{padding:10px;gap:10px}.card{padding:12px}.field-grid,.field-grid.three{grid-template-columns:1fr}.hours-grid{grid-template-columns:1fr}.totals-grid{grid-template-columns:1fr 1fr}.day-grid{grid-template-columns:1fr 1fr}.paper-frame{padding:3px}}
@@ -43,9 +38,9 @@ details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow
  <p id="status" class="status" role="status">Bereit</p>
  <h2 class="editor-title">Bericht ausfüllen</h2>
  <div id="editor"></div>
- <p class="notice">Die rot markierten Anpassungen sind integriert: größere Kennzeichen, Kilometer, Uhrzeiten und Monteurnamen, Jahreszahl oberhalb der Tabelle sowie Datum unter den Wochentagen. Die Berichtsnummer ist noch nicht zentral über Supabase vergeben.</p>
+ <p class="notice">Diese Version ist auf deine Arbeitsweise angepasst: 1 Monteur als Standard, weitere Kollegen nur bei Bedarf, größere Einträge auf dem Zettel, bessere Stunden-Eingabe und verschiebbare Unterschriften. Die automatische Berichtsnummer können wir als nächsten Schritt noch ergänzen.</p>
 </section>
-<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=5" alt="Original-Implenia-Monteurbericht"><canvas id="previewCanvas" width="1054" height="1492" aria-label="Vorschau des ausgefüllten Montageberichts"></canvas></div></div><p class="notice">Vorschau und PDF werden jetzt mit derselben Zeichenfunktion erzeugt. Einen Eintrag kannst du in der Vorschau anklicken und dann links bearbeiten.</p></section>
+<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=4" alt="Original-Implenia-Monteurbericht"><div id="stamps"></div></div></div><p class="notice">Alle Felder links ausfüllen. Die Eintragungen erscheinen direkt auf dem Originalzettel.</p></section>
 </main>
 <div id="sigOverlay" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigdialog"><h2 id="sigTitle">Unterschrift</h2><p class="notice">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigCanvas" width="900" height="285"></canvas><div class="toolbar" style="margin-top:10px"><button id="sigClear">Löschen</button><button id="sigCancel">Abbrechen</button><button class="btn primary" id="sigSave">Unterschrift übernehmen</button></div></div></div>
 <script>
@@ -64,10 +59,9 @@ function escapeText(s){return str(s).replace(/[&<>"']/g,chr=>({'&':'&amp;','<':'
 function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
 function initDefaults(){
  if(!data.employeeCount)data.employeeCount=1;
- if(!data.arbeiten_font)data.arbeiten_font=14;
+ if(!data.arbeiten_font)data.arbeiten_font=15;
  if(!data.material_font)data.material_font=13;
  if(!data.showTech)data.showTech=false;
- if(!data.jahr)data.jahr=String(new Date().getFullYear());
  SIG_FIELDS.forEach(s=>{if(data[s.key+'_dx']==null)data[s.key+'_dx']=0;if(data[s.key+'_dy']==null)data[s.key+'_dy']=0});
 }
 
@@ -80,14 +74,14 @@ const sectionSpecs=[
   {label:'Auftragsnummer',key:'auftragsnummer',x:19.1,y:19.35,w:28.8,h:1.45,font:1.42}
  ]},
  {title:'Fahrzeuge und Fahrtzeiten',open:true,rows:[
-  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:22.55,w:28,h:1.8,font:1.35,align:'center',weight:500},
-  {label:'Gefahrene KM 1',key:'km1',x:73.5,y:22.55,w:20,h:1.8,font:1.35,align:'center',weight:500},
-  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.3,w:28,h:1.8,font:1.35,align:'center',weight:500},
-  {label:'Gefahrene KM 2',key:'km2',x:73.5,y:25.3,w:20,h:1.8,font:1.35,align:'center',weight:500},
-  {label:'Abfahrt 1',key:'abfahrt1',x:56.9,y:28.06,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
-  {label:'Rückkehr 1',key:'rueckkehr1',x:79.2,y:28.06,w:12.3,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
-  {label:'Abfahrt 2',key:'abfahrt2',x:56.9,y:30.35,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
-  {label:'Rückkehr 2',key:'rueckkehr2',x:79.2,y:30.35,w:12.3,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'}
+  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:23.2,w:22.2,h:1.45,font:1.34},
+  {label:'Gefahrene KM 1',key:'km1',x:74.0,y:23.2,w:9.5,h:1.45,font:1.34,align:'center'},
+  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.95,w:22.2,h:1.45,font:1.34},
+  {label:'Gefahrene KM 2',key:'km2',x:74.0,y:25.95,w:9.5,h:1.45,font:1.34,align:'center'},
+  {label:'Abfahrt 1',key:'abfahrt1',x:62.3,y:28.58,w:8.6,h:1.4,font:1.32,align:'center',input:'time'},
+  {label:'Rückkehr 1',key:'rueckkehr1',x:84.0,y:28.58,w:8.7,h:1.4,font:1.32,align:'center',input:'time'},
+  {label:'Abfahrt 2',key:'abfahrt2',x:62.3,y:30.87,w:8.6,h:1.4,font:1.32,align:'center',input:'time'},
+  {label:'Rückkehr 2',key:'rueckkehr2',x:84.0,y:30.87,w:8.7,h:1.4,font:1.32,align:'center',input:'time'}
  ]},
  {title:'Gerät / Technik (optional)',open:false,optional:true,rows:[
   {label:'Gerät',key:'geraet',x:72.2,y:9.22,w:22.3,h:1.4,font:1.3},
@@ -99,22 +93,21 @@ const sectionSpecs=[
  ]}
 ];
 
-const yearSpec={label:'Jahreszahl',key:'jahr',x:27.4,y:29.3,w:20.0,h:2.2,font:1.45,align:'center',weight:500};
-const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:35.72,w:5.45,h:1.3,font:1.42,align:'center'}));
-const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.0,y:37.88+i*2.68,w:10.6,h:1.9,font:1.35,weight:500}));
+const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:34.7,w:5.45,h:1.1,font:1.18,align:'center'}));
+const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:5.0,y:37.62+i*2.68,w:12.6,h:1.38,font:1.28}));
 const employeeHourSpecs=[]; const employeeTotalSpecs=[];
 for(let r=1;r<=4;r++){
- const rowY=38.15+(r-1)*2.68;
- for(let i=0;i<7;i++) employeeHourSpecs.push({label:`Monteur ${r} ${DAYS[i]}`,key:`m${r}_${DAYS[i]}`,x:18.95+i*5.93,y:rowY,w:5.45,h:1.38,font:1.22,align:'center',weight:500});
- for(let t=0;t<6;t++) employeeTotalSpecs.push({label:`Monteur ${r} ${SUMS[t]}`,key:`m${r}_sum${t}`,x:60.25+t*6.0,y:rowY,w:5.65,h:1.38,font:1.18,align:'center',weight:500});
+ const rowY=37.62+(r-1)*2.68;
+ for(let i=0;i<7;i++) employeeHourSpecs.push({label:`Monteur ${r} ${DAYS[i]}`,key:`m${r}_${DAYS[i]}`,x:18.95+i*5.93,y:rowY,w:5.45,h:1.38,font:1.24,align:'center'});
+ for(let t=0;t<6;t++) employeeTotalSpecs.push({label:`Monteur ${r} ${SUMS[t]}`,key:`m${r}_sum${t}`,x:60.25+t*6.0,y:rowY,w:5.65,h:1.38,font:1.18,align:'center'});
 }
 const extraSpecs=[
  {label:'Gewaltschaden Ja',key:'gewaltJa',x:39.8,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Gewaltschaden Nein',key:'gewaltNein',x:46.05,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Ja',key:'inspektionJa',x:60.55,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Nein',key:'inspektionNein',x:67.15,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
- {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:50.42,w:89.2,h:2.0,font:1.45,align:'left',kind:'ruled',lines:7,firstCenter:52.85,rowStep:1.94},
- {label:'Weitere Mängel am Gerät',key:'maengel',x:4.8,y:67.65,w:89.2,h:2.5,font:1.18,kind:'ruled',lines:2,firstCenter:68.32,rowStep:1.935},
+ {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:52.45,w:89.2,h:2.0,font:1.45,align:'left',kind:'singleline'},
+ {label:'Weitere Mängel am Gerät',key:'maengel',x:4.8,y:67.65,w:89.2,h:2.5,font:1.18,kind:'multiline'},
 ];
 const materialSpecs=[];
 for(let i=1;i<=8;i++){
@@ -146,19 +139,12 @@ function renderEditor(){
    if(sec.optional){
      extra=`<div class="inline-toggle" style="margin-bottom:10px"><label><input type="checkbox" data-key="showTech"> Sektion anzeigen, wenn sie gebraucht wird</label></div>`;
    }
-   if(sec.title==='Fahrzeuge und Fahrtzeiten'){
-     extra+=`<p class="notice" style="margin-top:14px">Gewichtsklasse je Fahrzeug auswählen. Pro Fahrzeug ist nur ein Häkchen möglich.</p>`;
-     for(let n=1;n<=2;n++)extra+=`<fieldset class="weight-group"><legend>Fahrzeug ${n} · Gewichtsklasse</legend><div class="weight-choices">
-       <label><input type="checkbox" data-key="kfz${n}_bis15"> bis 1,5 t</label>
-       <label><input type="checkbox" data-key="kfz${n}_ueber15"> über 1,5 t</label>
-     </div></fieldset>`;
-   }
-   h+=`<details ${sec.open?'open':''}><summary>${escapeText(sec.title)}</summary><div class="inner"><div class="field-grid">${sec.rows.map(r=>inputHtml(r)).join('')}</div>${extra}</div></details>`;
+   h+=`<details ${sec.open?'open':''}><summary>${escapeText(sec.title)}</summary><div class="inner">${extra}<div class="field-grid">${sec.rows.map(r=>inputHtml(r)).join('')}</div></div></details>`;
  }
  
  h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inner">
  <div class="field-grid two" style="grid-template-columns:1fr 160px"><div class="hintbox">Standard ist <strong>1 Monteur</strong>. Weitere Kollegen nur hinzufügen, wenn ihr wirklich zu mehreren draußen seid.</div>${inputHtml({label:'Anzahl Monteure',key:'employeeCount'},{type:'select',options:[1,2,3,4].map(n=>({value:String(n),label:String(n)}))})}</div>
- <div class="field-grid one" style="margin-top:12px">${inputHtml(yearSpec,{type:'number'})}</div><h3 style="margin:14px 0 8px;font-size:14px">Datum unter den Wochentagen</h3><div class="day-grid">${DAYS.map(d=>`<div class="day-box"><h4>${d}</h4><input data-key="date_${d}" placeholder="17/10"></div>`).join('')}</div>`;
+ <h3 style="margin:14px 0 8px;font-size:14px">Datum unter den Wochentagen</h3><div class="day-grid">${DAYS.map(d=>`<div class="day-box"><h4>${d}</h4><input data-key="date_${d}" placeholder="17/10"></div>`).join('')}</div>`;
  for(let r=1;r<=num(data.employeeCount,1);r++){
    h+=`<div class="employee-card"><div class="employee-head"><strong>Monteur ${r}</strong>${r===1?'<span class="muted">immer sichtbar</span>':'<span class="muted">optional</span>'}</div>`;
    h+=`<div class="field-grid one">${inputHtml(employeeNameSpecs[r-1])}</div>`;
@@ -167,11 +153,11 @@ function renderEditor(){
  }
  h+='</div></details>';
  
- h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'),{textarea:true,rows:4})}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="11" max="19" step="1"><output id="o_arbeiten_font"></output></div></div><p class="notice" id="arbeitenLines" aria-live="polite"></p>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}<p class="notice" id="maengelLines" aria-live="polite"></p></div></div></details>`;
+ h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'))}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="12" max="22" step="1"><output id="o_arbeiten_font"></output></div></div>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}</div></div></details>`;
  
  h+=`<details open><summary>📦 Verwendete Materialien</summary><div class="inner"><div class="field"><label for="f_material_font">Schriftgröße Materialien</label><div class="range-wrap"><input id="f_material_font" data-key="material_font" type="range" min="11" max="18" step="1"><output id="o_material_font"></output></div></div>`;
- for(let i=1;i<=8;i++) h+=`<div class="field-grid two" style="grid-template-columns:110px 1fr;margin-bottom:8px">${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_name`),{textarea:true,rows:2})}</div>`;
- h+='<p class="notice" id="materialsLines" aria-live="polite"></p></div></details>';
+ for(let i=1;i<=8;i++) h+=`<div class="field-grid two" style="grid-template-columns:110px 1fr;margin-bottom:8px">${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_name`))}</div>`;
+ h+='</div></details>';
  
  h+=`<details><summary>✍️ Unterschriften</summary><div class="inner"><div class="toolbar">${SIG_FIELDS.map(f=>`<button type="button" data-sign="${f.key}" class="btn">${escapeText(f.label)}</button>`).join('')}</div><p class="notice">Bauleitung und Meister können über die Regler noch etwas nach links/rechts und oben/unten verschoben werden.</p>`;
  for(const s of SIG_FIELDS){
@@ -193,16 +179,9 @@ function updateField(el){
  if(key==='gewaltNein'&&el.checked)data.gewaltJa=false;
  if(key==='inspektionJa'&&el.checked)data.inspektionNein=false;
  if(key==='inspektionNein'&&el.checked)data.inspektionJa=false;
- // Je Fahrzeug nur eine Gewichtsklasse (oder keine) auswählen.
- const weightMatch=key.match(/^kfz([12])_(bis15|ueber15)$/);
- if(weightMatch&&el.checked){
-   const other=weightMatch[2]==='bis15'?'ueber15':'bis15';
-   data[`kfz${weightMatch[1]}_${other}`]=false;
-   syncInputs();
- }
  if(key==='employeeCount'){ renderEditor(); renderStamps(); setStatus('Monteure angepasst – bitte speichern',false); unsaved=true; return; }
  if(key.endsWith('Ja')||key.endsWith('Nein')) syncInputs();
- unsaved=true; updateOutputs(); updateLinesHint(); renderStamps(); setStatus('Änderungen noch nicht gespeichert',false);
+ unsaved=true; updateOutputs(); renderStamps(); setStatus('Änderungen noch nicht gespeichert',false);
 }
 
 function syncInputs(){
@@ -212,7 +191,6 @@ function syncInputs(){
    else el.value=(v==null?'':v);
  }
  updateOutputs();
- updateLinesHint();
 }
 function updateOutputs(){
  for(const out of $('editor').querySelectorAll('output[id^="o_"]')){
@@ -220,274 +198,56 @@ function updateOutputs(){
    out.value=str(data[key]??'');
    out.textContent=str(data[key]??'');
  }
- updateLinesHint();
 }
 function setStatus(s,ok=true){$('status').textContent=s;$('status').style.color=ok?'#86efac':'#facc15'}
 function formatValue(spec,raw){
- if(spec.kind==='check')return '✓';
- if((spec.input==='time'||/(abfahrt|rueckkehr)/.test(spec.key))&&/^\d{2}:\d{2}$/.test(str(raw)))return str(raw);
+ if(spec.kind==='check') return '✓';
+ if((spec.input==='time'||/(abfahrt|rueckkehr)/.test(spec.key)) && /^\d{2}:\d{2}$/.test(str(raw))) return str(raw).replace(':',' : ');
  return str(raw);
 }
 function getFont(spec){
- if(spec.key==='arbeiten')return num(data.arbeiten_font,17);
- if(spec.key.startsWith('mat'))return num(data.material_font,13);
- return Math.max(11,(spec.font||1.2)*12.2);
+ if(spec.key==='arbeiten') return num(data.arbeiten_font,15)/10;
+ if(spec.key.startsWith('mat')) return num(data.material_font,13)/10;
+ return spec.font||1.2;
 }
 function getVisibleSpecs(){
  const list=[];
- sectionSpecs.forEach(sec=>{if(sec.optional&&!data.showTech)return;list.push(...sec.rows)});
- list.push(yearSpec,...dateSpecs);
+ sectionSpecs.forEach(sec=>{if(sec.optional && !data.showTech) return; list.push(...sec.rows)});
+ list.push(...dateSpecs);
  const count=num(data.employeeCount,1);
  list.push(...employeeNameSpecs.slice(0,count));
  list.push(...employeeHourSpecs.filter(s=>Number(s.key[1])<=count));
  list.push(...employeeTotalSpecs.filter(s=>Number(s.key[1])<=count));
  list.push(...extraSpecs);
- // Material rows are laid out as a flow so long names can use the next free row.
+ list.push(...materialSpecs);
  return list;
 }
-// Use actual canvas font measurements, not guessed character counts.
-// Newlines are respected. A single very long word is split only when necessary.
-function wrapLines(ctx,text,maxWidth){
- const result=[];
- const rawText=str(text).replace(/\r\n?/g,'\n');
- if(!rawText.trim())return [];
- const paragraphs=rawText.split('\n');
- for(const para of paragraphs){
-   if(!para.trim()){result.push('');continue;}
-   let line='';
-   for(const word of para.trim().split(/\s+/)){
-     const candidate=line?line+' '+word:word;
-     if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
-     if(line){result.push(line);line='';}
-     let part='';
-     for(const char of word){
-       if(part&&ctx.measureText(part+char).width>maxWidth){result.push(part);part=char;}
-       else part+=char;
-     }
-     line=part;
-   }
-   result.push(line);
+function stampCss(s){
+ const cls=(s.align==='center'?'text-align:center;':'') + (s.kind==='singleline'?'white-space:nowrap;':'');
+ return `left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%;font-size:${getFont(s)}cqw;${cls}`;
+}
+function renderStamps(){
+ let html='';
+ for(const s of getVisibleSpecs()){
+   const raw=data[s.key];
+   if(raw==null||raw===''||raw===false) continue;
+   html+=`<div tabindex="0" role="button" aria-label="${escapeText(s.label)} bearbeiten" data-focus="${s.key}" class="stamp ${(s.kind==='check'?'check ':'')}${s.align==='center'?'center':''}" style="${stampCss(s)}">${escapeText(formatValue(s,raw))}</div>`;
  }
- return result;
-}
-function fontForRuled(spec){ return Math.min(getFont(spec),spec.rowStep*14.92*.76); }
-function getRuledLines(spec){
- const measure=$('previewCanvas').getContext('2d');
- measure.font=`500 ${fontForRuled(spec)}px Arial, sans-serif`;
- return wrapLines(measure,data[spec.key]||'',spec.w*10.54-15);
-}
-// Each material description can continue into following free material lines,
-// without ever drawing over the quantity column or outside the original grid.
-function getMaterialLayout(){
- const measure=$('previewCanvas').getContext('2d');
- const font=num(data.material_font,13);
- measure.font=`500 ${font}px Arial, sans-serif`;
- const quantityWidth=8.2*10.54-12;
- const nameWidth=79.2*10.54-16;
- const rows=[];let requested=0;const tooWideQuantities=[];
- for(let i=1;i<=8;i++){
-   const quantity=str(data[`mat${i}_menge`]||'').trim();
-   const desc=str(data[`mat${i}_name`]||'').trim();
-   if(!quantity&&!desc)continue;
-   let names=wrapLines(measure,desc,nameWidth);
-   if(!names.length) names=[''];
-   const needed=names.length;
-   if(quantity && measure.measureText(quantity).width>quantityWidth)tooWideQuantities.push(i);
-   for(let j=0;j<needed;j++)rows.push({index:i,quantity:j===0?quantity:'',name:names[j]});
-   requested+=needed;
+ for(const s of SIG_FIELDS){
+   if(!data[s.key]) continue;
+   const dx=num(data[s.key+'_dx'],0), dy=num(data[s.key+'_dy'],0);
+   html+=`<img class="stamp signature" alt="${escapeText(s.label)}" src="${data[s.key]}" style="left:${s.x+dx}%;top:${s.y+dy}%;width:${s.w}%;height:${s.h}%">`;
  }
- return {rows,required:requested,available:8,overflow:requested>8,tooWideQuantities};
-}
-function checkLayout(){
- const errors=[];
- for(const spec of extraSpecs.filter(s=>s.kind==='ruled')){
-   const lines=getRuledLines(spec).length;
-   const max=spec.lines;
-   const el=$(spec.key==='arbeiten'?'arbeitenLines':'maengelLines');
-   if(el){el.textContent=lines>max?`⚠️ ${lines} Zeilen benötigt, aber nur ${max} verfügbar. Bitte Text kürzen oder Schriftgröße verkleinern.`:`${lines} von ${max} Formularzeilen belegt.`;el.style.color=lines>max?'#fca5a5':'#b9c6d9';}
-   if(lines>max)errors.push(`${spec.label}: ${lines} statt ${max} Zeilen`);
- }
- const mat=getMaterialLayout();
- const matEl=$('materialsLines');
- const matWarnings=[];
- if(mat.overflow)matWarnings.push(`${mat.required} Zeilen benötigt, aber nur 8 frei`);
- if(mat.tooWideQuantities.length)matWarnings.push(`Menge in Position ${mat.tooWideQuantities.join(', ')} zu lang`);
- if(matEl){matEl.textContent=matWarnings.length?'⚠️ '+matWarnings.join('; ')+'. Bitte kürzen.':`${mat.required} von 8 Materialzeilen belegt. Lange Bezeichnungen belegen automatisch die nächste freie Zeile.`;matEl.style.color=matWarnings.length?'#fca5a5':'#b9c6d9';}
- if(mat.overflow)errors.push(`Material: ${mat.required} statt 8 Zeilen`);
- if(mat.tooWideQuantities.length)errors.push(`Materialmengen zu lang (Position ${mat.tooWideQuantities.join(', ')})`);
- return errors;
-}
-function updateLinesHint(){checkLayout()}
-function drawMaterials(ctx){
- const layout=getMaterialLayout();
- const font=num(data.material_font,13);
- ctx.save();ctx.textBaseline='middle';ctx.fillStyle='#091524';ctx.font=`500 ${font}px Arial, sans-serif`;
- for(const [i,row] of layout.rows.slice(0,layout.available).entries()){
-   const yy=(74.2+i*1.94)*14.92+1.3*14.92/2;
-   if(row.quantity){
-     const x=4.8*10.54,w=8.2*10.54;
-     ctx.save();ctx.beginPath();ctx.rect(x,yy-11,w,22);ctx.clip();
-     ctx.textAlign='center';ctx.fillText(row.quantity,x+w/2,yy);ctx.restore();
-   }
-   if(row.name){
-     const x=14.6*10.54,w=79.2*10.54;
-     ctx.save();ctx.beginPath();ctx.rect(x,yy-11,w,22);ctx.clip();
-     ctx.fillText(row.name,x+3,yy);ctx.restore();
-   }
- }
- ctx.restore();
-}
-// Die Vorlage enthält bereits einen Doppelpunkt. Stunden und Minuten deshalb
-// links und rechts davon schreiben, anstatt einen zweiten Doppelpunkt zu drucken.
-function drawPrintedTime(ctx,s,value){
- const match=/^(\d{1,2}):(\d{2})$/.exec(value);
- if(!match)return;
- const isReturn=s.key.startsWith('rueckkehr');
- const isSecond=s.key.endsWith('2');
- const colonX=isReturn?882:639;
- const yy=isSecond?475:443;
- const hourX=colonX-36, minuteX=colonX+37;
- ctx.save();
- ctx.font='700 23px Arial, sans-serif';
- ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.textAlign='center';
- ctx.fillText(match[1].padStart(2,'0'),hourX,yy);
- ctx.fillText(match[2],minuteX,yy);
- ctx.restore();
-}
-function drawField(ctx,s){
- const raw=data[s.key];
- if(raw===undefined||raw===null||raw===''||raw===false)return;
- const value=formatValue(s,raw),x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
- if(s.kind==='printed-time'){drawPrintedTime(ctx,s,value);return;}
- const baseFont=getFont(s);
- const weight=s.weight||700;
- ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`${weight} ${baseFont}px Arial, sans-serif`;
- if(s.kind!=='ruled'){ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();}
- if(s.kind==='ruled'){
-   const font=fontForRuled(s);ctx.font=`500 ${font}px Arial, sans-serif`;const lines=wrapLines(ctx,value,w-15);
-   // Each source-form row gets exactly one line, no clipping into the next.
-   const rowHeight=s.rowStep*14.92;
-   ctx.font=`500 ${font}px Arial, sans-serif`;
-   for(let i=0;i<Math.min(lines.length,s.lines);i++){
-     const centerY=(s.firstCenter+i*s.rowStep)*14.92;
-     ctx.fillText(lines[i],x+3,centerY);
-   }
- }else{
-   let drawFont=baseFont;
-   while(ctx.measureText(value).width>w-6&&drawFont>9){drawFont-=.5;ctx.font=`${weight} ${drawFont}px Arial, sans-serif`}
-   const tw=ctx.measureText(value).width;
-   const tx=s.align==='center'?x+(w-tw)/2:x+2;
-   ctx.fillText(value,tx,y+h/2,w-4);
- }
- ctx.restore();
-}
-const imageCache=new Map();
-function getSignatureImage(src){
- if(imageCache.has(src))return imageCache.get(src);
- const promise=new Promise((resolve,reject)=>{const img=new Image;img.onload=()=>resolve(img);img.onerror=reject;img.src=src});
- imageCache.set(src,promise);
- return promise;
-}
-// Die Originalvorlage enthält an diesen vier Stellen gedruckte Nullen.
-// Nur diese Ziffern werden auf der Vorschau/PDF maskiert und durch Kästchen ersetzt.
-// Das Quellbild selbst bleibt unverändert.
-function drawVehicleWeightBoxes(ctx){
- const spots=[
-   {key:'kfz1_bis15',x:512,y:361},
-   {key:'kfz1_ueber15',x:599,y:361},
-   {key:'kfz2_bis15',x:512,y:402},
-   {key:'kfz2_ueber15',x:599,y:402}
- ];
- ctx.save();
- for(const spot of spots){
-   const px=Math.round(spot.x), py=Math.round(spot.y);
-   // Hintergrund unmittelbar ober- und unterhalb der alten Ziffer abtasten.
-   const top=ctx.getImageData(px,py-15,1,1).data;
-   const bottom=ctx.getImageData(px,py+15,1,1).data;
-   const gradient=ctx.createLinearGradient(0,py-12,0,py+12);
-   gradient.addColorStop(0,`rgb(${top[0]},${top[1]},${top[2]})`);
-   gradient.addColorStop(1,`rgb(${bottom[0]},${bottom[1]},${bottom[2]})`);
-   ctx.fillStyle=gradient;
-   ctx.fillRect(px-11,py-12,22,24);
-   const boxSize=14;
-   ctx.lineWidth=1.4;ctx.strokeStyle='#18232a';
-   ctx.strokeRect(px-boxSize/2,py-boxSize/2,boxSize,boxSize);
-   if(data[spot.key]){
-     ctx.strokeStyle='#081c31';ctx.lineWidth=2.3;
-     ctx.lineCap='round';ctx.lineJoin='round';
-     ctx.beginPath();
-     ctx.moveTo(px-4.0,py);ctx.lineTo(px-0.6,py+3.5);ctx.lineTo(px+5.2,py-4.0);
-     ctx.stroke();
-   }
- }
- ctx.restore();
+ $('stamps').innerHTML=html;
+ $('stamps').querySelectorAll('[data-focus]').forEach(el=>el.onclick=()=>{const input=$('editor').querySelector('[data-key="'+el.dataset.focus+'"]');if(input){const d=input.closest('details'); if(d) d.open=true; input.scrollIntoView({behavior:'smooth',block:'center'}); input.focus();}});
 }
 
-async function renderPageTo(canvas){
- if(!templateImg.complete||!templateImg.naturalWidth){
-   await new Promise((resolve,reject)=>{templateImg.addEventListener('load',resolve,{once:true});templateImg.addEventListener('error',reject,{once:true})});
- }
- canvas.width=1054;canvas.height=1492;
- const ctx=canvas.getContext('2d');
- ctx.drawImage(templateImg,0,0,1054,1492);
- drawVehicleWeightBoxes(ctx);
- for(const spec of getVisibleSpecs())drawField(ctx,spec);
- drawMaterials(ctx);
- for(const spec of SIG_FIELDS){
-   if(!data[spec.key])continue;
-   try{
-     const img=await getSignatureImage(data[spec.key]);
-     const dx=num(data[spec.key+'_dx'],0),dy=num(data[spec.key+'_dy'],0);
-     ctx.drawImage(img,(spec.x+dx)*10.54,(spec.y+dy)*14.92,spec.w*10.54,spec.h*14.92);
-   }catch(e){console.warn('Unterschrift konnte nicht geladen werden',e)}
- }
- return canvas;
-}
-let renderVersion=0, renderTimer=0;
-function renderStamps(){
- const version=++renderVersion;
- cancelAnimationFrame(renderTimer);
- renderTimer=requestAnimationFrame(async()=>{
-   try{
-     const temp=document.createElement('canvas');
-     await renderPageTo(temp);
-     if(version!==renderVersion)return;
-     const preview=$('previewCanvas');
-     preview.getContext('2d').clearRect(0,0,1054,1492);
-     preview.getContext('2d').drawImage(temp,0,0);
-   }catch(e){console.error('Vorschaufehler',e)}
- });
-}
-$('previewCanvas').addEventListener('click',e=>{
- const bounds=e.currentTarget.getBoundingClientRect();
- const x=100*(e.clientX-bounds.left)/bounds.width,y=100*(e.clientY-bounds.top)/bounds.height;
- // Auch per Klick auf die Kästchen in der Vorschau auswählbar.
- const weightSpot=[
-   {key:'kfz1_bis15',x:512,y:361},{key:'kfz1_ueber15',x:599,y:361},
-   {key:'kfz2_bis15',x:512,y:402},{key:'kfz2_ueber15',x:599,y:402}
- ].find(s=>Math.abs(s.x-x*10.54)<14&&Math.abs(s.y-y*14.92)<15);
- if(weightSpot){
-   const input=$('editor').querySelector(`[data-key="${weightSpot.key}"]`);
-   if(input){input.closest('details').open=true;input.checked=!input.checked;updateField(input)}
-   return;
- }
- const field=getVisibleSpecs().find(s=>{
-   const top=s.kind==='ruled'?s.firstCenter-.95:s.y;
-   const height=s.kind==='ruled'?s.lines*s.rowStep:s.h;
-   return x>=s.x&&x<=s.x+s.w&&y>=top&&y<=top+height;
- });
- if(!field)return;
- const input=$('editor').querySelector(`[data-key="${field.key}"]`);
- if(!input)return;
- const parent=input.closest('details');if(parent)parent.open=true;
- input.scrollIntoView({behavior:'smooth',block:'center'});input.focus();
-});
 function allReports(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
 function saveStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify(reports));localStorage.setItem(ACTIVE_KEY,activeId)}
 function saveReport(){
  try{reports[activeId]={data:structuredClone(data),updated:new Date().toISOString()};saveStorage();unsaved=false;renderSelect();setStatus('✓ Bericht auf diesem Gerät gespeichert')}catch(e){console.error(e);setStatus('Speichern fehlgeschlagen',false)}
 }
-function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:14,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
+function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:15,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
 function renderSelect(){
  const list=Object.entries(reports).sort((a,b)=>str(b[1].updated).localeCompare(str(a[1].updated)));
  $('reportSelect').innerHTML='<option value="">Gespeicherten Bericht öffnen …</option>'+list.map(([id,r])=>{
@@ -510,14 +270,27 @@ $('sigCanvas').addEventListener('pointermove',e=>{if(!drawing)return;const [x,y]
 $('sigClear').onclick=()=>sigCtx.clearRect(0,0,900,285); $('sigCancel').onclick=()=>$('sigOverlay').classList.remove('visible'); $('sigSave').onclick=()=>{if(activeSig){data[activeSig]=$('sigCanvas').toDataURL('image/png'); unsaved=true; renderStamps(); setStatus('Unterschrift hinzugefügt, bitte speichern',false)} $('sigOverlay').classList.remove('visible')};
 
 async function exportCanvas(){
- const canvas=document.createElement('canvas');
- await renderPageTo(canvas); // Identical drawing logic for preview and PDF.
+ if(!templateImg.complete||!templateImg.naturalWidth) await new Promise((ok,no)=>{templateImg.addEventListener('load',ok,{once:true});templateImg.addEventListener('error',no,{once:true})});
+ const canvas=document.createElement('canvas'); canvas.width=1054; canvas.height=1492; const ctx=canvas.getContext('2d'); ctx.drawImage(templateImg,0,0,1054,1492);
+ for(const s of getVisibleSpecs()){
+   const raw=data[s.key]; if(raw===undefined||raw===null||raw===''||raw===false) continue;
+   const value=formatValue(s,raw); const x=s.x*10.54, y=s.y*14.92, w=s.w*10.54, h=s.h*14.92; const fontPx=Math.max(11,getFont(s)*12.2); ctx.font=`700 ${fontPx}px Arial, sans-serif`; ctx.fillStyle='#091524'; ctx.textBaseline='middle';
+   if(s.kind==='multiline'){
+     const lines=[]; const lineh=fontPx*1.25; const paras=value.split('\n');
+     for(const para of paras){ let cur=''; for(const word of para.split(/\s+/)){ if(!word) continue; const test=cur?cur+' '+word:word; if(ctx.measureText(test).width>w-8 && cur){ lines.push(cur); cur=word; } else cur=test; } if(cur) lines.push(cur); }
+     for(let i=0;i<lines.length && (i+1)*lineh<=h;i++){ const yy=y+lineh/2+2+i*lineh; if((s.align||'left')==='center'){ const tw=ctx.measureText(lines[i]).width; ctx.fillText(lines[i],x+(w-tw)/2,yy); } else ctx.fillText(lines[i],x+2,yy); }
+   } else {
+     let drawFont=fontPx; ctx.font=`700 ${drawFont}px Arial, sans-serif`; while(ctx.measureText(value).width>w-6 && drawFont>8){ drawFont-=.5; ctx.font=`700 ${drawFont}px Arial, sans-serif`; }
+     const textWidth=ctx.measureText(value).width; const tx=(s.align==='center')?x+(w-textWidth)/2:x+2; const ty=y+h/2; ctx.fillText(value,tx,ty);
+   }
+ }
+ for(const s of SIG_FIELDS){ if(!data[s.key]) continue; try{ const im=await new Promise((resolve,reject)=>{const i=new Image;i.onload=()=>resolve(i);i.onerror=reject;i.src=data[s.key]}); const dx=num(data[s.key+'_dx'],0), dy=num(data[s.key+'_dy'],0); ctx.drawImage(im,(s.x+dx)*10.54,(s.y+dy)*14.92,s.w*10.54,s.h*14.92); }catch(e){ console.warn('Unterschrift übersprungen',e) } }
  return canvas;
 }
 function bytes(s){return new TextEncoder().encode(s)}
 function concatBytes(parts){const size=parts.reduce((n,a)=>n+a.length,0);const result=new Uint8Array(size);let o=0;for(const p of parts){result.set(p,o);o+=p.length}return result}
 function pdfFromJpeg(jpg,w,h){ const header=bytes('%PDF-1.4\n'); const chunks=[header]; const offsets=[0]; let offset=header.length; function add(buffer){chunks.push(buffer);offset+=buffer.length} function obj(n,body){offsets[n]=offset; add(bytes(n+' 0 obj\n')); add(typeof body==='string'?bytes(body):body); add(bytes('\nendobj\n'))} obj(1,'<< /Type /Catalog /Pages 2 0 R >>'); obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>'); obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>'); const content=bytes('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n'); obj(4,concatBytes([bytes('<< /Length '+content.length+' >>\nstream\n'),content,bytes('endstream')])); obj(5,concatBytes([bytes('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'),jpg,bytes('\nendstream')])); const start=offset; add(bytes('xref\n0 6\n0000000000 65535 f \n')); for(let n=1;n<=5;n++) add(bytes(String(offsets[n]).padStart(10,'0')+' 00000 n \n')); add(bytes('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF')); return new Blob(chunks,{type:'application/pdf'}); }
-async function downloadPdf(){ const errors=checkLayout(); if(errors.length){setStatus('PDF nicht erstellt: '+errors.join(' | ')+'. Bitte Eingaben anpassen.',false);return;} const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
+async function downloadPdf(){ const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
 $('saveReport').onclick=saveReport; $('newReport').onclick=()=>newReport(); $('deleteReport').onclick=deleteReport; $('reportSelect').onchange=e=>{if(e.target.value)loadReport(e.target.value)}; $('downloadPdf').onclick=downloadPdf;
 window.addEventListener('beforeunload',e=>{ if(unsaved){ e.preventDefault(); e.returnValue=''; } });
 reports=allReports(); const prior=localStorage.getItem(ACTIVE_KEY); if(prior&&reports[prior]){ activeId=prior; data=structuredClone(reports[prior].data||{}); initDefaults(); renderEditor(); renderStamps(); renderSelect(); setStatus('Letzten gespeicherten Bericht geladen') } else newReport(false);
