@@ -43,7 +43,7 @@ details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow
  <p id="status" class="status" role="status">Bereit</p>
  <h2 class="editor-title">Bericht ausfüllen</h2>
  <div id="editor"></div>
- <p class="notice">Diese Version ist auf deine Arbeitsweise angepasst: 1 Monteur als Standard, weitere Kollegen nur bei Bedarf, automatischer Zeilenumbruch bei den Arbeiten, identische Darstellung in Vorschau und PDF sowie verschiebbare Unterschriften. Die automatische Berichtsnummer können wir als nächsten Schritt noch ergänzen.</p>
+ <p class="notice">Die rot markierten Anpassungen sind integriert: größere Kennzeichen, Kilometer, Uhrzeiten und Monteurnamen, Jahreszahl oberhalb der Tabelle sowie Datum unter den Wochentagen. Die Berichtsnummer ist noch nicht zentral über Supabase vergeben.</p>
 </section>
 <section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=5" alt="Original-Implenia-Monteurbericht"><canvas id="previewCanvas" width="1054" height="1492" aria-label="Vorschau des ausgefüllten Montageberichts"></canvas></div></div><p class="notice">Vorschau und PDF werden jetzt mit derselben Zeichenfunktion erzeugt. Einen Eintrag kannst du in der Vorschau anklicken und dann links bearbeiten.</p></section>
 </main>
@@ -67,6 +67,7 @@ function initDefaults(){
  if(!data.arbeiten_font)data.arbeiten_font=14;
  if(!data.material_font)data.material_font=13;
  if(!data.showTech)data.showTech=false;
+ if(!data.jahr)data.jahr=String(new Date().getFullYear());
  SIG_FIELDS.forEach(s=>{if(data[s.key+'_dx']==null)data[s.key+'_dx']=0;if(data[s.key+'_dy']==null)data[s.key+'_dy']=0});
 }
 
@@ -79,14 +80,14 @@ const sectionSpecs=[
   {label:'Auftragsnummer',key:'auftragsnummer',x:19.1,y:19.35,w:28.8,h:1.45,font:1.42}
  ]},
  {title:'Fahrzeuge und Fahrtzeiten',open:true,rows:[
-  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:23.2,w:22.2,h:1.45,font:1.34},
-  {label:'Gefahrene KM 1',key:'km1',x:74.0,y:23.2,w:9.5,h:1.45,font:1.34,align:'center'},
-  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.95,w:22.2,h:1.45,font:1.34},
-  {label:'Gefahrene KM 2',key:'km2',x:74.0,y:25.95,w:9.5,h:1.45,font:1.34,align:'center'},
-  {label:'Abfahrt 1',key:'abfahrt1',x:62.3,y:28.58,w:8.6,h:1.4,font:1.32,align:'center',input:'time'},
-  {label:'Rückkehr 1',key:'rueckkehr1',x:84.0,y:28.58,w:8.7,h:1.4,font:1.32,align:'center',input:'time'},
-  {label:'Abfahrt 2',key:'abfahrt2',x:62.3,y:30.87,w:8.6,h:1.4,font:1.32,align:'center',input:'time'},
-  {label:'Rückkehr 2',key:'rueckkehr2',x:84.0,y:30.87,w:8.7,h:1.4,font:1.32,align:'center',input:'time'}
+  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:22.55,w:27,h:1.8,font:1.95},
+  {label:'Gefahrene KM 1',key:'km1',x:73.8,y:22.55,w:10.6,h:1.8,font:2.06,align:'center'},
+  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.3,w:27,h:1.8,font:1.95},
+  {label:'Gefahrene KM 2',key:'km2',x:73.8,y:25.3,w:10.6,h:1.8,font:2.06,align:'center'},
+  {label:'Abfahrt 1',key:'abfahrt1',x:56.9,y:28.06,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
+  {label:'Rückkehr 1',key:'rueckkehr1',x:79.2,y:28.06,w:12.3,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
+  {label:'Abfahrt 2',key:'abfahrt2',x:56.9,y:30.35,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
+  {label:'Rückkehr 2',key:'rueckkehr2',x:79.2,y:30.35,w:12.3,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'}
  ]},
  {title:'Gerät / Technik (optional)',open:false,optional:true,rows:[
   {label:'Gerät',key:'geraet',x:72.2,y:9.22,w:22.3,h:1.4,font:1.3},
@@ -98,8 +99,9 @@ const sectionSpecs=[
  ]}
 ];
 
-const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:34.7,w:5.45,h:1.1,font:1.18,align:'center'}));
-const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.5,y:37.62+i*2.68,w:9.9,h:1.38,font:1.28}));
+const yearSpec={label:'Jahreszahl',key:'jahr',x:28.2,y:28.35,w:18.0,h:3.45,font:3.18,align:'center'};
+const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:35.72,w:5.45,h:1.3,font:1.42,align:'center'}));
+const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.0,y:37.88+i*2.68,w:10.6,h:1.9,font:1.77}));
 const employeeHourSpecs=[]; const employeeTotalSpecs=[];
 for(let r=1;r<=4;r++){
  const rowY=37.62+(r-1)*2.68;
@@ -156,7 +158,7 @@ function renderEditor(){
  
  h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inner">
  <div class="field-grid two" style="grid-template-columns:1fr 160px"><div class="hintbox">Standard ist <strong>1 Monteur</strong>. Weitere Kollegen nur hinzufügen, wenn ihr wirklich zu mehreren draußen seid.</div>${inputHtml({label:'Anzahl Monteure',key:'employeeCount'},{type:'select',options:[1,2,3,4].map(n=>({value:String(n),label:String(n)}))})}</div>
- <h3 style="margin:14px 0 8px;font-size:14px">Datum unter den Wochentagen</h3><div class="day-grid">${DAYS.map(d=>`<div class="day-box"><h4>${d}</h4><input data-key="date_${d}" placeholder="17/10"></div>`).join('')}</div>`;
+ <div class="field-grid one" style="margin-top:12px">${inputHtml(yearSpec,{type:'number'})}</div><h3 style="margin:14px 0 8px;font-size:14px">Datum unter den Wochentagen</h3><div class="day-grid">${DAYS.map(d=>`<div class="day-box"><h4>${d}</h4><input data-key="date_${d}" placeholder="17/10"></div>`).join('')}</div>`;
  for(let r=1;r<=num(data.employeeCount,1);r++){
    h+=`<div class="employee-card"><div class="employee-head"><strong>Monteur ${r}</strong>${r===1?'<span class="muted">immer sichtbar</span>':'<span class="muted">optional</span>'}</div>`;
    h+=`<div class="field-grid one">${inputHtml(employeeNameSpecs[r-1])}</div>`;
@@ -234,7 +236,7 @@ function getFont(spec){
 function getVisibleSpecs(){
  const list=[];
  sectionSpecs.forEach(sec=>{if(sec.optional&&!data.showTech)return;list.push(...sec.rows)});
- list.push(...dateSpecs);
+ list.push(yearSpec,...dateSpecs);
  const count=num(data.employeeCount,1);
  list.push(...employeeNameSpecs.slice(0,count));
  list.push(...employeeHourSpecs.filter(s=>Number(s.key[1])<=count));
@@ -335,10 +337,28 @@ function drawMaterials(ctx){
  }
  ctx.restore();
 }
+// Die Vorlage enthält bereits einen Doppelpunkt. Stunden und Minuten deshalb
+// links und rechts davon schreiben, anstatt einen zweiten Doppelpunkt zu drucken.
+function drawPrintedTime(ctx,s,value){
+ const match=/^(\d{1,2}):(\d{2})$/.exec(value);
+ if(!match)return;
+ const isReturn=s.key.startsWith('rueckkehr');
+ const isSecond=s.key.endsWith('2');
+ const colonX=isReturn?882:639;
+ const yy=isSecond?475:443;
+ const hourX=colonX-(isReturn?23:36), minuteX=colonX+37;
+ ctx.save();
+ ctx.font='700 23px Arial, sans-serif';
+ ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.textAlign='center';
+ ctx.fillText(match[1].padStart(2,'0'),hourX,yy);
+ ctx.fillText(match[2],minuteX,yy);
+ ctx.restore();
+}
 function drawField(ctx,s){
  const raw=data[s.key];
  if(raw===undefined||raw===null||raw===''||raw===false)return;
  const value=formatValue(s,raw),x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
+ if(s.kind==='printed-time'){drawPrintedTime(ctx,s,value);return;}
  const baseFont=getFont(s);
  ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`700 ${baseFont}px Arial, sans-serif`;
  if(s.kind!=='ruled'){ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();}
