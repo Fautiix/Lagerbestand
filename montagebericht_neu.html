@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-1">
+<title>Blauer Montagebericht · Materialverwaltung</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d10;--panel:#121824;--ink:#f4f6fb;--muted:#b0bfd5;--line:#29354a;--accent:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 17px;border-bottom:1px solid var(--line);background:#090d14}.top a{color:#a7caff;text-decoration:none;font-weight:700}.top h1{font-size:19px;flex:1;margin:0}.version{color:#9fe2ae;font-size:12px;border:1px solid #386346;padding:4px 8px;border-radius:7px}
+main{display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);align-items:start;gap:15px;padding:15px;max-width:1500px;margin:auto}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}button,select{border:1px solid #35425a;background:#1c2739;color:var(--ink);border-radius:9px;padding:10px 12px}button{font-weight:700}.primary{background:var(--accent);border-color:var(--accent)}.delete{color:#ffb4b4}button:disabled{opacity:.5}
+h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin:10px 0;border-radius:10px;overflow:hidden}summary{padding:12px;background:#1b2535;cursor:pointer;font-weight:750}.inside{padding:12px}.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.one{grid-template-columns:1fr}.field{min-width:0}.field label{font-size:12px;color:#c0cce0;display:block;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;min-width:0;background:#070d17;border:1px solid #374760;border-radius:8px;color:var(--ink);padding:10px;min-height:41px}.field textarea{resize:vertical;min-height:92px}.field input:focus,.field textarea:focus{outline:2px solid #487fee}.field input[type=checkbox]{width:auto;min-height:0;accent-color:#60a5fa}.field input[type=range]{padding:0;min-height:22px;accent-color:#60a5fa}.tiny{font-size:12px;color:var(--muted);line-height:1.5}.note{font-size:12px;background:#101d2e;padding:10px;border:1px solid var(--line);border-radius:8px}.danger-note{color:#ffaeae}.ok-note{color:#9fe2ae}.status{min-height:20px;font-size:13px;color:#9fe2ae}
+.emp{padding:10px;border:1px solid #35435a;border-radius:9px;margin:10px 0}.emp strong{display:block;margin-bottom:9px}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.days .field label{text-align:center}.days input{padding:8px 2px!important;text-align:center!important}.totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}.materialrow{display:grid;grid-template-columns:90px minmax(0,1fr);gap:7px;margin-bottom:7px}.sigRow{padding:10px;border:1px solid var(--line);border-radius:9px;margin:8px 0}.sigRow strong{display:block;margin-bottom:8px}.sigControls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sigControls .field input{width:100%}
+.preview{position:sticky;top:12px}.previewTitle{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}.previewTitle h2{margin:0}.sheetFrame{padding:10px;background:#202a39;border-radius:10px;overflow:auto}.sheetCanvas{display:block;width:100%;height:auto;max-width:1054px;margin:0 auto;box-shadow:0 6px 22px #0009;background:#d3e7ed}.selectReport{max-width:100%;flex:1;min-width:150px}
+#sigModal{display:none;position:fixed;inset:0;z-index:30;background:#000d;align-items:center;justify-content:center;padding:16px}#sigModal.visible{display:flex}.sigDialog{background:#141e2b;border:1px solid #45617a;padding:17px;border-radius:14px;width:100%;max-width:650px}.sigDialog canvas{display:block;touch-action:none;width:100%;height:180px;background:white;border:2px solid #6b8299;border-radius:8px;margin:10px 0}
+@media(max-width:980px){main{grid-template-columns:1fr}.preview{position:static}.panel{padding:12px}.sheetFrame{padding:5px}}@media(max-width:510px){.cols,.totals{grid-template-columns:1fr}.days{grid-template-columns:repeat(4,minmax(0,1fr))}.sigControls{grid-template-columns:1fr 1fr}.top{padding:10px}.top h1{flex-basis:100%}}
+</style>
+</head>
+<body>
+<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU · 18.10.2026</span></header>
+<main>
+<section class="panel">
+<div class="buttons"><select class="selectReport" id="saved" aria-label="Gespeicherten Bericht öffnen"></select><button id="add" type="button">＋ Neuer Bericht</button></div>
+<div class="buttons"><button class="primary" id="pdf" type="button">📄 PDF herunterladen</button><button id="save" type="button">💾 Speichern</button><button id="remove" class="delete" type="button">🗑️ Löschen</button></div>
+<div id="status" class="status" role="status"></div>
+<h2>Bericht ausfüllen</h2><div id="editor"></div>
+<p class="tiny">Der blaue Originalzettel bleibt unverändert. Berichtsdaten werden aktuell nur auf diesem Gerät gespeichert. Die Berichtsnummer 0116300 auf der Vorlage wird noch nicht automatisch vergeben.</p>
+</section>
+<section class="panel preview"><div class="previewTitle"><h2>Vorschau auf dem Originalzettel</h2><span class="version">PDF = Vorschau</span></div><div class="sheetFrame"><canvas id="page" class="sheetCanvas" width="1054" height="1492" aria-label="Vorschau des blauen Montageberichts"></canvas></div><p class="tiny">Die Positionen stammen aus den Tabellenlinien des Originalbildes. Für eine größere Ansicht kannst du auf dem Handy zoomen.</p></section>
+</main>
+<div id="sigModal" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigDialog"><h2 id="sigTitle">Unterschrift</h2><p class="tiny">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigPad" width="900" height="280"></canvas><div class="buttons"><button id="sigClear">Leeren</button><button id="sigCancel">Abbrechen</button><button id="sigDone" class="primary">Übernehmen</button></div></div></div>
+<img id="template" src="./montagebericht_vorlage.png?v=20261018-neu1" alt="" hidden>
+<script>
+'use strict';
+// Neue Rendering-Engine: alle Positionen sind echte Pixel in derselben 1054x1492-Vorlage.
+// EIN Canvas ist die einzige Quelle für Vorschau und PDF. Keine zweiten CSS-Positionen.
+const VERSION='2026-10-18-NEU-1', W=1054,H=1492;
+const STORAGE='mv_montageberichte_v2', ACTIVE='mv_montagebericht_aktiv_v2';
+const $=id=>document.getElementById(id);
+const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const SUMS=['Gesamtstd.','Fahrstd.','Rüstzeit','Pause','Überstd.','Nacht'];
+const FIELD_FONT='600 16px Arial, sans-serif';
+const DAY_EDGES=[194,256,318,381,443,505,568,631];
+const SUM_EDGES=[631,693,756,819,881,944,1009];
+const ROW_EDGES=[560,600,640,680,723];
+const WORK_EDGES=[773,803,832,861,890,919,947,975];
+const DEFECT_EDGES=[975,1004,1033,1061];
+const MAT_EDGES=[1105,1134,1163,1193,1222,1251,1281,1310];
+const SIGNATURES=[
+ {key:'sign_monteur',name:'Monteur',box:[48,1324,314,1369]},
+ {key:'sign_bauleitung',name:'Bauleitung',box:[324,1324,604,1369]},
+ {key:'sign_meister',name:'Meister / MI',box:[618,1324,998,1369]}
+];
+let reports={},currentId='',model={},changed=false,signatureKey='',paintSeq=0,raf=0;
+const imagePromises=new Map();
+const safe=v=>String(v??'');
+const esc=v=>safe(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\"':'&quot;'}[c]));
+const number=(v,fallback=0)=>Number.isFinite(Number(v))?Number(v):fallback;
+function defaults(){
+ if(!model.employeeCount)model.employeeCount=1;
+ if(!model.jahr)model.jahr=String(new Date().getFullYear());
+ if(!model.arbeiten_font)model.arbeiten_font=16;
+ if(!model.material_font)model.material_font=16;
+ for(const s of SIGNATURES){if(model[s.key+'_dx']==null)model[s.key+'_dx']=0;if(model[s.key+'_dy']==null)model[s.key+'_dy']=0;if(model[s.key+'_scale']==null)model[s.key+'_scale']=100;}
+}
+function field(label,key,type='text',placeholder=''){
+ if(type==='textarea')return `<div class="field"><label for="f_${key}">${esc(label)}</label><textarea data-field="${key}" id="f_${key}" rows="4" placeholder="${esc(placeholder)}"></textarea></div>`;
+ return `<div class="field"><label for="f_${key}">${esc(label)}</label><input data-field="${key}" id="f_${key}" type="${type}" autocomplete="off" placeholder="${esc(placeholder)}"></div>`;
+}
+function selectEmployee(){return `<div class="field"><label for="f_employeeCount">Anzahl Monteure</label><select id="f_employeeCount" data-field="employeeCount">${[1,2,3,4].map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>`}
+function checkbox(label,key){return `<label style="display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px"><input data-field="${key}" type="checkbox">${esc(label)}</label>`}
+function weightRadios(i){return `<div class="field"><label>Fahrzeug ${i} · Gewichtsklasse</label><div style="display:flex;flex-wrap:wrap;gap:14px">${checkbox('bis 1,5 t',`kfz${i}_bis15`)}${checkbox('über 1,5 t',`kfz${i}_ueber15`)}</div></div>`}
+function range(label,key,min,max){return `<div class="field"><label for="f_${key}">${esc(label)} <output id="out_${key}"></output></label><input id="f_${key}" data-field="${key}" type="range" min="${min}" max="${max}" step="1"></div>`}
+function buildEditor(){
+ defaults();
+ let h=`<details open><summary>🏗️ Baustelle / Einsatz</summary><div class="inside cols">${[
+ ['Standort','standort'],['Einsatz angeordnet von','angeordnet'],['Einsatzort / Kunde','kunde'],['Einsatzkostenstelle','kostenstelle'],['Auftragsnummer','auftragsnummer']].map(a=>field(...a)).join('')}</div></details>`;
+ h+=`<details open><summary>🚐 Fahrzeuge und Fahrtzeiten</summary><div class="inside"><div class="cols">${field('KFZ 1 Kennzeichen','kfz1')}${field('Gefahrene KM 1','km1')}${field('KFZ 2 Kennzeichen','kfz2')}${field('Gefahrene KM 2','km2')}${field('Abfahrt 1','abfahrt1','time')}${field('Rückkehr 1','rueckkehr1','time')}${field('Abfahrt 2','abfahrt2','time')}${field('Rückkehr 2','rueckkehr2','time')}</div><div style="margin-top:10px">${weightRadios(1)}${weightRadios(2)}</div></div></details>`;
+ h+=`<details><summary>🔧 Gerät / Technik (optional)</summary><div class="inside"><p class="tiny">Nur öffnen und ausfüllen, wenn ihr diesen Bereich benötigt.</p><div class="cols">${[
+ ['Gerät','geraet'],['Geräteeigentümer','eigentuemer'],['Equipment-Nr.','equipment'],['Fabrikat','fabrikat'],['Typ','typ'],['Betriebsstunden','betriebsstunden']].map(a=>field(...a)).join('')}</div></div></details>`;
+ h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inside"><div class="cols">${selectEmployee()}${field('Jahreszahl','jahr','number')}</div><p class="tiny">Datum steht direkt unter dem Wochentag. Kollegen 2–4 nur nach Bedarf hinzufügen.</p><div class="days">${DAYS.map(d=>field(d,`date_${d}`,'text','17/10')).join('')}</div>`;
+ for(let i=1;i<=Number(model.employeeCount);i++){
+  h+=`<div class="emp"><strong>Monteur ${i}</strong>${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days">${DAYS.map(d=>field(d,`m${i}_${d}`,'text','9,25')).join('')}</div><div class="totals">${SUMS.map((s,j)=>field(s,`m${i}_sum${j}`)).join('')}</div></div>`;
+ }
+ h+=`</div></details>`;
+ h+=`<details open><summary>🛠️ Ausgeführte Arbeiten</summary><div class="inside"><div class="cols">${checkbox('Gewaltschaden: Ja','gewaltJa')}${checkbox('Gewaltschaden: Nein','gewaltNein')}${checkbox('Inspektion: Ja','inspektionJa')}${checkbox('Inspektion: Nein','inspektionNein')}</div>${field('Ausgeführte Arbeiten','arbeiten','textarea','Eine Zeile nach der anderen …')}${range('Schriftgröße Arbeiten','arbeiten_font',12,19)}<p class="tiny" id="workHint"></p>${field('Weitere Mängel am Gerät','maengel','textarea')}<p class="tiny" id="defectHint"></p></div></details>`;
+ h+=`<details><summary>📦 Verwendete Materialien</summary><div class="inside">${range('Schriftgröße Materialien','material_font',12,18)}<p class="tiny">Lange Bezeichnungen dürfen in die nächste freie Materialzeile laufen.</p>`;
+ for(let i=1;i<=8;i++){h+=`<div class="materialrow">${field(`Menge ${i}`,`mat${i}_menge`)}${field(`Material ${i}`,`mat${i}_name`)}</div>`}
+ h+=`<p class="tiny" id="materialHint"></p></div></details>`;
+ h+=`<details><summary>✍️ Unterschriften</summary><div class="inside"><p class="tiny">Jede Unterschrift kann einzeln verschoben und in der Größe angepasst werden.</p>`;
+ for(const s of SIGNATURES){h+=`<div class="sigRow"><strong>${esc(s.name)}</strong><div class="buttons"><button type="button" data-sign="${s.key}">✍️ Unterschreiben</button><button type="button" data-clear-sign="${s.key}">Entfernen</button></div><div class="sigControls">${range('Links / Rechts',s.key+'_dx',-70,70)}${range('Hoch / Runter',s.key+'_dy',-25,25)}${range('Größe %',s.key+'_scale',40,130)}</div></div>`}
+ h+=`</div></details>`;
+ $('editor').innerHTML=h;
+ syncEditor();
+}
+function syncEditor(){for(const el of document.querySelectorAll('#editor [data-field]')){const value=model[el.dataset.field];if(el.type==='checkbox')el.checked=!!value;else el.value=value==null?'':value;}for(const o of document.querySelectorAll('output[id^="out_"]'))o.textContent=model[o.id.slice(4)]??'';}
+$('editor').addEventListener('input',e=>{if(e.target.matches('[data-field]'))editValue(e.target)});
+$('editor').addEventListener('change',e=>{if(e.target.matches('[data-field]'))editValue(e.target)});
+$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){openSign(sign.dataset.sign);return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
+function editValue(el){const key=el.dataset.field;model[key]=el.type==='checkbox'?el.checked:el.value;
+ if(el.checked&&/^(gewalt|inspektion)(Ja|Nein)$/.test(key)){model[key.replace(/Ja$/,'TEMP').replace(/Nein$/,'Ja').replace(/TEMP$/,'Nein')]=false;syncEditor()}
+ const match=key.match(/^kfz([12])_(bis15|ueber15)$/);if(match&&el.checked){model[`kfz${match[1]}_${match[2]==='bis15'?'ueber15':'bis15'}`]=false;syncEditor()}
+ if(key==='employeeCount'){buildEditor()}
+ const o=$('out_'+key);if(o)o.textContent=model[key];dirty();
+}
+function dirty(){changed=true;setStatus('Änderungen noch nicht gespeichert',false);queuePaint()}
+function setStatus(msg,ok=true){$('status').textContent=msg;$('status').style.color=ok?'#9fe2ae':'#ffdb84'}
+function loadImage(src){if(!imagePromises.has(src)){imagePromises.set(src,new Promise((res,rej)=>{const i=new Image;i.onload=()=>res(i);i.onerror=rej;i.src=src}))}return imagePromises.get(src)}
+function clipped(ctx,x1,y1,x2,y2,fn){ctx.save();ctx.beginPath();ctx.rect(x1+2,y1+2,x2-x1-4,y2-y1-4);ctx.clip();fn();ctx.restore()}
+// Reale Pixelkoordinaten und ein gemeinsames Textlayout; kein CSS-Overlay.
+function put(ctx,value,rect,{center=false,font=16,weight=600}={}){
+ const text=safe(value).trim();if(!text)return;
+ const [x1,y1,x2,y2]=rect;const maxWidth=x2-x1-12;
+ let size=font;ctx.save();ctx.fillStyle='#15202b';ctx.textAlign=center?'center':'left';ctx.textBaseline='middle';
+ do{ctx.font=`${weight} ${size}px Arial, sans-serif`;if(ctx.measureText(text).width<=maxWidth)break;size--}while(size>11);
+ clipped(ctx,x1,y1,x2,y2,()=>ctx.fillText(text,center?(x1+x2)/2:x1+5,(y1+y2)/2));ctx.restore();
+}
+function checkmark(ctx,x,y,on){if(!on)return;ctx.save();ctx.strokeStyle='#13202d';ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x-1,y+4);ctx.lineTo(x+6,y-5);ctx.stroke();ctx.restore()}
+function overwriteZeros(ctx){ // Vier gedruckte Nullen der Originalvorlage durch Checkboxen ersetzen.
+ const marks=[[512,361,'kfz1_bis15'],[599,361,'kfz1_ueber15'],[512,402,'kfz2_bis15'],[599,402,'kfz2_ueber15']];
+ for(const [x,y,key] of marks){
+  // Der Scan hat einen sehr feinen Blautonverlauf. Diesen lokal nachzeichnen.
+  const pTop=ctx.getImageData(x,y-14,1,1).data,pBottom=ctx.getImageData(x,y+14,1,1).data;
+  const gr=ctx.createLinearGradient(0,y-12,0,y+12);gr.addColorStop(0,`rgb(${pTop[0]},${pTop[1]},${pTop[2]})`);gr.addColorStop(1,`rgb(${pBottom[0]},${pBottom[1]},${pBottom[2]})`);
+  ctx.save();ctx.fillStyle=gr;ctx.fillRect(x-11,y-12,22,24);ctx.strokeStyle='#263c50';ctx.lineWidth=1.2;ctx.strokeRect(x-7,y-7,14,14);ctx.restore();checkmark(ctx,x,y,model[key]);
+ }
+}
+function printedTime(ctx,value,type,second){
+ const m=/^(\d{2}):(\d{2})$/.exec(safe(value));if(!m)return;
+ // Der Originalzettel enthält bereits einen gedruckten Doppelpunkt.
+ const cx=type==='rueckkehr'?889:621, cy=second?468:436;
+ put(ctx,m[1],[cx-65,cy-13,cx-9,cy+15],{center:true});put(ctx,m[2],[cx+9,cy-13,cx+63,cy+15],{center:true});
+}
+function wrapText(ctx,v,max){const all=[];ctx.save();
+ for(const paragraph of safe(v).replace(/\r/g,'').split('\n')){
+  if(!paragraph.trim()){all.push('');continue;}
+  let line='';for(const word of paragraph.trim().split(/\s+/)){
+   if(ctx.measureText(line?line+' '+word:word).width<=max){line=line?line+' '+word:word;continue;}
+   if(line){all.push(line);line=''}
+   let part='';for(const char of word){if(part&&ctx.measureText(part+char).width>max){all.push(part);part=char}else part+=char}line=part;
+  }all.push(line);
+ }ctx.restore();return all;
+}
+function getRows(text,font,width){const ctx=$('page').getContext('2d');ctx.save();ctx.font=`600 ${font}px Arial, sans-serif`;const rows=wrapText(ctx,text,width);ctx.restore();return rows;}
+function materialRows(){const rows=[];const font=number(model.material_font,16);
+ for(let i=1;i<=8;i++){
+  const qty=safe(model[`mat${i}_menge`]).trim(),name=safe(model[`mat${i}_name`]).trim();if(!qty&&!name)continue;
+  const lines=getRows(name,font,848);const list=lines.length?lines:[''];for(let j=0;j<list.length;j++)rows.push({qty:j?'':qty,name:list[j]});
+ }return rows;
+}
+function validate(){const issues=[];
+ for(const [key,title,edges] of [['arbeiten','Ausgeführte Arbeiten',WORK_EDGES],['maengel','Weitere Mängel',DEFECT_EDGES.slice(1)]]){
+  const max=edges.length-1,lines=getRows(model[key],number(model[key+'_font'],16),924);let n=lines.length;if(!safe(model[key]).trim())n=0;
+  if(n>max)issues.push(`${title}: ${n} Zeilen, nur ${max} verfügbar`);
+  const hint=$(key==='arbeiten'?'workHint':'defectHint');if(hint){hint.textContent=`${Math.min(n,max)} von ${max} Zeilen belegt${n>max?' · Text zu lang!':''}`;hint.className=n>max?'tiny danger-note':'tiny';}
+ }
+ const mat=materialRows();if(mat.length>7)issues.push(`Materialien: ${mat.length} Zeilen, nur 7 verfügbar`);
+ const hint=$('materialHint');if(hint){hint.textContent=`${Math.min(mat.length,7)} von 7 Materialzeilen belegt${mat.length>7?' · Bitte kürzen!':''}`;hint.className=mat.length>7?'tiny danger-note':'tiny';}
+ return issues;
+}
+function ruled(ctx,txt,edges,font,start=0,maxLines=edges.length-1){const list=getRows(txt,font,924);for(let i=0;i<Math.min(maxLines,list.length);i++){put(ctx,list[i],[48,edges[start+i]+1,1000,edges[start+i+1]-1],{font,weight:600})}}
+function paintText(ctx){
+ const left=[['standort',162,183],['angeordnet',194,214],['kunde',225,245],['kostenstelle',256,276],['auftragsnummer',287,307]];
+ for(const [key,y1,y2] of left)put(ctx,model[key],[194,y1,490,y2]);
+ const right=[['geraet',138,158],['eigentuemer',169,189],['equipment',200,220],['fabrikat',231,251],['typ',262,282],['betriebsstunden',293,313]];
+ for(const [key,y1,y2] of right)put(ctx,model[key],[740,y1,980,y2]);
+ // Erst die tatsächlichen gedruckten Grenzen verwenden: (143..432) und (740..1009), (337..381) usw.
+ put(ctx,model.kfz1,[145,339,432,379],{center:true});put(ctx,model.kfz2,[145,383,432,420],{center:true});
+ put(ctx,model.km1,[746,339,1008,379],{center:true});put(ctx,model.km2,[746,383,1008,420],{center:true});
+ // Jahreszahl im freien Kopfbereich zwischen Beschreibung und Tabelle.
+ put(ctx,model.jahr,[318,424,485,488],{center:true});
+ for(let i=1;i<=2;i++)for(const prefix of ['abfahrt','rueckkehr'])printedTime(ctx,model[prefix+i],prefix,i===2);
+ DAYS.forEach((d,i)=>put(ctx,model[`date_${d}`],[DAY_EDGES[i]+1,510,DAY_EDGES[i+1]-1,543],{center:true,font:15}));
+ for(let r=1;r<=Math.max(1,Math.min(4,number(model.employeeCount,1)));r++){
+  const y1=ROW_EDGES[r-1]+2,y2=ROW_EDGES[r]-2;
+  put(ctx,model[`monteur${r}`],[56,y1,192,y2],{center:true});
+  DAYS.forEach((d,i)=>put(ctx,model[`m${r}_${d}`],[DAY_EDGES[i]+1,y1,DAY_EDGES[i+1]-1,y2],{center:true}));
+  SUMS.forEach((s,i)=>put(ctx,model[`m${r}_sum${i}`],[SUM_EDGES[i]+1,y1,SUM_EDGES[i+1]-1,y2],{center:true}));
+ }
+ const boxes={gewaltJa:[415,759],gewaltNein:[481,759],inspektionJa:[627,759],inspektionNein:[693,759]};
+ for(const [key,[x,y]] of Object.entries(boxes))checkmark(ctx,x,y,model[key]);
+ ruled(ctx,model.arbeiten,WORK_EDGES,number(model.arbeiten_font,16));
+ ruled(ctx,model.maengel,DEFECT_EDGES.slice(1),15);
+ const mats=materialRows();for(let i=0;i<Math.min(mats.length,7);i++){
+  const [y1,y2]=[MAT_EDGES[i],MAT_EDGES[i+1]];
+  put(ctx,mats[i].qty,[42,y1+1,142,y2-1],{center:true,font:number(model.material_font,16)});
+  put(ctx,mats[i].name,[150,y1+1,1008,y2-1],{font:number(model.material_font,16)});
+ }
+}
+async function drawPage(canvas){const img=$('template');if(!img.complete||!img.naturalWidth)await new Promise((res,rej)=>{img.addEventListener('load',res,{once:true});img.addEventListener('error',rej,{once:true})});
+ canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,W,H);overwriteZeros(ctx);paintText(ctx);
+ for(const s of SIGNATURES){const v=model[s.key];if(!v)continue;try{const sig=await loadImage(v);const [x1,y1,x2,y2]=s.box,dx=number(model[s.key+'_dx']),dy=number(model[s.key+'_dy']),scale=number(model[s.key+'_scale'],100)/100;
+  const w=(x2-x1)*scale,h=(y2-y1)*scale,mx=(x1+x2)/2+dx,my=(y1+y2)/2+dy;
+  ctx.drawImage(sig,mx-w/2,my-h/2,w,h);
+ }catch(e){console.warn('Unterschrift:',e)}}return canvas;
+}
+function queuePaint(){const seq=++paintSeq;cancelAnimationFrame(raf);raf=requestAnimationFrame(async()=>{try{const temp=document.createElement('canvas');await drawPage(temp);if(seq!==paintSeq)return;const cv=$('page');cv.getContext('2d').clearRect(0,0,W,H);cv.getContext('2d').drawImage(temp,0,0);validate()}catch(e){console.error(e);setStatus('Vorschau: '+e.message,false)}})}
+function allReports(){try{const list=JSON.parse(localStorage.getItem(STORAGE)||'{}');return list&&typeof list==='object'&&!Array.isArray(list)?list:{}}catch{return {}}}
+function uid(){return `bericht_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`}
+function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]?.updated).localeCompare(safe(a[1]?.updated)));
+ $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
+function saveCurrent(){try{reports[currentId]={data:structuredClone(model),updated:new Date().toISOString()};localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);changed=false;updateSaved();setStatus('✓ Auf diesem Gerät gespeichert')}catch(e){setStatus('Speichern fehlgeschlagen: '+e.message,false)}}
+function fresh(ask=true){if(ask&&changed&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;currentId=uid();model={employeeCount:1,jahr:String(new Date().getFullYear()),arbeiten_font:16,material_font:16};defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Neuer Bericht bereit');localStorage.setItem(ACTIVE,currentId)}
+function restore(id){if(changed&&!confirm('Ungespeicherte Änderungen verwerfen?')){updateSaved();return}const rec=reports[id];if(!rec)return;currentId=id;model=structuredClone(rec.data||{});defaults();changed=false;buildEditor();queuePaint();updateSaved();setStatus('Bericht geladen');localStorage.setItem(ACTIVE,id)}
+$('saved').addEventListener('change',e=>{if(e.target.value)restore(e.target.value)});
+$('add').onclick=()=>fresh();$('save').onclick=saveCurrent;$('remove').onclick=()=>{if(!reports[currentId]){fresh(false);return}if(!confirm('Gespeicherten Bericht auf diesem Gerät löschen?'))return;delete reports[currentId];localStorage.setItem(STORAGE,JSON.stringify(reports));changed=false;fresh(false)};
+function utf8(v){return new TextEncoder().encode(v)}
+function bytesJoin(parts){let len=0;for(const p of parts)len+=p.length;const res=new Uint8Array(len);let start=0;for(const p of parts){res.set(p,start);start+=p.length}return res}
+function makePdf(jpeg,w,h){const parts=[],offsets=[0];let count=0;const add=bytes=>{parts.push(bytes);count+=bytes.length};add(utf8('%PDF-1.4\n'));
+ function obj(n,buf){offsets[n]=count;add(utf8(n+' 0 obj\n'));add(typeof buf==='string'?utf8(buf):buf);add(utf8('\nendobj\n'))}
+ obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>');obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
+ const cmds=utf8('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n');obj(4,bytesJoin([utf8('<< /Length '+cmds.length+' >>\nstream\n'),cmds,utf8('endstream')]));
+ obj(5,bytesJoin([utf8('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n'),jpeg,utf8('\nendstream')]));
+ const start=count;add(utf8('xref\n0 6\n0000000000 65535 f \n'));for(let i=1;i<=5;i++)add(utf8(safe(offsets[i]).padStart(10,'0')+' 00000 n \n'));
+ add(utf8('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));return new Blob(parts,{type:'application/pdf'});
+}
+$('pdf').onclick=async()=>{const issues=validate();if(issues.length){setStatus('PDF nicht erstellt: '+issues.join(' · '),false);return}const btn=$('pdf');btn.disabled=true;btn.textContent='PDF wird erstellt …';try{const cv=document.createElement('canvas');await drawPage(cv);const b64=cv.toDataURL('image/jpeg',.96).split(',')[1];const bin=atob(b64),jpeg=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)jpeg[i]=bin.charCodeAt(i);
+ const pdf=makePdf(jpeg,W,H),url=URL.createObjectURL(pdf),a=document.createElement('a');a.href=url;a.download='Montagebericht_'+safe(model.standort||model.kunde||'Baustelle').replace(/[^\wäöüÄÖÜß-]+/g,'_').slice(0,35)+'_'+new Date().toISOString().slice(0,10)+'.pdf';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setStatus('✓ PDF erstellt')}catch(e){console.error(e);setStatus('PDF-Fehler: '+e.message,false)}finally{btn.disabled=false;btn.textContent='📄 PDF herunterladen'}};
+// Unterschriften per Pointer zeichnen
+const pad=$('sigPad'),pctx=pad.getContext('2d');let isDrawing=false;
+function pointerXY(e){const b=pad.getBoundingClientRect();return [(e.clientX-b.left)*pad.width/b.width,(e.clientY-b.top)*pad.height/b.height]}
+function openSign(key){signatureKey=key;$('sigTitle').textContent='Unterschrift: '+SIGNATURES.find(s=>s.key===key).name;$('sigModal').classList.add('visible');pctx.clearRect(0,0,pad.width,pad.height);pctx.lineWidth=3.5;pctx.lineCap='round';pctx.lineJoin='round';pctx.strokeStyle='#18202b'}
+pad.addEventListener('pointerdown',e=>{isDrawing=true;pad.setPointerCapture(e.pointerId);const [x,y]=pointerXY(e);pctx.beginPath();pctx.moveTo(x,y);pctx.lineTo(x+.01,y+.01);pctx.stroke()});
+pad.addEventListener('pointermove',e=>{if(!isDrawing)return;const [x,y]=pointerXY(e);pctx.lineTo(x,y);pctx.stroke()});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])pad.addEventListener(ev,()=>isDrawing=false);
+$('sigClear').onclick=()=>pctx.clearRect(0,0,pad.width,pad.height);$('sigCancel').onclick=()=>$('sigModal').classList.remove('visible');$('sigDone').onclick=()=>{if(signatureKey){model[signatureKey]=pad.toDataURL('image/png');dirty()}$('sigModal').classList.remove('visible')};
+window.addEventListener('beforeunload',e=>{if(changed){e.preventDefault();e.returnValue=''}});
+reports=allReports();const old=localStorage.getItem(ACTIVE);
+if(old&&reports[old]){currentId=old;model=structuredClone(reports[old].data||{});defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Gespeicherten Bericht geladen')}else fresh(false);
+</script>
+</body>
+</html>
