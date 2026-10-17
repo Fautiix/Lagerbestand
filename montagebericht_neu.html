@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-4">
+<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-5">
 <title>Blauer Montagebericht · Materialverwaltung</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d10;--panel:#121824;--ink:#f4f6fb;--muted:#b0bfd5;--line:#29354a;--accent:#2563eb}
@@ -11,14 +11,14 @@
 main{display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);align-items:start;gap:15px;padding:15px;max-width:1500px;margin:auto}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}
 .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}button,select{border:1px solid #35425a;background:#1c2739;color:var(--ink);border-radius:9px;padding:10px 12px}button{font-weight:700}.primary{background:var(--accent);border-color:var(--accent)}.delete{color:#ffb4b4}button:disabled{opacity:.5}
 h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin:10px 0;border-radius:10px;overflow:hidden}summary{padding:12px;background:#1b2535;cursor:pointer;font-weight:750}.inside{padding:12px}.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.one{grid-template-columns:1fr}.field{min-width:0}.field label{font-size:12px;color:#c0cce0;display:block;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;min-width:0;background:#070d17;border:1px solid #374760;border-radius:8px;color:var(--ink);padding:10px;min-height:41px}.field textarea{resize:vertical;min-height:92px}.field input:focus,.field textarea:focus{outline:2px solid #487fee}.field input[type=checkbox]{width:auto;min-height:0;accent-color:#60a5fa}.field input[type=range]{padding:0;min-height:22px;accent-color:#60a5fa}.tiny{font-size:12px;color:var(--muted);line-height:1.5}.note{font-size:12px;background:#101d2e;padding:10px;border:1px solid var(--line);border-radius:8px}.danger-note{color:#ffaeae}.ok-note{color:#9fe2ae}.status{min-height:20px;font-size:13px;color:#9fe2ae}
-.emp{padding:10px;border:1px solid #35435a;border-radius:9px;margin:10px 0}.emp strong{display:block;margin-bottom:9px}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.days .field label{text-align:center}.days input{padding:8px 2px!important;text-align:center!important}.totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}.materialrow{display:grid;grid-template-columns:90px minmax(0,1fr);gap:7px;margin-bottom:7px}.sigRow{padding:10px;border:1px solid var(--line);border-radius:9px;margin:8px 0}.sigRow strong{display:block;margin-bottom:8px}.sigControls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sigControls .field input{width:100%}
+.emp{padding:10px;border:1px solid #35435a;border-radius:9px;margin:10px 0}.emp strong{display:block;margin-bottom:9px}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.days .field label{text-align:center}.days input{padding:8px 2px!important;text-align:center!important}.days.hour-days{grid-template-columns:repeat(4,minmax(0,1fr))}.days.hour-days select{padding:9px 6px}.totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}.materialrow{display:grid;grid-template-columns:90px minmax(0,1fr);gap:7px;margin-bottom:7px}.sigRow{padding:10px;border:1px solid var(--line);border-radius:9px;margin:8px 0}.sigRow strong{display:block;margin-bottom:8px}.sigControls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sigControls .field input{width:100%}
 .preview{position:sticky;top:12px}.previewTitle{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}.previewTitle h2{margin:0}.sheetFrame{padding:10px;background:#202a39;border-radius:10px;overflow:auto}.sheetCanvas{display:block;width:100%;height:auto;max-width:1054px;margin:0 auto;box-shadow:0 6px 22px #0009;background:#d3e7ed}.selectReport{max-width:100%;flex:1;min-width:150px}
 #sigModal{display:none;position:fixed;inset:0;z-index:30;background:#000d;align-items:center;justify-content:center;padding:16px}#sigModal.visible{display:flex}.sigDialog{background:#141e2b;border:1px solid #45617a;padding:17px;border-radius:14px;width:100%;max-width:650px}.sigDialog canvas{display:block;touch-action:none;width:100%;height:180px;background:white;border:2px solid #6b8299;border-radius:8px;margin:10px 0}
-@media(max-width:980px){main{grid-template-columns:1fr}.preview{position:static}.panel{padding:12px}.sheetFrame{padding:5px}}@media(max-width:510px){.cols,.totals{grid-template-columns:1fr}.days{grid-template-columns:repeat(4,minmax(0,1fr))}.sigControls{grid-template-columns:1fr 1fr}.top{padding:10px}.top h1{flex-basis:100%}}
+@media(max-width:980px){main{grid-template-columns:1fr}.preview{position:static}.panel{padding:12px}.sheetFrame{padding:5px}}@media(max-width:510px){.cols,.totals{grid-template-columns:1fr}.days{grid-template-columns:repeat(4,minmax(0,1fr))}.days.hour-days{grid-template-columns:repeat(2,minmax(0,1fr))}.sigControls{grid-template-columns:1fr 1fr}.top{padding:10px}.top h1{flex-basis:100%}}
 </style>
 </head>
 <body>
-<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU 4 · 18.10.2026</span></header>
+<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU 5 · 18.10.2026</span></header>
 <main>
 <section class="panel">
 <div class="buttons"><select class="selectReport" id="saved" aria-label="Gespeicherten Bericht öffnen"></select><button id="add" type="button">＋ Neuer Bericht</button></div>
@@ -35,7 +35,7 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 'use strict';
 // Neue Rendering-Engine: alle Positionen sind echte Pixel in derselben 1054x1492-Vorlage.
 // EIN Canvas ist die einzige Quelle für Vorschau und PDF. Keine zweiten CSS-Positionen.
-const VERSION='2026-10-18-NEU-4', W=1054,H=1492;
+const VERSION='2026-10-18-NEU-5', W=1054,H=1492;
 const STORAGE='mv_montageberichte_v2', ACTIVE='mv_montagebericht_aktiv_v2';
 const $=id=>document.getElementById(id);
 const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
@@ -47,11 +47,18 @@ const HOME_LOCATION_KEY='mv_bericht_standort_v1';
 let availableSites=[];
 let availableVehicles=[];
 let availableTemplates=[];
+let availableMaterials=[];
+let materialState='loading';
 let sitesState='loading';
 let vehicleState='loading';
 let templateState='loading';
 let reportIsAdmin=false;
-const pauseValues=Array.from({length:17},(_,i)=>(i*.25).toFixed(2).replace('.',','));
+const quarterCache=new Map();
+function quarterValues(max){
+ if(!quarterCache.has(max))quarterCache.set(max,Array.from({length:Math.round(max*4)+1},(_,i)=>(i/4).toFixed(2).replace('.',',')));
+ return quarterCache.get(max);
+}
+function quarterMax(key){return /_sum0$/.test(key)?80:24;}
 const FIELD_FONT='600 16px Arial, sans-serif';
 const DAY_EDGES=[194,256,318,381,443,505,568,631];
 const SUM_EDGES=[631,693,756,819,881,944,1009];
@@ -72,6 +79,9 @@ const number=(v,fallback=0)=>Number.isFinite(Number(v))?Number(v):fallback;
 function defaults(){
  if(!model.employeeCount)model.employeeCount=1;
  if(!model.angeordnet)model.angeordnet='Schlottau';
+ // Ältere gespeicherte Berichte nur bei eindeutig automatischer Reihenfolge korrigieren.
+ if(model.polier && model.angeordnet===`Schlottau / ${safe(model.polier).trim()}`)model.angeordnet=composeResponsible(model.polier);
+ for(let r=1;r<=4;r++)if(model['quarterCustom_m'+r+'_sum3']==null && model['pauseCustom'+r]===true)model['quarterCustom_m'+r+'_sum3']=true;
  for(let i=1;i<=2;i++)if(!model['kmMode'+i])model['kmMode'+i]='one';
  if(!model.jahr)model.jahr=String(new Date().getFullYear());
  if(!model.arbeiten_font)model.arbeiten_font=16;
@@ -93,7 +103,7 @@ function siteChoice(){
 function orderChoice(){return `<div class="field"><label for="f_orderType">Auftragsart</label><select id="f_orderType" data-field="orderType"><option value="auftrag">Auftrag</option><option value="zusatz">Zusatz</option></select></div>`}
 function polierChoice(){
  const names=[...new Set(availableSites.map(s=>safe(s.contact_person).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));
- return `<div class="field"><label for="f_polier">Polier / Ansprechpartner (änderbar)</label><input id="f_polier" data-field="polier" list="availablePoliers" autocomplete="off" placeholder="Polier auswählen oder selbst schreiben"><datalist id="availablePoliers">${names.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist><div class="tiny">Wird automatisch hinter „Schlottau“ eingetragen.</div></div>`;
+ return `<div class="field"><label for="f_polier">Polier / Ansprechpartner (änderbar)</label><input id="f_polier" data-field="polier" list="availablePoliers" autocomplete="off" placeholder="Polier auswählen oder selbst schreiben"><datalist id="availablePoliers">${names.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist><div class="tiny">Wird automatisch vor „Schlottau“ eingetragen.</div></div>`;
 }
 function vehicleChoice(i){
  const opts=availableVehicles.filter(v=>v.active!==false||String(v.id)===String(model[`vehicle${i}Id`]))
@@ -117,12 +127,20 @@ function templateAdminPanel(){
  <button type="button" id="adminTemplateDeleteBtn" class="delete" style="margin-top:9px">Ausgewählte Vorlage löschen</button></div>`;
 }
 
-function pauseChoice(r){
- const key=`m${r}_sum3`,val=safe(model[key]).trim().replace('.',',');
- const isKnown=val===''||pauseValues.includes(val)||pauseValues.some(v=>Number(v.replace(',','.'))===Number(val.replace(',','.')));
- const options=pauseValues.map(v=>`<option value="${v}">${v} Std.</option>`).join('');
- const custom= !isKnown || model[`pauseCustom${r}`]===true;
- return `<div class="field"><label for="pauseSelect${r}">Pause</label><select id="pauseSelect${r}" data-pause="${r}"><option value="">Bitte wählen …</option>${options}<option value="custom">Eigener Wert …</option></select><div id="pauseCustom${r}" style="${custom?'':'display:none;'}margin-top:7px"><input id="pauseInput${r}" type="text" inputmode="decimal" placeholder="z. B. 0,75" data-pause-custom="${r}" value="${custom?esc(model[key]||''):''}"></div></div>`;
+function quarterChoice(label,key,max=24){
+ const val=safe(model[key]).trim();
+ const options=quarterValues(max).map(v=>`<option value="${v}">${v} Std.</option>`).join('');
+ return `<div class="field"><label for="q_${key}">${esc(label)}</label>
+ <select id="q_${key}" data-quarter="${key}" data-quarter-max="${max}"><option value="">Bitte wählen …</option>${options}<option value="custom">Eigener Wert …</option></select>
+ <div id="qc_${key}" style="display:none;margin-top:6px"><input id="qi_${key}" type="text" inputmode="decimal" data-quarter-custom="${key}" placeholder="Wert selbst eintragen" value="${esc(val)}"></div></div>`;
+}
+function materialPicker(i){
+ const name=safe(model[`mat${i}_name`]);
+ const options=availableMaterials.map(m=>{
+  const display=safe(m.name)+(m.unit?' · '+safe(m.unit):'');
+  return `<option value="${esc(m.name)}">${esc(display)}</option>`;
+ }).join('');
+ return `<div class="field"><label for="materialChoice${i}">Material ${i}</label><select id="materialChoice${i}" data-material-choice="${i}"><option value="">${materialState==='loading'?'Lagerliste wird geladen …':'Aus Lager auswählen …'}</option>${options}</select><input style="margin-top:5px" type="text" id="f_mat${i}_name" data-field="mat${i}_name" autocomplete="off" placeholder="Oder Material frei eingeben" value="${esc(name)}"></div>`;
 }
 function selectEmployee(){return `<div class="field"><label for="f_employeeCount">Anzahl Monteure</label><select id="f_employeeCount" data-field="employeeCount">${[1,2,3,4].map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>`}
 function checkbox(label,key){return `<label style="display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px"><input data-field="${key}" type="checkbox">${esc(label)}</label>`}
@@ -134,15 +152,15 @@ function buildEditor(){
  h+=`<details open><summary>🚐 Fahrzeuge und Fahrtzeiten</summary><div class="inside"><div class="cols">${vehicleChoice(1)}${vehicleChoice(2)}${field('KFZ 1 Kennzeichen (änderbar)','kfz1')}${field('KFZ 2 Kennzeichen (änderbar)','kfz2')}${kmChoice(1)}${kmChoice(2)}${field('Gefahrene KM 1 (änderbar)','km1')}${field('Gefahrene KM 2 (änderbar)','km2')}${field('Abfahrt 1','abfahrt1','time')}${field('Rückkehr 1','rueckkehr1','time')}${field('Abfahrt 2','abfahrt2','time')}${field('Rückkehr 2','rueckkehr2','time')}</div><div style="margin-top:10px">${weightRadios(1)}${weightRadios(2)}</div></div></details>`;
  h+=`<details><summary>🔧 Gerät / Technik (optional)</summary><div class="inside"><p class="tiny">Nur öffnen und ausfüllen, wenn ihr diesen Bereich benötigt.</p><div class="cols">${[
  ['Gerät','geraet'],['Geräteeigentümer','eigentuemer'],['Equipment-Nr.','equipment'],['Fabrikat','fabrikat'],['Typ','typ'],['Betriebsstunden','betriebsstunden']].map(a=>field(...a)).join('')}</div></div></details>`;
- h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inside"><div class="cols">${selectEmployee()}${field('Jahreszahl','jahr','number')}</div><p class="tiny">Datum steht direkt unter dem Wochentag. Kollegen 2–4 nur nach Bedarf hinzufügen.</p><div class="days">${DAYS.map(d=>field(d,`date_${d}`,'text','17/10')).join('')}</div>`;
+ h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inside"><div class="cols">${selectEmployee()}${field('Jahreszahl','jahr','number')}</div><p class="tiny">Datum steht direkt unter dem Wochentag. Kollegen 2–4 nur nach Bedarf hinzufügen.</p><div class="days">${DAYS.map(d=>field(d,`date_${d}`)).join('')}</div>`;
  for(let i=1;i<=Number(model.employeeCount);i++){
-  h+=`<div class="emp"><strong>Monteur ${i}</strong>${hoursTemplateChooser(i)}${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days">${DAYS.map(d=>field(d,`m${i}_${d}`,'text','9,25')).join('')}</div><div class="totals">${SUMS.map((s,j)=>j===3?pauseChoice(i):field(s,`m${i}_sum${j}`)).join('')}</div></div>`;
+  h+=`<div class="emp"><strong>Monteur ${i}</strong>${hoursTemplateChooser(i)}${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days hour-days">${DAYS.map(d=>quarterChoice(d,`m${i}_${d}`)).join('')}</div><div class="totals">${SUMS.map((s,j)=>quarterChoice(s,`m${i}_sum${j}`,quarterMax(`m${i}_sum${j}`))).join('')}</div></div>`;
  }
  h+=`</div></details>`;
  h+=`<details><summary>📋 Stunden-Vorlagen verwalten</summary><div class="inside" id="templateAdminMount">${templateAdminPanel()}</div></details>`;
  h+=`<details open><summary>🛠️ Ausgeführte Arbeiten</summary><div class="inside"><div class="cols">${checkbox('Gewaltschaden: Ja','gewaltJa')}${checkbox('Gewaltschaden: Nein','gewaltNein')}${checkbox('Inspektion: Ja','inspektionJa')}${checkbox('Inspektion: Nein','inspektionNein')}</div>${field('Ausgeführte Arbeiten','arbeiten','textarea','Eine Zeile nach der anderen …')}${range('Schriftgröße Arbeiten','arbeiten_font',12,19)}<p class="tiny" id="workHint"></p>${field('Weitere Mängel am Gerät','maengel','textarea')}<p class="tiny" id="defectHint"></p></div></details>`;
- h+=`<details><summary>📦 Verwendete Materialien</summary><div class="inside">${range('Schriftgröße Materialien','material_font',12,18)}<p class="tiny">Lange Bezeichnungen dürfen in die nächste freie Materialzeile laufen.</p>`;
- for(let i=1;i<=8;i++){h+=`<div class="materialrow">${field(`Menge ${i}`,`mat${i}_menge`)}${field(`Material ${i}`,`mat${i}_name`)}</div>`}
+ h+=`<details><summary>📦 Verwendete Materialien</summary><div class="inside">${range('Schriftgröße Materialien','material_font',12,18)}<p class="tiny">Material aus dem Lager wählen oder frei eingeben. Die Auswahl bucht kein Material aus dem Lager aus. <button type="button" id="reloadMaterials" style="padding:3px 8px;font-size:12px">↻ Lager aktualisieren</button></p>`;
+ for(let i=1;i<=8;i++){h+=`<div class="materialrow">${field(`Menge ${i}`,`mat${i}_menge`)}${materialPicker(i)}</div>`}
  h+=`<p class="tiny" id="materialHint"></p></div></details>`;
  h+=`<details><summary>✍️ Unterschriften</summary><div class="inside"><p class="tiny">Jede Unterschrift kann einzeln verschoben und in der Größe angepasst werden.</p>`;
  for(const s of SIGNATURES){h+=`<div class="sigRow"><strong>${esc(s.name)}</strong><div class="buttons"><button type="button" data-sign="${s.key}">✍️ Unterschreiben</button><button type="button" data-clear-sign="${s.key}">Entfernen</button></div><div class="sigControls">${range('Links / Rechts',s.key+'_dx',-70,70)}${range('Hoch / Runter',s.key+'_dy',-25,25)}${range('Größe %',s.key+'_scale',40,130)}</div></div>`}
@@ -156,27 +174,38 @@ function syncEditor(){
  for(let i=1;i<=2;i++){
   const hint=$('kmHelp'+i);const site=getSelectedSite();if(hint){const raw=safe(site?.distance_km).trim();const base=parseKilometers(raw);hint.textContent=raw?(base==null?'Baustellen-KM „'+raw+'“ ist kein reiner Zahlenwert. Bitte KM individuell eintragen.':'Baustellenentfernung: '+raw+' km pro Strecke'):'Keine Entfernung hinterlegt. KM bleiben manuell editierbar.';}
  }
- for(const el of document.querySelectorAll('[data-pause]')){
-   const r=el.dataset.pause, raw=safe(model[`m${r}_sum3`]).trim().replace('.',',');
-   const match=pauseValues.find(v=>raw!=='' && Number(v.replace(',','.'))===Number(raw.replace(',','.')));
-   const custom=Boolean(model[`pauseCustom${r}`])||Boolean(raw && !match);
-   el.value=custom?'custom':match||'';
-   const holder=$('pauseCustom'+r);if(holder)holder.style.display=custom?'block':'none';
-   const input=$('pauseInput'+r);if(input)input.value=custom?safe(model[`m${r}_sum3`]):'';
+ for(const el of document.querySelectorAll('[data-quarter]')){
+  const key=el.dataset.quarter, raw=safe(model[key]).trim(),max=Number(el.dataset.quarterMax);
+  const n=Number(raw.replace(',','.'));
+  const match=raw!=='' && Number.isFinite(n) && n>=0 && n<=max && Math.abs(n*4-Math.round(n*4))<1e-7;
+  const val=match?n.toFixed(2).replace('.',','):'';
+  const custom=Boolean(model['quarterCustom_'+key])||Boolean(raw && !match);
+  el.value=custom?'custom':val;
+  const holder=$('qc_'+key);if(holder)holder.style.display=custom?'block':'none';
+  const input=$('qi_'+key);if(input && document.activeElement!==input)input.value=custom?raw:'';
+ }
+ for(let i=1;i<=8;i++){
+  const el=$('materialChoice'+i);
+  if(el){const name=safe(model['mat'+i+'_name']);el.value=availableMaterials.some(m=>m.name===name)?name:'';}
  }
 }
 $('editor').addEventListener('input',e=>{
- if(e.target.matches('[data-pause-custom]')){
-  const r=e.target.dataset.pauseCustom;model[`m${r}_sum3`]=e.target.value;dirty();return;
+ if(e.target.matches('[data-quarter-custom]')){
+  const key=e.target.dataset.quarterCustom;model[key]=e.target.value;dirty();return;
  }
  if(e.target.matches('[data-field]') && e.target.type!=='select')editValue(e.target);
 });
 $('editor').addEventListener('change',e=>{
- if(e.target.matches('[data-pause]')){
-  const r=e.target.dataset.pause, val=e.target.value;
-  model[`pauseCustom${r}`]=val==='custom';
-  if(val!=='custom')model[`m${r}_sum3`]=val;
-  syncEditor();if(val==='custom')$('pauseInput'+r)?.focus();dirty();return;
+ if(e.target.matches('[data-quarter]')){
+  const key=e.target.dataset.quarter,val=e.target.value;
+  model['quarterCustom_'+key]=val==='custom';
+  if(val!=='custom')model[key]=val;
+  syncEditor();if(val==='custom')$('qi_'+key)?.focus();dirty();return;
+ }
+ if(e.target.matches('[data-material-choice]')){
+  const i=e.target.dataset.materialChoice, selected=e.target.value;
+  if(selected){model['mat'+i+'_name']=selected;syncEditor();dirty();}
+  return;
  }
  if(e.target.matches('[data-field]'))editValue(e.target);
 });
@@ -185,11 +214,12 @@ $('editor').addEventListener('click',async e=>{
  if(e.target.id==='adminTemplateSave'){await saveHourTemplate();return;}
  if(e.target.id==='adminTemplateDeleteBtn'){await deleteHourTemplate();return;}
 });
-$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){openSign(sign.dataset.sign);return;}if(e.target.closest('#reloadSites')){loadAvailableSites();return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
+$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){openSign(sign.dataset.sign);return;}if(e.target.closest('#reloadSites')){loadAvailableSites();return;}if(e.target.closest('#reloadMaterials')){loadAvailableMaterials();return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
 function editValue(el){const key=el.dataset.field;model[key]=el.type==='checkbox'?el.checked:el.value;
+ if(/^mat[1-8]_name$/.test(key)){const i=Number(key.match(/^mat([1-8])_/)[1]);const sel=$('materialChoice'+i);if(sel)sel.value=availableMaterials.some(m=>m.name===model[key])?model[key]:'';}
  if(key==='polier'){model.angeordnet=composeResponsible(model.polier);syncEditor();}
  const vehicleMatch=key.match(/^vehicle([12])Id$/);
- if(vehicleMatch){const i=Number(vehicleMatch[1]);const vehicle=availableVehicles.find(v=>String(v.id)===safe(model[key]));if(vehicle){model['kfz'+i]=safe(vehicle.plate||vehicle.name);if(model['kmMode'+i]!=='custom')setSiteKm(i);}syncEditor();}
+ if(vehicleMatch){const i=Number(vehicleMatch[1]);const vehicle=availableVehicles.find(v=>String(v.id)===safe(model[key]));if(vehicle)model['kfz'+i]=safe(vehicle.plate||vehicle.name);syncEditor();}
  if(key==='kfz1'||key==='kfz2'){const i=Number(key.slice(-1));const v=availableVehicles.find(v=>String(v.id)===safe(model['vehicle'+i+'Id']));if(v&&safe(v.plate||v.name)!==safe(model[key])){model['vehicle'+i+'Id']='';syncEditor();}}
  if(/^kmMode[12]$/.test(key)){const i=Number(key.slice(-1));if(model[key]!=='custom')setSiteKm(i);syncEditor();}
  if(/^km[12]$/.test(key)&&!el.dataset.kmAutofill){const i=Number(key.slice(-1));model['kmMode'+i]='custom';syncEditor();}
@@ -208,15 +238,12 @@ function applySiteSelection(){
  model.polier=safe(site.contact_person);
  model.angeordnet=composeResponsible(model.polier);
  // Entfernung ist immer EINFACHE Strecke; bei zwei Fahrten verdoppeln wir nur echte Zahlenwerte.
- for(let i=1;i<=2;i++)if(model['kmMode'+i]!=='custom') {
-  if(i===1||safe(model.kfz2).trim()||safe(model.vehicle2Id))setSiteKm(i);
-  else model.km2='';
- }
+ for(let i=1;i<=2;i++)if(model['kmMode'+i]!=='custom')setSiteKm(i);
  model.orderType=site.order_number?'auftrag':site.extra_order_number?'zusatz':'auftrag';
  applyOrderType();
 }
 function getSelectedSite(){return availableSites.find(s=>String(s.id)===String(model.siteId));}
-function composeResponsible(polier){return safe(polier).trim()?`Schlottau / ${safe(polier).trim()}`:'Schlottau';}
+function composeResponsible(polier){return safe(polier).trim()?`${safe(polier).trim()} / Schlottau`:'Schlottau';}
 function parseKilometers(v){
  const raw=safe(v).trim().replace(/\s/g,'').replace(',','.');
  if(!/^\d+(?:\.\d+)?$/.test(raw))return null;
@@ -272,6 +299,17 @@ async function loadAvailableVehicles(){
  for(let i=1;i<=2;i++)refreshSelectContainer('f_vehicle'+i+'Id',vehicleChoice(i));
  syncEditor();
 }
+async function loadAvailableMaterials(){
+ materialState='loading';
+ try{
+  const items=await apiRest('materials?select=id,name,unit,stock&order=name.asc');
+  availableMaterials=Array.isArray(items)?items.filter(m=>safe(m.name).trim()):[];
+  materialState='ready';
+ }catch(e){materialState='error';console.warn('Lager-Material:',e);}
+ for(let i=1;i<=8;i++)refreshSelectContainer('materialChoice'+i,materialPicker(i));
+ syncEditor();
+ if(materialState==='error')setStatus('Lagerliste konnte nicht geladen werden. Material bleibt frei eingabebar.',false);
+}
 async function checkReportAdmin(){
  try{
   const session=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null');
@@ -306,6 +344,8 @@ function applyHourTemplate(r){
  DAYS.forEach(d=>{model[`m${r}_${d}`]=safe(hours.days?.[d]);});
  SUMS.forEach((s,i)=>{model[`m${r}_sum${i}`]=safe(hours.totals?.[i]);});
  model['pauseCustom'+r]=false;
+ for(const d of DAYS)model['quarterCustom_m'+r+'_'+d]=false;
+ for(let i=0;i<SUMS.length;i++)model['quarterCustom_m'+r+'_sum'+i]=false;
  syncEditor();dirty();setStatus('✓ Vorlage „'+t.name+'“ für Monteur '+r+' übernommen');
 }
 async function saveHourTemplate(){
@@ -481,7 +521,7 @@ if(!localStorage.getItem(HOME_LOCATION_KEY)){
 }
 const old=localStorage.getItem(ACTIVE);
 if(old&&reports[old]){currentId=old;model=structuredClone(reports[old].data||{});defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Gespeicherten Bericht geladen')}else fresh(false);
-Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadHourTemplates(),checkReportAdmin()]);
+Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadAvailableMaterials(),loadHourTemplates(),checkReportAdmin()]);
 </script>
 </body>
 </html>
