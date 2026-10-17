@@ -17,7 +17,7 @@ main{max-width:1450px;margin:auto;padding:16px;display:grid;grid-template-column
 .editor-title{font-weight:800;margin:0 0 10px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field-grid.one{grid-template-columns:1fr}.field-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{min-width:0}.field label{color:#b2bed0;font-size:12px;display:block;margin:0 0 4px}.field input,.field textarea,.field select{background:#06090f;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 11px;width:100%;min-height:40px;outline:none}.field textarea{resize:vertical;min-height:88px}.field input:focus,.field textarea:focus,.field select:focus{border-color:#60a5fa}
 details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}summary{font-weight:750;padding:12px 13px;cursor:pointer;background:#111723}.inner{padding:12px}
 .notice{color:#b9c6d9;font-size:12px;line-height:1.55;margin-top:10px}.status{font-size:12px;color:#86efac}.muted{color:var(--muted)}
-.preview-panel{position:sticky;top:80px}.preview-panel h2{font-size:16px;margin:0 0 12px}.paper-frame{overflow:auto;background:#202a36;padding:12px;border-radius:10px;text-align:center}.paper{container-type:inline-size;position:relative;width:100%;max-width:1020px;margin:auto;aspect-ratio:1054/1492;background:#bad1d6;box-shadow:0 12px 30px #0008;overflow:hidden}.paper>img.template{position:absolute;inset:0;width:100%;height:100%;display:block}
+.preview-panel{position:sticky;top:80px}.preview-panel h2{font-size:16px;margin:0 0 12px}.paper-frame{overflow:auto;background:#202a36;padding:12px;border-radius:10px;text-align:center}.paper{container-type:inline-size;position:relative;width:100%;max-width:1020px;margin:auto;aspect-ratio:1054/1492;background:#bad1d6;box-shadow:0 12px 30px #0008;overflow:hidden}.paper>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}.paper>img.template{display:none}
 .stamp{position:absolute;color:#091524;font-family:Arial,sans-serif;white-space:pre-line;overflow:hidden;line-height:1.12;pointer-events:auto;cursor:pointer;font-weight:700;word-break:break-word;padding:0 1px}.stamp:hover{outline:1px dashed #2563eb;background:#ffffff35}.stamp.check{font-weight:900;text-align:center;display:flex;align-items:center;justify-content:center}.stamp.center{text-align:center}.stamp.signature{object-fit:contain;object-position:center center;pointer-events:none}
 .report-controls{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px}.report-controls select{border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--surface);color:var(--fg);max-width:100%;min-width:140px}
 .hintbox{background:#101725;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0 0;color:#d9e1ec;font-size:12px}
@@ -38,9 +38,9 @@ details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow
  <p id="status" class="status" role="status">Bereit</p>
  <h2 class="editor-title">Bericht ausfüllen</h2>
  <div id="editor"></div>
- <p class="notice">Diese Version ist auf deine Arbeitsweise angepasst: 1 Monteur als Standard, weitere Kollegen nur bei Bedarf, größere Einträge auf dem Zettel, bessere Stunden-Eingabe und verschiebbare Unterschriften. Die automatische Berichtsnummer können wir als nächsten Schritt noch ergänzen.</p>
+ <p class="notice">Diese Version ist auf deine Arbeitsweise angepasst: 1 Monteur als Standard, weitere Kollegen nur bei Bedarf, automatischer Zeilenumbruch bei den Arbeiten, identische Darstellung in Vorschau und PDF sowie verschiebbare Unterschriften. Die automatische Berichtsnummer können wir als nächsten Schritt noch ergänzen.</p>
 </section>
-<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=4" alt="Original-Implenia-Monteurbericht"><div id="stamps"></div></div></div><p class="notice">Alle Felder links ausfüllen. Die Eintragungen erscheinen direkt auf dem Originalzettel.</p></section>
+<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=5" alt="Original-Implenia-Monteurbericht"><canvas id="previewCanvas" width="1054" height="1492" aria-label="Vorschau des ausgefüllten Montageberichts"></canvas></div></div><p class="notice">Vorschau und PDF werden jetzt mit derselben Zeichenfunktion erzeugt. Einen Eintrag kannst du in der Vorschau anklicken und dann links bearbeiten.</p></section>
 </main>
 <div id="sigOverlay" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigdialog"><h2 id="sigTitle">Unterschrift</h2><p class="notice">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigCanvas" width="900" height="285"></canvas><div class="toolbar" style="margin-top:10px"><button id="sigClear">Löschen</button><button id="sigCancel">Abbrechen</button><button class="btn primary" id="sigSave">Unterschrift übernehmen</button></div></div></div>
 <script>
@@ -59,7 +59,7 @@ function escapeText(s){return str(s).replace(/[&<>"']/g,chr=>({'&':'&amp;','<':'
 function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
 function initDefaults(){
  if(!data.employeeCount)data.employeeCount=1;
- if(!data.arbeiten_font)data.arbeiten_font=15;
+ if(!data.arbeiten_font)data.arbeiten_font=17;
  if(!data.material_font)data.material_font=13;
  if(!data.showTech)data.showTech=false;
  SIG_FIELDS.forEach(s=>{if(data[s.key+'_dx']==null)data[s.key+'_dx']=0;if(data[s.key+'_dy']==null)data[s.key+'_dy']=0});
@@ -94,7 +94,7 @@ const sectionSpecs=[
 ];
 
 const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:34.7,w:5.45,h:1.1,font:1.18,align:'center'}));
-const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:5.0,y:37.62+i*2.68,w:12.6,h:1.38,font:1.28}));
+const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.5,y:37.62+i*2.68,w:9.9,h:1.38,font:1.28}));
 const employeeHourSpecs=[]; const employeeTotalSpecs=[];
 for(let r=1;r<=4;r++){
  const rowY=37.62+(r-1)*2.68;
@@ -106,8 +106,8 @@ const extraSpecs=[
  {label:'Gewaltschaden Nein',key:'gewaltNein',x:46.05,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Ja',key:'inspektionJa',x:60.55,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Nein',key:'inspektionNein',x:67.15,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
- {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:52.45,w:89.2,h:2.0,font:1.45,align:'left',kind:'singleline'},
- {label:'Weitere Mängel am Gerät',key:'maengel',x:4.8,y:67.65,w:89.2,h:2.5,font:1.18,kind:'multiline'},
+ {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:50.42,w:89.2,h:2.0,font:1.45,align:'left',kind:'ruled',lines:7,firstCenter:51.36,rowStep:1.935},
+ {label:'Weitere Mängel am Gerät',key:'maengel',x:4.8,y:67.65,w:89.2,h:2.5,font:1.18,kind:'ruled',lines:2,firstCenter:68.32,rowStep:1.935},
 ];
 const materialSpecs=[];
 for(let i=1;i<=8;i++){
@@ -153,7 +153,7 @@ function renderEditor(){
  }
  h+='</div></details>';
  
- h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'))}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="12" max="22" step="1"><output id="o_arbeiten_font"></output></div></div>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}</div></div></details>`;
+ h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'),{textarea:true,rows:4})}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="12" max="22" step="1"><output id="o_arbeiten_font"></output></div></div><p class="notice" id="arbeitenLines" aria-live="polite"></p>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}</div></div></details>`;
  
  h+=`<details open><summary>📦 Verwendete Materialien</summary><div class="inner"><div class="field"><label for="f_material_font">Schriftgröße Materialien</label><div class="range-wrap"><input id="f_material_font" data-key="material_font" type="range" min="11" max="18" step="1"><output id="o_material_font"></output></div></div>`;
  for(let i=1;i<=8;i++) h+=`<div class="field-grid two" style="grid-template-columns:110px 1fr;margin-bottom:8px">${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_name`))}</div>`;
@@ -198,21 +198,22 @@ function updateOutputs(){
    out.value=str(data[key]??'');
    out.textContent=str(data[key]??'');
  }
+ updateLinesHint();
 }
 function setStatus(s,ok=true){$('status').textContent=s;$('status').style.color=ok?'#86efac':'#facc15'}
 function formatValue(spec,raw){
- if(spec.kind==='check') return '✓';
- if((spec.input==='time'||/(abfahrt|rueckkehr)/.test(spec.key)) && /^\d{2}:\d{2}$/.test(str(raw))) return str(raw).replace(':',' : ');
+ if(spec.kind==='check')return '✓';
+ if((spec.input==='time'||/(abfahrt|rueckkehr)/.test(spec.key))&&/^\d{2}:\d{2}$/.test(str(raw)))return str(raw);
  return str(raw);
 }
 function getFont(spec){
- if(spec.key==='arbeiten') return num(data.arbeiten_font,15)/10;
- if(spec.key.startsWith('mat')) return num(data.material_font,13)/10;
- return spec.font||1.2;
+ if(spec.key==='arbeiten')return num(data.arbeiten_font,17);
+ if(spec.key.startsWith('mat'))return num(data.material_font,13);
+ return Math.max(11,(spec.font||1.2)*12.2);
 }
 function getVisibleSpecs(){
  const list=[];
- sectionSpecs.forEach(sec=>{if(sec.optional && !data.showTech) return; list.push(...sec.rows)});
+ sectionSpecs.forEach(sec=>{if(sec.optional&&!data.showTech)return;list.push(...sec.rows)});
  list.push(...dateSpecs);
  const count=num(data.employeeCount,1);
  list.push(...employeeNameSpecs.slice(0,count));
@@ -222,32 +223,128 @@ function getVisibleSpecs(){
  list.push(...materialSpecs);
  return list;
 }
-function stampCss(s){
- const cls=(s.align==='center'?'text-align:center;':'') + (s.kind==='singleline'?'white-space:nowrap;':'');
- return `left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%;font-size:${getFont(s)}cqw;${cls}`;
+// Use actual canvas font measurements, not guessed character counts.
+// Newlines are respected. A single very long word is split only when necessary.
+function wrapLines(ctx,text,maxWidth){
+ const result=[];
+ const paragraphs=str(text).replace(/\r\n?/g,'\n').split('\n');
+ for(const para of paragraphs){
+   if(!para.trim()){result.push('');continue;}
+   let line='';
+   for(const word of para.trim().split(/\s+/)){
+     const candidate=line?line+' '+word:word;
+     if(ctx.measureText(candidate).width<=maxWidth){line=candidate;continue;}
+     if(line){result.push(line);line='';}
+     let part='';
+     for(const char of word){
+       if(part&&ctx.measureText(part+char).width>maxWidth){result.push(part);part=char;}
+       else part+=char;
+     }
+     line=part;
+   }
+   result.push(line);
+ }
+ return result;
 }
+function getRuledLines(spec){
+ const measure=$('previewCanvas').getContext('2d');
+ measure.font=`700 ${Math.min(getFont(spec),spec.rowStep*14.92*.8)}px Arial, sans-serif`;
+ return wrapLines(measure,data[spec.key]||'',spec.w*10.54-12);
+}
+function updateLinesHint(){
+ const el=$('arbeitenLines');if(!el)return;
+ const spec=extraSpecs.find(s=>s.key==='arbeiten');
+ const lines=getRuledLines(spec).length;
+ const max=spec.lines;
+ const overflow=lines>max;
+ el.textContent=overflow?`⚠️ Der Text braucht ${lines} Zeilen, aber der Zettel hat nur ${max}. Bitte Schrift kleiner wählen oder Text kürzen.`:`Text belegt ${lines} von ${max} Zeilen. Jede Formularzeile enthält nur eine Textzeile.`;
+ el.style.color=overflow?'#fca5a5':'#b9c6d9';
+}
+function drawField(ctx,s){
+ const raw=data[s.key];
+ if(raw===undefined||raw===null||raw===''||raw===false)return;
+ const value=formatValue(s,raw),x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
+ const baseFont=getFont(s);
+ ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`700 ${baseFont}px Arial, sans-serif`;
+ if(s.kind==='ruled'){
+   const lines=wrapLines(ctx,value,w-12);
+   // Each source-form row gets exactly one line, no clipping into the next.
+   const rowHeight=s.rowStep*14.92;
+   const font=Math.min(baseFont,rowHeight*.8);
+   ctx.font=`700 ${font}px Arial, sans-serif`;
+   for(let i=0;i<Math.min(lines.length,s.lines);i++){
+     const centerY=(s.firstCenter+i*s.rowStep)*14.92;
+     ctx.fillText(lines[i],x+3,centerY,w-8);
+   }
+ }else{
+   let drawFont=baseFont;
+   while(ctx.measureText(value).width>w-6&&drawFont>9){drawFont-=.5;ctx.font=`700 ${drawFont}px Arial, sans-serif`}
+   const tw=ctx.measureText(value).width;
+   const tx=s.align==='center'?x+(w-tw)/2:x+2;
+   ctx.fillText(value,tx,y+h/2,w-4);
+ }
+ ctx.restore();
+}
+const imageCache=new Map();
+function getSignatureImage(src){
+ if(imageCache.has(src))return imageCache.get(src);
+ const promise=new Promise((resolve,reject)=>{const img=new Image;img.onload=()=>resolve(img);img.onerror=reject;img.src=src});
+ imageCache.set(src,promise);
+ return promise;
+}
+async function renderPageTo(canvas){
+ if(!templateImg.complete||!templateImg.naturalWidth){
+   await new Promise((resolve,reject)=>{templateImg.addEventListener('load',resolve,{once:true});templateImg.addEventListener('error',reject,{once:true})});
+ }
+ canvas.width=1054;canvas.height=1492;
+ const ctx=canvas.getContext('2d');
+ ctx.drawImage(templateImg,0,0,1054,1492);
+ for(const spec of getVisibleSpecs())drawField(ctx,spec);
+ for(const spec of SIG_FIELDS){
+   if(!data[spec.key])continue;
+   try{
+     const img=await getSignatureImage(data[spec.key]);
+     const dx=num(data[spec.key+'_dx'],0),dy=num(data[spec.key+'_dy'],0);
+     ctx.drawImage(img,(spec.x+dx)*10.54,(spec.y+dy)*14.92,spec.w*10.54,spec.h*14.92);
+   }catch(e){console.warn('Unterschrift konnte nicht geladen werden',e)}
+ }
+ return canvas;
+}
+let renderVersion=0, renderTimer=0;
 function renderStamps(){
- let html='';
- for(const s of getVisibleSpecs()){
-   const raw=data[s.key];
-   if(raw==null||raw===''||raw===false) continue;
-   html+=`<div tabindex="0" role="button" aria-label="${escapeText(s.label)} bearbeiten" data-focus="${s.key}" class="stamp ${(s.kind==='check'?'check ':'')}${s.align==='center'?'center':''}" style="${stampCss(s)}">${escapeText(formatValue(s,raw))}</div>`;
- }
- for(const s of SIG_FIELDS){
-   if(!data[s.key]) continue;
-   const dx=num(data[s.key+'_dx'],0), dy=num(data[s.key+'_dy'],0);
-   html+=`<img class="stamp signature" alt="${escapeText(s.label)}" src="${data[s.key]}" style="left:${s.x+dx}%;top:${s.y+dy}%;width:${s.w}%;height:${s.h}%">`;
- }
- $('stamps').innerHTML=html;
- $('stamps').querySelectorAll('[data-focus]').forEach(el=>el.onclick=()=>{const input=$('editor').querySelector('[data-key="'+el.dataset.focus+'"]');if(input){const d=input.closest('details'); if(d) d.open=true; input.scrollIntoView({behavior:'smooth',block:'center'}); input.focus();}});
+ const version=++renderVersion;
+ cancelAnimationFrame(renderTimer);
+ renderTimer=requestAnimationFrame(async()=>{
+   try{
+     const temp=document.createElement('canvas');
+     await renderPageTo(temp);
+     if(version!==renderVersion)return;
+     const preview=$('previewCanvas');
+     preview.getContext('2d').clearRect(0,0,1054,1492);
+     preview.getContext('2d').drawImage(temp,0,0);
+   }catch(e){console.error('Vorschaufehler',e)}
+ });
 }
-
+$('previewCanvas').addEventListener('click',e=>{
+ const bounds=e.currentTarget.getBoundingClientRect();
+ const x=100*(e.clientX-bounds.left)/bounds.width,y=100*(e.clientY-bounds.top)/bounds.height;
+ const field=getVisibleSpecs().find(s=>{
+   const top=s.kind==='ruled'?s.firstCenter-.95:s.y;
+   const height=s.kind==='ruled'?s.lines*s.rowStep:s.h;
+   return x>=s.x&&x<=s.x+s.w&&y>=top&&y<=top+height;
+ });
+ if(!field)return;
+ const input=$('editor').querySelector(`[data-key="${field.key}"]`);
+ if(!input)return;
+ const parent=input.closest('details');if(parent)parent.open=true;
+ input.scrollIntoView({behavior:'smooth',block:'center'});input.focus();
+});
 function allReports(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
 function saveStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify(reports));localStorage.setItem(ACTIVE_KEY,activeId)}
 function saveReport(){
  try{reports[activeId]={data:structuredClone(data),updated:new Date().toISOString()};saveStorage();unsaved=false;renderSelect();setStatus('✓ Bericht auf diesem Gerät gespeichert')}catch(e){console.error(e);setStatus('Speichern fehlgeschlagen',false)}
 }
-function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:15,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
+function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:17,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
 function renderSelect(){
  const list=Object.entries(reports).sort((a,b)=>str(b[1].updated).localeCompare(str(a[1].updated)));
  $('reportSelect').innerHTML='<option value="">Gespeicherten Bericht öffnen …</option>'+list.map(([id,r])=>{
@@ -270,27 +367,14 @@ $('sigCanvas').addEventListener('pointermove',e=>{if(!drawing)return;const [x,y]
 $('sigClear').onclick=()=>sigCtx.clearRect(0,0,900,285); $('sigCancel').onclick=()=>$('sigOverlay').classList.remove('visible'); $('sigSave').onclick=()=>{if(activeSig){data[activeSig]=$('sigCanvas').toDataURL('image/png'); unsaved=true; renderStamps(); setStatus('Unterschrift hinzugefügt, bitte speichern',false)} $('sigOverlay').classList.remove('visible')};
 
 async function exportCanvas(){
- if(!templateImg.complete||!templateImg.naturalWidth) await new Promise((ok,no)=>{templateImg.addEventListener('load',ok,{once:true});templateImg.addEventListener('error',no,{once:true})});
- const canvas=document.createElement('canvas'); canvas.width=1054; canvas.height=1492; const ctx=canvas.getContext('2d'); ctx.drawImage(templateImg,0,0,1054,1492);
- for(const s of getVisibleSpecs()){
-   const raw=data[s.key]; if(raw===undefined||raw===null||raw===''||raw===false) continue;
-   const value=formatValue(s,raw); const x=s.x*10.54, y=s.y*14.92, w=s.w*10.54, h=s.h*14.92; const fontPx=Math.max(11,getFont(s)*12.2); ctx.font=`700 ${fontPx}px Arial, sans-serif`; ctx.fillStyle='#091524'; ctx.textBaseline='middle';
-   if(s.kind==='multiline'){
-     const lines=[]; const lineh=fontPx*1.25; const paras=value.split('\n');
-     for(const para of paras){ let cur=''; for(const word of para.split(/\s+/)){ if(!word) continue; const test=cur?cur+' '+word:word; if(ctx.measureText(test).width>w-8 && cur){ lines.push(cur); cur=word; } else cur=test; } if(cur) lines.push(cur); }
-     for(let i=0;i<lines.length && (i+1)*lineh<=h;i++){ const yy=y+lineh/2+2+i*lineh; if((s.align||'left')==='center'){ const tw=ctx.measureText(lines[i]).width; ctx.fillText(lines[i],x+(w-tw)/2,yy); } else ctx.fillText(lines[i],x+2,yy); }
-   } else {
-     let drawFont=fontPx; ctx.font=`700 ${drawFont}px Arial, sans-serif`; while(ctx.measureText(value).width>w-6 && drawFont>8){ drawFont-=.5; ctx.font=`700 ${drawFont}px Arial, sans-serif`; }
-     const textWidth=ctx.measureText(value).width; const tx=(s.align==='center')?x+(w-textWidth)/2:x+2; const ty=y+h/2; ctx.fillText(value,tx,ty);
-   }
- }
- for(const s of SIG_FIELDS){ if(!data[s.key]) continue; try{ const im=await new Promise((resolve,reject)=>{const i=new Image;i.onload=()=>resolve(i);i.onerror=reject;i.src=data[s.key]}); const dx=num(data[s.key+'_dx'],0), dy=num(data[s.key+'_dy'],0); ctx.drawImage(im,(s.x+dx)*10.54,(s.y+dy)*14.92,s.w*10.54,s.h*14.92); }catch(e){ console.warn('Unterschrift übersprungen',e) } }
+ const canvas=document.createElement('canvas');
+ await renderPageTo(canvas); // Identical drawing logic for preview and PDF.
  return canvas;
 }
 function bytes(s){return new TextEncoder().encode(s)}
 function concatBytes(parts){const size=parts.reduce((n,a)=>n+a.length,0);const result=new Uint8Array(size);let o=0;for(const p of parts){result.set(p,o);o+=p.length}return result}
 function pdfFromJpeg(jpg,w,h){ const header=bytes('%PDF-1.4\n'); const chunks=[header]; const offsets=[0]; let offset=header.length; function add(buffer){chunks.push(buffer);offset+=buffer.length} function obj(n,body){offsets[n]=offset; add(bytes(n+' 0 obj\n')); add(typeof body==='string'?bytes(body):body); add(bytes('\nendobj\n'))} obj(1,'<< /Type /Catalog /Pages 2 0 R >>'); obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>'); obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>'); const content=bytes('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n'); obj(4,concatBytes([bytes('<< /Length '+content.length+' >>\nstream\n'),content,bytes('endstream')])); obj(5,concatBytes([bytes('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'),jpg,bytes('\nendstream')])); const start=offset; add(bytes('xref\n0 6\n0000000000 65535 f \n')); for(let n=1;n<=5;n++) add(bytes(String(offsets[n]).padStart(10,'0')+' 00000 n \n')); add(bytes('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF')); return new Blob(chunks,{type:'application/pdf'}); }
-async function downloadPdf(){ const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
+async function downloadPdf(){ const workSpec=extraSpecs.find(s=>s.key==='arbeiten'); if(getRuledLines(workSpec).length>workSpec.lines){setStatus('Der Arbeitstext ist zu lang für den Zettel. Bitte Schrift verkleinern oder kürzen.',false);return;} const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
 $('saveReport').onclick=saveReport; $('newReport').onclick=()=>newReport(); $('deleteReport').onclick=deleteReport; $('reportSelect').onchange=e=>{if(e.target.value)loadReport(e.target.value)}; $('downloadPdf').onclick=downloadPdf;
 window.addEventListener('beforeunload',e=>{ if(unsaved){ e.preventDefault(); e.returnValue=''; } });
 reports=allReports(); const prior=localStorage.getItem(ACTIVE_KEY); if(prior&&reports[prior]){ activeId=prior; data=structuredClone(reports[prior].data||{}); initDefaults(); renderEditor(); renderStamps(); renderSelect(); setStatus('Letzten gespeicherten Bericht geladen') } else newReport(false);
