@@ -106,7 +106,7 @@ const extraSpecs=[
  {label:'Gewaltschaden Nein',key:'gewaltNein',x:46.05,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Ja',key:'inspektionJa',x:60.55,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
  {label:'Inspektion Nein',key:'inspektionNein',x:67.15,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
- {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:50.42,w:89.2,h:2.0,font:1.45,align:'left',kind:'ruled',lines:7,firstCenter:51.36,rowStep:1.935},
+ {label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.8,y:50.42,w:89.2,h:2.0,font:1.45,align:'left',kind:'ruled',lines:7,firstCenter:52.85,rowStep:1.94},
  {label:'Weitere Mängel am Gerät',key:'maengel',x:4.8,y:67.65,w:89.2,h:2.5,font:1.18,kind:'ruled',lines:2,firstCenter:68.32,rowStep:1.935},
 ];
 const materialSpecs=[];
@@ -227,7 +227,9 @@ function getVisibleSpecs(){
 // Newlines are respected. A single very long word is split only when necessary.
 function wrapLines(ctx,text,maxWidth){
  const result=[];
- const paragraphs=str(text).replace(/\r\n?/g,'\n').split('\n');
+ const rawText=str(text).replace(/\r\n?/g,'\n');
+ if(!rawText.trim())return [];
+ const paragraphs=rawText.split('\n');
  for(const para of paragraphs){
    if(!para.trim()){result.push('');continue;}
    let line='';
