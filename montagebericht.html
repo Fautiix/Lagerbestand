@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-1">
+<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-2">
 <title>Blauer Montagebericht · Materialverwaltung</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d10;--panel:#121824;--ink:#f4f6fb;--muted:#b0bfd5;--line:#29354a;--accent:#2563eb}
@@ -18,7 +18,7 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 </style>
 </head>
 <body>
-<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU · 18.10.2026</span></header>
+<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU 2 · 18.10.2026</span></header>
 <main>
 <section class="panel">
 <div class="buttons"><select class="selectReport" id="saved" aria-label="Gespeicherten Bericht öffnen"></select><button id="add" type="button">＋ Neuer Bericht</button></div>
@@ -30,12 +30,12 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 <section class="panel preview"><div class="previewTitle"><h2>Vorschau auf dem Originalzettel</h2><span class="version">PDF = Vorschau</span></div><div class="sheetFrame"><canvas id="page" class="sheetCanvas" width="1054" height="1492" aria-label="Vorschau des blauen Montageberichts"></canvas></div><p class="tiny">Die Positionen stammen aus den Tabellenlinien des Originalbildes. Für eine größere Ansicht kannst du auf dem Handy zoomen.</p></section>
 </main>
 <div id="sigModal" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigDialog"><h2 id="sigTitle">Unterschrift</h2><p class="tiny">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigPad" width="900" height="280"></canvas><div class="buttons"><button id="sigClear">Leeren</button><button id="sigCancel">Abbrechen</button><button id="sigDone" class="primary">Übernehmen</button></div></div></div>
-<img id="template" src="./montagebericht_vorlage.png?v=20261018-neu1" alt="" hidden>
+<img id="template" src="./montagebericht_vorlage.png?v=20261018-neu2" alt="" hidden>
 <script>
 'use strict';
 // Neue Rendering-Engine: alle Positionen sind echte Pixel in derselben 1054x1492-Vorlage.
 // EIN Canvas ist die einzige Quelle für Vorschau und PDF. Keine zweiten CSS-Positionen.
-const VERSION='2026-10-18-NEU-1', W=1054,H=1492;
+const VERSION='2026-10-18-NEU-2', W=1054,H=1492;
 const STORAGE='mv_montageberichte_v2', ACTIVE='mv_montagebericht_aktiv_v2';
 const $=id=>document.getElementById(id);
 const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
@@ -128,9 +128,14 @@ function overwriteZeros(ctx){ // Vier gedruckte Nullen der Originalvorlage durch
 }
 function printedTime(ctx,value,type,second){
  const m=/^(\d{2}):(\d{2})$/.exec(safe(value));if(!m)return;
- // Der Originalzettel enthält bereits einen gedruckten Doppelpunkt.
- const cx=type==='rueckkehr'?889:621, cy=second?468:436;
- put(ctx,m[1],[cx-65,cy-13,cx-9,cy+15],{center:true});put(ctx,m[2],[cx+9,cy-13,cx+63,cy+15],{center:true});
+ // Beide Zahlen direkt NEBEN den bereits auf der Vorlage gedruckten Doppelpunkt setzen.
+ // Die Positionen stammen aus dem Originalbild, nicht aus geschätzten Feldbreiten.
+ const colonX=type==='rueckkehr'?883:639, centerY=second?475:440;
+ ctx.save();
+ ctx.fillStyle='#15202b';ctx.font=FIELD_FONT;ctx.textBaseline='middle';
+ ctx.textAlign='right';ctx.fillText(m[1],colonX-8,centerY);
+ ctx.textAlign='left';ctx.fillText(m[2],colonX+8,centerY);
+ ctx.restore();
 }
 function wrapText(ctx,v,max){const all=[];ctx.save();
  for(const paragraph of safe(v).replace(/\r/g,'').split('\n')){
@@ -171,7 +176,7 @@ function paintText(ctx){
  // Jahreszahl im freien Kopfbereich zwischen Beschreibung und Tabelle.
  put(ctx,model.jahr,[318,424,485,488],{center:true});
  for(let i=1;i<=2;i++)for(const prefix of ['abfahrt','rueckkehr'])printedTime(ctx,model[prefix+i],prefix,i===2);
- DAYS.forEach((d,i)=>put(ctx,model[`date_${d}`],[DAY_EDGES[i]+1,510,DAY_EDGES[i+1]-1,543],{center:true,font:15}));
+ DAYS.forEach((d,i)=>put(ctx,model[`date_${d}`],[DAY_EDGES[i]+1,525,DAY_EDGES[i+1]-1,558],{center:true,font:15}));
  for(let r=1;r<=Math.max(1,Math.min(4,number(model.employeeCount,1)));r++){
   const y1=ROW_EDGES[r-1]+2,y2=ROW_EDGES[r]-2;
   put(ctx,model[`monteur${r}`],[56,y1,192,y2],{center:true});
