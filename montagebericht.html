@@ -59,7 +59,7 @@ function escapeText(s){return str(s).replace(/[&<>"']/g,chr=>({'&':'&amp;','<':'
 function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
 function initDefaults(){
  if(!data.employeeCount)data.employeeCount=1;
- if(!data.arbeiten_font)data.arbeiten_font=17;
+ if(!data.arbeiten_font)data.arbeiten_font=14;
  if(!data.material_font)data.material_font=13;
  if(!data.showTech)data.showTech=false;
  SIG_FIELDS.forEach(s=>{if(data[s.key+'_dx']==null)data[s.key+'_dx']=0;if(data[s.key+'_dy']==null)data[s.key+'_dy']=0});
@@ -153,11 +153,11 @@ function renderEditor(){
  }
  h+='</div></details>';
  
- h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'),{textarea:true,rows:4})}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="12" max="22" step="1"><output id="o_arbeiten_font"></output></div></div><p class="notice" id="arbeitenLines" aria-live="polite"></p>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}</div></div></details>`;
+ h+=`<details open><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner"><div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(extraSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${inputHtml(extraSpecs.find(f=>f.key==='arbeiten'),{textarea:true,rows:4})}<div class="field"> <label for="f_arbeiten_font">Schriftgröße ausgeführte Arbeiten</label><div class="range-wrap"><input id="f_arbeiten_font" data-key="arbeiten_font" type="range" min="11" max="19" step="1"><output id="o_arbeiten_font"></output></div></div><p class="notice" id="arbeitenLines" aria-live="polite"></p>${inputHtml(extraSpecs.find(f=>f.key==='maengel'),{textarea:true,rows:3})}<p class="notice" id="maengelLines" aria-live="polite"></p></div></div></details>`;
  
  h+=`<details open><summary>📦 Verwendete Materialien</summary><div class="inner"><div class="field"><label for="f_material_font">Schriftgröße Materialien</label><div class="range-wrap"><input id="f_material_font" data-key="material_font" type="range" min="11" max="18" step="1"><output id="o_material_font"></output></div></div>`;
- for(let i=1;i<=8;i++) h+=`<div class="field-grid two" style="grid-template-columns:110px 1fr;margin-bottom:8px">${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_name`))}</div>`;
- h+='</div></details>';
+ for(let i=1;i<=8;i++) h+=`<div class="field-grid two" style="grid-template-columns:110px 1fr;margin-bottom:8px">${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(materialSpecs.find(f=>f.key===`mat${i}_name`),{textarea:true,rows:2})}</div>`;
+ h+='<p class="notice" id="materialsLines" aria-live="polite"></p></div></details>';
  
  h+=`<details><summary>✍️ Unterschriften</summary><div class="inner"><div class="toolbar">${SIG_FIELDS.map(f=>`<button type="button" data-sign="${f.key}" class="btn">${escapeText(f.label)}</button>`).join('')}</div><p class="notice">Bauleitung und Meister können über die Regler noch etwas nach links/rechts und oben/unten verschoben werden.</p>`;
  for(const s of SIG_FIELDS){
@@ -181,7 +181,7 @@ function updateField(el){
  if(key==='inspektionNein'&&el.checked)data.inspektionJa=false;
  if(key==='employeeCount'){ renderEditor(); renderStamps(); setStatus('Monteure angepasst – bitte speichern',false); unsaved=true; return; }
  if(key.endsWith('Ja')||key.endsWith('Nein')) syncInputs();
- unsaved=true; updateOutputs(); renderStamps(); setStatus('Änderungen noch nicht gespeichert',false);
+ unsaved=true; updateOutputs(); updateLinesHint(); renderStamps(); setStatus('Änderungen noch nicht gespeichert',false);
 }
 
 function syncInputs(){
@@ -191,6 +191,7 @@ function syncInputs(){
    else el.value=(v==null?'':v);
  }
  updateOutputs();
+ updateLinesHint();
 }
 function updateOutputs(){
  for(const out of $('editor').querySelectorAll('output[id^="o_"]')){
@@ -220,7 +221,7 @@ function getVisibleSpecs(){
  list.push(...employeeHourSpecs.filter(s=>Number(s.key[1])<=count));
  list.push(...employeeTotalSpecs.filter(s=>Number(s.key[1])<=count));
  list.push(...extraSpecs);
- list.push(...materialSpecs);
+ // Material rows are laid out as a flow so long names can use the next free row.
  return list;
 }
 // Use actual canvas font measurements, not guessed character counts.
@@ -248,19 +249,72 @@ function wrapLines(ctx,text,maxWidth){
  }
  return result;
 }
+function fontForRuled(spec){ return Math.min(getFont(spec),spec.rowStep*14.92*.76); }
 function getRuledLines(spec){
  const measure=$('previewCanvas').getContext('2d');
- measure.font=`700 ${Math.min(getFont(spec),spec.rowStep*14.92*.8)}px Arial, sans-serif`;
- return wrapLines(measure,data[spec.key]||'',spec.w*10.54-12);
+ measure.font=`500 ${fontForRuled(spec)}px Arial, sans-serif`;
+ return wrapLines(measure,data[spec.key]||'',spec.w*10.54-15);
 }
-function updateLinesHint(){
- const el=$('arbeitenLines');if(!el)return;
- const spec=extraSpecs.find(s=>s.key==='arbeiten');
- const lines=getRuledLines(spec).length;
- const max=spec.lines;
- const overflow=lines>max;
- el.textContent=overflow?`⚠️ Der Text braucht ${lines} Zeilen, aber der Zettel hat nur ${max}. Bitte Schrift kleiner wählen oder Text kürzen.`:`Text belegt ${lines} von ${max} Zeilen. Jede Formularzeile enthält nur eine Textzeile.`;
- el.style.color=overflow?'#fca5a5':'#b9c6d9';
+// Each material description can continue into following free material lines,
+// without ever drawing over the quantity column or outside the original grid.
+function getMaterialLayout(){
+ const measure=$('previewCanvas').getContext('2d');
+ const font=num(data.material_font,13);
+ measure.font=`500 ${font}px Arial, sans-serif`;
+ const quantityWidth=8.2*10.54-12;
+ const nameWidth=79.2*10.54-16;
+ const rows=[];let requested=0;const tooWideQuantities=[];
+ for(let i=1;i<=8;i++){
+   const quantity=str(data[`mat${i}_menge`]||'').trim();
+   const desc=str(data[`mat${i}_name`]||'').trim();
+   if(!quantity&&!desc)continue;
+   let names=wrapLines(measure,desc,nameWidth);
+   if(!names.length) names=[''];
+   const needed=names.length;
+   if(quantity && measure.measureText(quantity).width>quantityWidth)tooWideQuantities.push(i);
+   for(let j=0;j<needed;j++)rows.push({index:i,quantity:j===0?quantity:'',name:names[j]});
+   requested+=needed;
+ }
+ return {rows,required:requested,available:8,overflow:requested>8,tooWideQuantities};
+}
+function checkLayout(){
+ const errors=[];
+ for(const spec of extraSpecs.filter(s=>s.kind==='ruled')){
+   const lines=getRuledLines(spec).length;
+   const max=spec.lines;
+   const el=$(spec.key==='arbeiten'?'arbeitenLines':'maengelLines');
+   if(el){el.textContent=lines>max?`⚠️ ${lines} Zeilen benötigt, aber nur ${max} verfügbar. Bitte Text kürzen oder Schriftgröße verkleinern.`:`${lines} von ${max} Formularzeilen belegt.`;el.style.color=lines>max?'#fca5a5':'#b9c6d9';}
+   if(lines>max)errors.push(`${spec.label}: ${lines} statt ${max} Zeilen`);
+ }
+ const mat=getMaterialLayout();
+ const matEl=$('materialsLines');
+ const matWarnings=[];
+ if(mat.overflow)matWarnings.push(`${mat.required} Zeilen benötigt, aber nur 8 frei`);
+ if(mat.tooWideQuantities.length)matWarnings.push(`Menge in Position ${mat.tooWideQuantities.join(', ')} zu lang`);
+ if(matEl){matEl.textContent=matWarnings.length?'⚠️ '+matWarnings.join('; ')+'. Bitte kürzen.':`${mat.required} von 8 Materialzeilen belegt. Lange Bezeichnungen belegen automatisch die nächste freie Zeile.`;matEl.style.color=matWarnings.length?'#fca5a5':'#b9c6d9';}
+ if(mat.overflow)errors.push(`Material: ${mat.required} statt 8 Zeilen`);
+ if(mat.tooWideQuantities.length)errors.push(`Materialmengen zu lang (Position ${mat.tooWideQuantities.join(', ')})`);
+ return errors;
+}
+function updateLinesHint(){checkLayout()}
+function drawMaterials(ctx){
+ const layout=getMaterialLayout();
+ const font=num(data.material_font,13);
+ ctx.save();ctx.textBaseline='middle';ctx.fillStyle='#091524';ctx.font=`500 ${font}px Arial, sans-serif`;
+ for(const [i,row] of layout.rows.slice(0,layout.available).entries()){
+   const yy=(74.2+i*1.94)*14.92+1.3*14.92/2;
+   if(row.quantity){
+     const x=4.8*10.54,w=8.2*10.54;
+     ctx.save();ctx.beginPath();ctx.rect(x,yy-11,w,22);ctx.clip();
+     ctx.textAlign='center';ctx.fillText(row.quantity,x+w/2,yy);ctx.restore();
+   }
+   if(row.name){
+     const x=14.6*10.54,w=79.2*10.54;
+     ctx.save();ctx.beginPath();ctx.rect(x,yy-11,w,22);ctx.clip();
+     ctx.fillText(row.name,x+3,yy);ctx.restore();
+   }
+ }
+ ctx.restore();
 }
 function drawField(ctx,s){
  const raw=data[s.key];
@@ -268,15 +322,15 @@ function drawField(ctx,s){
  const value=formatValue(s,raw),x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
  const baseFont=getFont(s);
  ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`700 ${baseFont}px Arial, sans-serif`;
+ if(s.kind!=='ruled'){ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();}
  if(s.kind==='ruled'){
-   const lines=wrapLines(ctx,value,w-12);
+   const font=fontForRuled(s);ctx.font=`500 ${font}px Arial, sans-serif`;const lines=wrapLines(ctx,value,w-15);
    // Each source-form row gets exactly one line, no clipping into the next.
    const rowHeight=s.rowStep*14.92;
-   const font=Math.min(baseFont,rowHeight*.8);
-   ctx.font=`700 ${font}px Arial, sans-serif`;
+   ctx.font=`500 ${font}px Arial, sans-serif`;
    for(let i=0;i<Math.min(lines.length,s.lines);i++){
      const centerY=(s.firstCenter+i*s.rowStep)*14.92;
-     ctx.fillText(lines[i],x+3,centerY,w-8);
+     ctx.fillText(lines[i],x+3,centerY);
    }
  }else{
    let drawFont=baseFont;
@@ -302,6 +356,7 @@ async function renderPageTo(canvas){
  const ctx=canvas.getContext('2d');
  ctx.drawImage(templateImg,0,0,1054,1492);
  for(const spec of getVisibleSpecs())drawField(ctx,spec);
+ drawMaterials(ctx);
  for(const spec of SIG_FIELDS){
    if(!data[spec.key])continue;
    try{
@@ -346,7 +401,7 @@ function saveStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify(reports))
 function saveReport(){
  try{reports[activeId]={data:structuredClone(data),updated:new Date().toISOString()};saveStorage();unsaved=false;renderSelect();setStatus('✓ Bericht auf diesem Gerät gespeichert')}catch(e){console.error(e);setStatus('Speichern fehlgeschlagen',false)}
 }
-function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:17,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
+function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return; activeId=uniqueId(); data={employeeCount:1,arbeiten_font:14,material_font:13,showTech:false}; initDefaults(); unsaved=false; renderEditor(); renderStamps(); try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{} renderSelect(); setStatus('Neuer Bericht bereit')}
 function renderSelect(){
  const list=Object.entries(reports).sort((a,b)=>str(b[1].updated).localeCompare(str(a[1].updated)));
  $('reportSelect').innerHTML='<option value="">Gespeicherten Bericht öffnen …</option>'+list.map(([id,r])=>{
@@ -376,7 +431,7 @@ async function exportCanvas(){
 function bytes(s){return new TextEncoder().encode(s)}
 function concatBytes(parts){const size=parts.reduce((n,a)=>n+a.length,0);const result=new Uint8Array(size);let o=0;for(const p of parts){result.set(p,o);o+=p.length}return result}
 function pdfFromJpeg(jpg,w,h){ const header=bytes('%PDF-1.4\n'); const chunks=[header]; const offsets=[0]; let offset=header.length; function add(buffer){chunks.push(buffer);offset+=buffer.length} function obj(n,body){offsets[n]=offset; add(bytes(n+' 0 obj\n')); add(typeof body==='string'?bytes(body):body); add(bytes('\nendobj\n'))} obj(1,'<< /Type /Catalog /Pages 2 0 R >>'); obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>'); obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>'); const content=bytes('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n'); obj(4,concatBytes([bytes('<< /Length '+content.length+' >>\nstream\n'),content,bytes('endstream')])); obj(5,concatBytes([bytes('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'),jpg,bytes('\nendstream')])); const start=offset; add(bytes('xref\n0 6\n0000000000 65535 f \n')); for(let n=1;n<=5;n++) add(bytes(String(offsets[n]).padStart(10,'0')+' 00000 n \n')); add(bytes('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF')); return new Blob(chunks,{type:'application/pdf'}); }
-async function downloadPdf(){ const workSpec=extraSpecs.find(s=>s.key==='arbeiten'); if(getRuledLines(workSpec).length>workSpec.lines){setStatus('Der Arbeitstext ist zu lang für den Zettel. Bitte Schrift verkleinern oder kürzen.',false);return;} const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
+async function downloadPdf(){ const errors=checkLayout(); if(errors.length){setStatus('PDF nicht erstellt: '+errors.join(' | ')+'. Bitte Eingaben anpassen.',false);return;} const b=$('downloadPdf'); b.disabled=true; b.textContent='PDF wird erstellt …'; try{ const c=await exportCanvas(); const uri=c.toDataURL('image/jpeg',.95); const raw=atob(uri.split(',')[1]); const jpeg=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) jpeg[i]=raw.charCodeAt(i); const pdf=pdfFromJpeg(jpeg,c.width,c.height); const url=URL.createObjectURL(pdf); const a=document.createElement('a'); const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36); a.href=url; a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf'; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000); setStatus('✓ PDF wurde erstellt.'); }catch(e){ console.error(e); setStatus('PDF konnte nicht erzeugt werden: '+e.message,false) } finally{ b.disabled=false; b.textContent='📄 PDF herunterladen' } }
 $('saveReport').onclick=saveReport; $('newReport').onclick=()=>newReport(); $('deleteReport').onclick=deleteReport; $('reportSelect').onchange=e=>{if(e.target.value)loadReport(e.target.value)}; $('downloadPdf').onclick=downloadPdf;
 window.addEventListener('beforeunload',e=>{ if(unsaved){ e.preventDefault(); e.returnValue=''; } });
 reports=allReports(); const prior=localStorage.getItem(ACTIVE_KEY); if(prior&&reports[prior]){ activeId=prior; data=structuredClone(reports[prior].data||{}); initDefaults(); renderEditor(); renderStamps(); renderSelect(); setStatus('Letzten gespeicherten Bericht geladen') } else newReport(false);
