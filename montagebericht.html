@@ -1,227 +1,3293 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>Materialverwaltung</title>
+
+<link rel="manifest" href="./manifest.json">
+
 <meta name="theme-color" content="#000000">
-<title>Montagebericht | Materialverwaltung</title>
+<meta name="app-version" content="2026-10-17-montagebericht-01">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Material">
+
 <style>
-:root {color-scheme:dark;--bg:#000;--card:#0c1017;--surface:#141a26;--line:#243044;--muted:#94a3b8;--fg:#f4f6f8;--accent:#2563eb}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--fg);background:var(--bg)}button,input,select,textarea{font:inherit}button{cursor:pointer}
-header{background:#080b11;border-bottom:1px solid var(--line);padding:12px 16px;position:sticky;top:0;z-index:5}
-header .top{max-width:1200px;display:flex;margin:auto;align-items:center;gap:10px;flex-wrap:wrap}
-header a{color:#93c5fd;text-decoration:none;font-weight:600}header h1{font-size:19px;margin:0;flex:1}header small{color:var(--muted)}
-main{max-width:1320px;margin:auto;padding:16px;display:grid;grid-template-columns:minmax(325px,440px) minmax(0,1fr);gap:16px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:11px;padding:10px 12px;font-weight:700}.btn.primary{background:var(--accent);border-color:var(--accent);color:white}.btn.danger{color:#fca5a5}
-.editor-title{font-weight:800;margin:0 0 10px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.field-grid.one{grid-template-columns:1fr}.field{min-width:0}.field label{color:#b2bed0;font-size:12px;display:block;margin:0 0 4px}.field input,.field textarea,.field select{background:#06090f;color:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 10px;width:100%;min-height:38px;outline:none}.field textarea{resize:vertical;min-height:90px}.field input:focus,.field textarea:focus{border-color:#60a5fa}details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}summary{font-weight:750;padding:12px 13px;cursor:pointer;background:#111723}details .inner{padding:12px}.compact-row{display:flex;gap:6px;align-items:center;margin:6px 0}.compact-row span{min-width:55px;font-size:12px;color:var(--muted)}.compact-row input{width:100%;min-width:0;font-size:13px;border:1px solid var(--line);background:#06090f;color:#fff;border-radius:6px;padding:7px 4px;text-align:center}.employee-row{display:grid;grid-template-columns:1.8fr repeat(7,minmax(27px,1fr));gap:3px;align-items:center;margin:6px 0}.employee-row input{min-width:0;padding:7px 3px;text-align:center;border-radius:5px;border:1px solid var(--line);background:#06090f;color:white;font-size:12px}.employee-row .name{text-align:left}.employee-days{display:grid;grid-template-columns:1.8fr repeat(7,minmax(27px,1fr));gap:3px;color:var(--muted);font-size:11px;text-align:center}
-.notice{color:#b9c6d9;font-size:12px;line-height:1.55;margin-top:10px}.status{font-size:12px;color:#86efac}.preview-panel{position:sticky;top:80px}.preview-panel h2{font-size:16px;margin:0 0 12px}.paper-frame{overflow:auto;background:#202a36;padding:12px;border-radius:10px;text-align:center}.paper{container-type:inline-size;position:relative;width:100%;max-width:850px;margin:auto;aspect-ratio:1054/1492;background:#bad1d6;box-shadow:0 12px 30px #0008;overflow:hidden}.paper>img.template{position:absolute;inset:0;width:100%;height:100%;display:block}.stamp{position:absolute;color:#091524;font-family:Arial,sans-serif;white-space:pre-line;overflow:hidden;line-height:1.18;text-align:left;pointer-events:auto;cursor:pointer;font-weight:600;word-break:break-word}.stamp:hover{outline:1px dashed #2563eb;background:#ffffff42}.stamp.check{font-weight:900;text-align:center}.stamp.signature{object-fit:contain;object-position:left center}
-.report-controls{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:0 0 12px}.report-controls select{border:1px solid var(--line);border-radius:8px;padding:9px;background:var(--surface);color:var(--fg);max-width:100%;min-width:140px}
-#sigOverlay{position:fixed;inset:0;background:#000c;display:none;z-index:20;align-items:center;justify-content:center;padding:20px}#sigOverlay.visible{display:flex}.sigdialog{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:16px;width:100%;max-width:620px}.sigdialog canvas{touch-action:none;background:#fff;border:2px solid #8290a0;border-radius:6px;width:100%;height:190px}
-@media(max-width:900px){main{grid-template-columns:1fr}.preview-panel{position:static}.paper-frame{padding:6px}.paper{max-width:650px}}@media(max-width:520px){main{padding:10px;gap:10px}.card{padding:12px}.field-grid{grid-template-columns:1fr}.field-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.employee-row{overflow:auto}.toolbar button{font-size:13px;padding:9px}.paper-frame{padding:3px}}
+:root {
+  --bg: #000000;
+  --card: #0c1017;
+  --card2: #141a26;
+  --text: #f4f6f8;
+  --table-text-color: #f4f6f8;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --accent: #2563eb;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --table-header-bg: #1e3a8a;
+  --table-header-text: #ffffff;
+  --table-row-even: #080c14;
+  --table-row-odd: #111a2e;
+  --table-row-hover: #1e293b;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  max-width: 950px;
+  margin: auto;
+  padding-bottom: 100px;
+}
+
+header {
+  padding: 18px 18px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(0,0,0,.92);
+  backdrop-filter: blur(14px);
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-title {
+  min-width: 0;
+}
+
+h1 {
+  font-size: 27px;
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.admin-button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 13px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-button.active {
+  border-color: var(--green);
+  background: rgba(34,197,94,.14);
+  color: var(--green);
+}
+
+.header-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.version-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 175px;
+}
+.version-status {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.version-status.online {
+  color: #86efac;
+  border-color: rgba(34,197,94,.45);
+  background: rgba(22,163,74,.12);
+}
+.version-status.update {
+  color: #fcd34d;
+  border-color: rgba(245,158,11,.5);
+  background: rgba(245,158,11,.12);
+}
+.version-status.offline {
+  color: #fca5a5;
+  border-color: rgba(239,68,68,.45);
+  background: rgba(239,68,68,.10);
+}
+.app-version-label {
+  color: var(--muted);
+  font-size: 9px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.reload-app-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  header { padding: 12px 10px 9px; }
+  .header-row { gap: 7px; }
+  h1 { font-size: 21px; }
+  .subtitle { font-size: 12px; }
+  .header-actions { gap: 5px; }
+  .version-box { max-width: 125px; }
+  .version-status { padding: 6px 7px; font-size: 10px; }
+  .app-version-label { font-size: 8px; }
+  .admin-button { padding: 8px 9px; font-size: 12px; }
+}
+
+.content {
+  padding: 14px 16px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.tab {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  padding: 13px 5px;
+  border-radius: 13px;
+  font-size: 13px;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+/* Blauer Original-Montagebericht: öffnet eigene Berichtseite in der PWA. */
+.report-tab-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 17px;
+  margin-bottom: 13px;
+}
+
+.card h2 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.stat-icon {
+  font-size: 22px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.material-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.material-info {
+  min-width: 0;
+}
+
+.material-name {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.material-unit {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.material-stock {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.material-stock-number {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.material-stock-unit {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.search-box {
+  position: relative;
+  margin: 12px 0;
+}
+
+.search-box input {
+  padding-left: 42px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+.btn {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 700;
+  color: white;
+  background: var(--card2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  gap: 6px;
+}
+
+.btn.primary {
+  background: var(--accent);
+}
+
+.btn.green {
+  background: var(--green);
+}
+
+.btn.red {
+  background: var(--red);
+}
+
+.btn.orange {
+  background: var(--orange);
+  color: #111;
+}
+
+.btn.full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn.small {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.direction-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.direction-btn {
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 14px;
+  background: var(--card2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 17px;
+  text-align: left;
+}
+
+.direction-btn.active {
+  border-color: var(--accent);
+  background: rgba(59,130,246,.16);
+}
+
+.direction-icon {
+  font-size: 25px;
+  margin-right: 8px;
+}
+
+.route-box {
+  margin-top: 15px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  text-align: center;
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 13px;
+  padding: 14px;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+}
+
+label {
+  display: block;
+  margin: 13px 0 7px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.site-stock {
+  margin-top: 13px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.site-material {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.05);
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 10px;
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(34,197,94,.14);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.movement {
+  padding: 15px;
+}
+
+.movement-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.movement-route {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.movement-meta {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 35px 10px;
+}
+
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: 22px;
+  z-index: 30;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: white;
+  font-size: 28px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.6);
+}
+
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,.82);
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-bg.show {
+  display: flex;
+}
+
+.modal {
+  width: 100%;
+  max-width: 700px;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 22px 18px 30px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close {
+  border: 0;
+  background: var(--card2);
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+.notice {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card2);
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.employee-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.site-directory-search { margin-top: 14px; }
+.site-details { display:grid; grid-template-columns:1fr; gap:8px; margin-top:12px; }
+.site-detail { display:flex; gap:9px; align-items:flex-start; color:var(--muted); font-size:14px; overflow-wrap:anywhere; }
+.site-detail strong { color:var(--text); font-weight:700; }
+.site-detail-icon { width:20px; flex:0 0 20px; text-align:center; }
+
+.view-toggle {
+  display: flex;
+  gap: 6px;
+  background: var(--card2);
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-top: 12px;
+}
+.view-toggle-btn {
+  flex: 1;
+  padding: 9px 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.view-toggle-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* TABELLE MIT BLAUEN STREIFEN & SCHWARZEM HINTERGRUND */
+.paper-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 2px solid #1e3a8a;
+  background: #000000;
+  margin-top: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+}
+.paper-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+  white-space: nowrap;
+}
+.paper-table th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+  padding: 12px 14px;
+  font-weight: 800;
+  font-size: 14px;
+  border: 1px solid #2563eb;
+  letter-spacing: 0.3px;
+}
+.paper-table td {
+  padding: 11px 14px;
+  border: 1px solid #1e293b;
+  color: var(--table-text-color, var(--text));
+  font-weight: 600;
+  background-color: var(--table-row-even);
+}
+.paper-table tr:nth-child(odd) td {
+  background-color: var(--table-row-odd);
+}
+.paper-table tr:hover td {
+  background-color: var(--table-row-hover);
+}
+.paper-table .highlight-cell {
+  font-weight: 800;
+  color: #60a5fa;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.site-list-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.site-list-item:hover {
+  border-color: var(--accent);
+}
+
+/* Kabelkarten und übersichtliches Lager-Stücke-Overlay */
+.material-card-clickable {
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease;
+  border: 1px solid var(--border);
+}
+.material-card-clickable:hover, .material-card-clickable:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+}
+.material-card-hint {
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  color:var(--muted); font-size:12px; padding-top:9px; border-top:1px solid var(--border);
+}
+.warehouse-piece-modal { max-width:620px; }
+.warehouse-piece-summary {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;
+}
+.warehouse-piece-stat {
+  padding:14px; border-radius:14px; background:var(--card2); border:1px solid var(--border);
+}
+.warehouse-piece-stat strong { display:block; font-size:23px; margin-top:4px; }
+.warehouse-piece-row {
+  display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:9px; align-items:center;
+  padding:10px; margin:8px 0; border:1px solid var(--border); border-radius:13px; background:var(--card2);
+}
+.warehouse-piece-number { color:var(--muted); font-weight:800; text-align:center; }
+.warehouse-piece-row input { padding:10px; }
+.warehouse-piece-row .btn { padding:9px 10px; }
+.warehouse-piece-empty { text-align:center; padding:22px 12px; color:var(--muted); border:1px dashed var(--border); border-radius:13px; }
+@media (max-width:420px) {
+  .warehouse-piece-row { grid-template-columns:26px minmax(0,1fr) auto; gap:6px; padding:8px; }
+  .warehouse-piece-row .btn { padding:8px; }
+}
+
+/* Komfortables Overlay für Einzelstücke */
+.piece-manager-card {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+.piece-manager-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.piece-manager-title {
+  font-weight: 800;
+  font-size: 14px;
+}
+.piece-split-controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--card2);
+}
+.piece-split-controls label { margin-top: 0; }
+.piece-split-controls input { font-size: 17px; font-weight: 700; }
+.piece-split-controls .btn { min-height: 46px; white-space: nowrap; }
+@media (max-width: 420px) {
+  .piece-split-controls { gap: 7px; padding: 9px; }
+  .piece-split-controls .btn { padding: 10px 11px; font-size: 13px; }
+}
+.piece-manager-summary {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+.piece-manager-preview {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+.piece-preview-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.piece-preview-row strong { color: var(--text); }
+.piece-manager-layer { z-index: 130; }
+.piece-manager-modal {
+  max-width: 620px;
+}
+.piece-editor-intro {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--card2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.piece-editor-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 15px;
+  border-radius: 14px;
+  background: rgba(37,99,235,.16);
+  border: 1px solid rgba(37,99,235,.55);
+}
+.piece-editor-total strong { font-size: 23px; }
+.piece-entry {
+  margin: 10px 0;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--card2);
+}
+.piece-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.piece-entry-fields {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+.piece-entry label {
+  margin: 2px 0 6px;
+  font-size: 12px;
+}
+.piece-entry input {
+  padding: 13px 11px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.piece-entry-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.piece-entry-footer strong { color: var(--text); }
+.piece-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.piece-editor-actions .btn { min-height: 48px; }
+.site-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.site-list-name {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.custom-col-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card2);
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+
+@media (min-width: 701px) {
+  .modal-bg {
+    align-items: center;
+  }
+
+  .modal {
+    border-radius: 24px;
+    max-height: 85vh;
+  }
+}
+
+.booking-amount-overflow {
+  color: #dc2626 !important;
+  border: 2px solid #dc2626 !important;
+  font-weight: 700 !important;
+}
+
+
+.vehicle-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:14px; }
+.vehicle-card { display:flex; flex-direction:column; align-items:flex-start; gap:5px; text-align:left; border:1px solid var(--border); background:var(--card2); color:var(--text); border-radius:14px; padding:14px; cursor:pointer; }
+.vehicle-card.selected { border:2px solid var(--accent); }
+.vehicle-card-icon { font-size:25px; }
+.vehicle-card-name { font-weight:800; }
+.vehicle-card strong { color:var(--accent); font-size:13px; }
+.vehicle-item-list { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.vehicle-item { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--border); background:var(--card2); border-radius:12px; padding:13px; }
+.vehicle-item-done { opacity:.72; }
+.vehicle-item-main { min-width:0; display:flex; flex-direction:column; gap:5px; }
+.vehicle-item-amount { color:var(--accent); font-weight:800; }
+.vehicle-item-note { font-size:12px; margin-top:3px; }
+.vehicle-item-actions { display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+.note-card { border:1px solid var(--border); background:var(--card); border-radius:15px; padding:15px; margin:10px 0; }
+.note-card.note-done { opacity:.7; }
+.note-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.note-card-title { font-weight:800; font-size:17px; overflow-wrap:anywhere; }
+.note-card-body { white-space:pre-wrap; overflow-wrap:anywhere; margin-top:9px; line-height:1.45; }
+.site-order-actions { display:flex; flex-direction:column; gap:4px; }
+.site-order-actions .btn { min-width:36px; padding:5px 8px; }
+@media (max-width:600px) { .vehicle-item { align-items:flex-start; flex-direction:column; } .vehicle-item-actions { width:100%; justify-content:flex-start; } }
 </style>
 </head>
+
 <body>
-<header><div class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><small>Originalformular</small></div></header>
-<main>
-<section class="card">
- <div class="report-controls"><select id="reportSelect" aria-label="Gespeicherten Bericht auswählen"><option value="">Bericht auswählen</option></select><button class="btn" type="button" id="newReport">＋ Neuer Bericht</button></div>
- <div class="toolbar"><button class="btn primary" type="button" id="downloadPdf">📄 PDF herunterladen</button><button class="btn" type="button" id="saveReport">💾 Speichern</button><button class="btn danger" type="button" id="deleteReport">🗑️ Löschen</button></div>
- <p id="status" class="status" role="status">Bereit</p>
- <h2 class="editor-title">Bericht ausfüllen</h2>
- <div id="editor"></div>
- <p class="notice">Deine Eingaben werden zurzeit nur auf diesem Gerät gespeichert, nicht in Supabase synchronisiert. Das PDF enthält die neue scharfe Originalvorlage mit deinen Eintragungen. Für ein vollständig scharfes, druckidentisches Original benötigen wir später einen Scan oder die Original-PDF.</p>
-</section>
-<section class="preview-panel card"><h2>Vorschau auf dem blauen Originalzettel</h2><div class="paper-frame"><div class="paper" id="paper"><img class="template" src="./montagebericht_vorlage.png?v=3" alt="Original-Implenia-Monteurbericht, scharfe Originalvorlage"><div id="stamps"></div></div></div><p class="notice">Alle Felder links ausfüllen. Die Eintragungen erscheinen direkt auf dem Original. Du kannst auch einen Eintrag in der Vorschau antippen, um ihn links zu bearbeiten.</p></section>
-</main>
-<div id="sigOverlay" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigdialog"><h2 id="sigTitle">Unterschrift</h2><p class="notice">Mit Finger, Stift oder Maus unterschreiben.</p><canvas id="sigCanvas" width="900" height="285"></canvas><div class="toolbar" style="margin-top:10px"><button id="sigClear">Löschen</button><button id="sigCancel">Abbrechen</button><button class="btn primary" id="sigSave">Unterschrift übernehmen</button></div></div></div>
+
+<div class="app">
+
+<header>
+  <div class="header-row">
+    <div class="header-title">
+      <h1>Materialverwaltung</h1>
+      <div class="subtitle">Lager & Baustellen</div>
+    </div>
+
+    <div class="header-actions">
+      <div class="version-box">
+        <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-17-montagebericht-01</div>
+        <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
+      </div>
+      <button
+        id="adminButton"
+        class="admin-button"
+        onclick="openAdminModal()">
+        🔐 Admin
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+  <div class="tabs">
+    <button class="tab active"
+            onclick="showTab('lager', this)">
+      📦 Lager
+    </button>
+
+    <button class="tab"
+            onclick="showTab('baustellen', this)">
+      🏗️ Baustellen
+    </button>
+
+    <button class="tab"
+            onclick="showTab('historie', this)">
+      📜 Historie
+    </button>
+
+    <button class="tab"
+            onclick="showTab('fahrzeuge', this); loadAndRenderVehicles()">
+      🚐 Fahrzeuge
+    </button>
+    <button class="tab"
+            onclick="showTab('notizen', this); loadAndRenderNotes()">
+      📝 Notizen
+    </button>
+
+    <a class="tab report-tab-link" href="./montagebericht.html" aria-label="Blauen Montagebericht öffnen">
+      📄 Bericht
+    </a>
+  </div>
+
+  <section id="lager"></section>
+
+  <section id="baustellen" style="display:none"></section>
+
+  <section id="historie" style="display:none"></section>
+
+  <section id="fahrzeuge" style="display:none"></section>
+  <section id="notizen" style="display:none"></section>
+</div>
+</div>
+
+<button class="fab" onclick="openBooking()">
+  +
+</button>
+
+<!-- MATERIAL MODAL -->
+<div class="modal-bg" id="materialModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">Neues Material anlegen</h2>
+      <button class="close" onclick="closeMaterialModal()">×</button>
+    </div>
+
+    <div class="notice">
+      Füge ein neues Material / Kabel hinzu, falls es noch nicht im System existiert.
+    </div>
+
+    <label>Bezeichnung / Kabeltyp</label>
+    <input id="newMaterialName" placeholder="z. B. NYM-J 5x2,5 mm²">
+
+    <label>Einheit</label>
+    <select id="newMaterialUnit">
+      <option value="m">Meter (m)</option>
+      <option value="Stk">Stück (Stk)</option>
+      <option value="Rolle">Rollen</option>
+      <option value="Kg">Kilogramm (kg)</option>
+    </select>
+
+    <label>Anfangs-Lagerbestand im Zentrallager</label>
+    <input id="newMaterialStock" type="number" inputmode="decimal" value="0" step="0.01">
+
+    <button class="btn primary full" style="margin-top:16px;" onclick="createMaterial()">
+      📦 Material im System speichern
+    </button>
+  </div>
+</div>
+
+<!-- FAHRZEUG ANLEGEN MODAL -->
+<div class="modal-bg" id="vehicleModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">🚐 Einsatzfahrzeug hinzufügen</h2>
+      <button class="close" onclick="closeVehicleModal()">×</button>
+    </div>
+    <div class="notice">Lege jedes Einsatzfahrzeug einmal an. Danach kannst du pro Fahrzeug festhalten, welches Material entnommen wurde und wieder eingeladen werden muss.</div>
+    <label>Fahrzeugname</label>
+    <input id="newVehicleName" placeholder="z. B. Sprinter 1">
+    <label>Kennzeichen (optional)</label>
+    <input id="newVehiclePlate" placeholder="z. B. DIN-AB 123">
+    <button class="btn primary full" style="margin-top:16px;" onclick="createVehicle()">🚐 Fahrzeug speichern</button>
+  </div>
+</div>
+
+<!-- MATERIAL-ENTNAHME AUS FAHRZEUG MODAL -->
+<div class="modal-bg" id="vehicleItemModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">📦 Material als entnommen erfassen</h2>
+      <button class="close" onclick="closeVehicleItemModal()">×</button>
+    </div>
+    <div id="vehicleItemVehicleLabel" class="notice"></div>
+    <label>Material frei eingeben</label>
+    <input id="vehicleItemMaterialName" placeholder="z. B. NYM-J 3x1,5 mm² oder Schrauben">
+    <label>Einheit</label>
+    <select id="vehicleItemUnit"><option value="Stk">Stück (Stk)</option><option value="m">Meter (m)</option><option value="Rolle">Rollen</option><option value="Kg">Kilogramm (kg)</option><option value="Pack">Packung</option><option value="Sonstiges">Sonstiges</option></select>
+    <label>Welcher Kollege entnimmt das Material?</label>
+    <select id="vehicleItemTakenBy"></select>
+    <label>Menge</label>
+    <input id="vehicleItemAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Menge">
+    <label>Notiz (optional)</label>
+    <input id="vehicleItemNote" placeholder="z. B. bei Einsatz verbraucht">
+    <div class="muted" style="font-size:12px; margin-top:8px;">Diese Liste dient der Nachlade-Erinnerung. Der Lagerbestand wird dadurch nicht automatisch verändert.</div>
+    <button class="btn primary full" style="margin-top:16px;" onclick="createVehicleItem()">➕ Zur Nachlade-Liste hinzufügen</button>
+  </div>
+</div>
+
+<!-- WIEDERAUFFÜLLEN BESTÄTIGEN -->
+<div class="modal-bg" id="vehicleReloadModal">
+  <div class="modal">
+    <div class="modal-head"><h2 style="margin:0">✅ Wieder aufgefüllt</h2><button class="close" onclick="closeVehicleReloadModal()">×</button></div>
+    <div class="notice" id="vehicleReloadItemLabel"></div>
+    <label>Welcher Kollege hat aufgefüllt?</label>
+    <select id="vehicleReloadedBy"></select>
+    <button class="btn green full" onclick="confirmVehicleReloaded()">Auffüllen speichern</button>
+  </div>
+</div>
+
+<!-- NOTIZEN / ARBEITSAUFGABEN -->
+<div class="modal-bg" id="noteModal">
+  <div class="modal">
+    <div class="modal-head"><h2 style="margin:0">📝 Neue Notiz / Arbeit</h2><button class="close" onclick="closeNoteModal()">×</button></div>
+    <label>Überschrift</label>
+    <input id="noteTitle" placeholder="z. B. Kabelkanal im Keller fertigstellen">
+    <label>Beschreibung / Was ist zu tun?</label>
+    <textarea id="noteBody" rows="5" style="width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:13px;padding:14px;font:inherit;resize:vertical" placeholder="Details für die Kollegen ..."></textarea>
+    <label>Notiz von</label>
+    <select id="noteAuthor"></select>
+    <label>Baustelle (optional)</label>
+    <select id="noteSite"><option value="">Keine bestimmte Baustelle</option></select>
+    <button class="btn primary full" onclick="createNote()">📝 Notiz teilen</button>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-bg" id="adminModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 style="margin:0">🔐 Admin</h2>
+        <div class="subtitle">Verwaltungsbereich</div>
+      </div>
+      <button class="close" onclick="closeAdminModal()">×</button>
+    </div>
+
+    <div id="adminLoggedOut">
+      <div class="notice">
+        Nur Administratoren können Baustellen, Spalten und Einstellungen verwalten.
+      </div>
+
+      <label>E-Mail</label>
+      <input id="adminEmail" type="email" autocomplete="username" placeholder="Admin-E-Mail">
+
+      <label>Passwort</label>
+      <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Passwort">
+
+      <button class="btn primary full" onclick="loginAdmin()">
+        🔐 Als Admin anmelden
+      </button>
+    </div>
+
+    <div id="adminLoggedIn" class="hidden">
+      <div class="admin-badge">
+        🟢 Admin-Modus aktiv
+      </div>
+
+      <div class="notice">
+        Du bist als Administrator angemeldet. Verwaltungsfunktionen sind freigeschaltet.
+      </div>
+
+      <div style="margin-top:16px; padding:14px; background:var(--card2); border-radius:14px; border:1px solid var(--border);">
+        <h3 style="margin:0 0 10px; font-size:15px;">🎨 Schriftfarbe anpassen</h3>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="color" id="textColorPicker" value="#f4f6f8" onchange="updateTextColor(this.value)" style="width:50px; height:40px; padding:2px; cursor:pointer; border-radius:8px; border:1px solid var(--border); background:none;">
+          <div>
+            <div style="font-size:13px; font-weight:700;">Globale Schriftfarbe</div>
+            <div class="muted" style="font-size:11px;">Farbe wird für alle Texte & Tabellen übernommen</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn small" style="background:#ffffff; color:#000;" onclick="updateTextColor('#ffffff')">Weiß</button>
+          <button class="btn small" style="background:#93c5fd; color:#000;" onclick="updateTextColor('#93c5fd')">Eisblau</button>
+          <button class="btn small" style="background:#fef08a; color:#000;" onclick="updateTextColor('#fef08a')">Gelb</button>
+          <button class="btn small" style="background:#86efac; color:#000;" onclick="updateTextColor('#86efac')">Hellgrün</button>
+          <button class="btn small" style="background:#cbd5e1; color:#000;" onclick="updateTextColor('#cbd5e1')">Silber</button>
+        </div>
+      </div>
+
+      <button class="btn red full" style="margin-top:16px;" onclick="logoutAdmin()">
+        🔓 Admin abmelden
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BUCHUNGS MODAL -->
+<div class="modal-bg" id="bookingModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 style="margin:0">Material buchen</h2>
+        <div class="subtitle">Lager ↔ Baustelle</div>
+      </div>
+      <button class="close" onclick="closeBooking()">×</button>
+    </div>
+
+    <label>Richtung</label>
+    <div class="direction-buttons">
+      <button id="directionWarehouse" class="direction-btn" onclick="selectDirection('warehouse')">
+        <span class="direction-icon">📦</span>
+        VOM LAGER
+        <div class="subtitle">Material auf eine Baustelle bringen</div>
+      </button>
+
+      <button id="directionSite" class="direction-btn" onclick="selectDirection('site')">
+        <span class="direction-icon">🏗️</span>
+        VON BAUSTELLE
+        <div class="subtitle">Material zurück ins Lager bringen</div>
+      </button>
+    </div>
+
+    <div id="bookingFields" style="display:none">
+      <label>Material</label>
+      <div style="display:flex; gap:8px;">
+        <select id="bookingMaterial" style="flex:1;" onchange="updateBookingInfo()"></select>
+        <button type="button" class="btn primary small" style="white-space:nowrap;" onclick="openMaterialModal()">+ Neues Material</button>
+      </div>
+
+      <label>Menge in Meter (Gesamt)</label>
+      <input id="bookingAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="z. B. 40" oninput="updateBookingInfo()">
+
+      <!-- DIREKTE KABELAUFTEILUNG: Stücke ohne zusätzliches Overlay bearbeiten -->
+      <div class="piece-manager-card">
+        <div class="piece-manager-top">
+          <div>
+            <div class="piece-manager-title">✂️ Kabel direkt aufteilen</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;">Gesamtmeter eingeben, Stückzahl wählen und jede Länge direkt anpassen.</div>
+          </div>
+        </div>
+        <div class="piece-editor-total" style="margin-top:12px;">
+          <div>
+            <div class="muted" style="font-size:12px;">Summe aller Stücke</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;"><span id="pieceEditorCount">0 Stück</span></div>
+          </div>
+          <strong id="pieceEditorTotal">0 m</strong>
+        </div>
+        <div class="piece-split-controls">
+          <div style="flex:1; min-width:100px;">
+            <label for="bookingSplitCount">Aufteilen in Stücke</label>
+            <input id="bookingSplitCount" type="number" min="1" max="500" step="1" value="3" inputmode="numeric">
+          </div>
+          <button type="button" class="btn primary" onclick="splitBookingAmountIntoPieces()">✂️ Aufteilen</button>
+        </div>
+        <div id="bookingPieceRows"></div>
+        <button type="button" class="btn full" style="margin-top:8px; border:1px dashed var(--accent); background:rgba(37,99,235,.10); color:var(--text);" onclick="addBookingPieceRow(1, '')">＋ Einzelstück hinzufügen</button>
+        <div class="muted" style="font-size:12px; margin-top:8px;">Die Längen sind direkt bearbeitbar. Die Gesamtmenge oben passt sich automatisch an.</div>
+        <div id="pieceManagerPreview" style="display:none;"></div>
+        <span id="pieceManagerCount" style="display:none;"></span>
+        <span id="pieceManagerTotal" style="display:none;">0 m</span>
+      </div>
+
+      <div id="siteSelectionArea"></div>
+
+      <div id="routePreview" class="route-box"></div>
+
+      <label>Mitarbeiter</label>
+      <div class="employee-row">
+        <select id="bookingEmployee">
+          <option value="">Mitarbeiter auswählen</option>
+        </select>
+        <button id="addEmployeeButton" class="btn" onclick="openEmployeeModal()">+</button>
+      </div>
+
+      <div id="bookingInfo" class="notice"></div>
+
+      <button class="btn primary full" onclick="submitBooking()">
+        🔄 Material buchen
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Die Buchungs-Stückelung ist direkt im Buchungsfenster integriert. -->
+
+<!-- LAGER-KABELDETAILS / EINZELSTÜCKE -->
+<div class="modal-bg piece-manager-layer" id="warehousePieceModal" onclick="if(event.target===this) closeWarehousePieceModal()">
+  <div class="modal warehouse-piece-modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="warehousePieceTitle" style="margin:0">Kabelbestand</h2>
+        <div id="warehousePieceSubtitle" class="subtitle">Einzelstücke und Kabellängen</div>
+      </div>
+      <button class="close" onclick="closeWarehousePieceModal()" aria-label="Kabeldetails schließen">×</button>
+    </div>
+    <div class="warehouse-piece-summary">
+      <div class="warehouse-piece-stat">
+        <div class="muted" style="font-size:12px;">Einzelstücke</div>
+        <strong id="warehousePieceCount">0</strong>
+      </div>
+      <div class="warehouse-piece-stat">
+        <div class="muted" style="font-size:12px;">Gesamtlänge</div>
+        <strong id="warehousePieceTotal">0 m</strong>
+      </div>
+    </div>
+    <div class="muted" style="font-size:13px; margin-bottom:10px;">Jede Zeile ist ein einzelnes Kabelstück. Länge ändern oder einzelne Stücke löschen. Änderungen erst mit „Speichern“ übernehmen.</div>
+    <div id="warehousePieceRows"></div>
+    <button type="button" class="btn full" style="border:1px dashed var(--accent); background:rgba(37,99,235,.12); color:var(--text);" onclick="addWarehousePieceRow()">＋ Kabelstück hinzufügen</button>
+    <div class="piece-editor-actions">
+      <button type="button" class="btn" onclick="closeWarehousePieceModal()">Abbrechen</button>
+      <button type="button" class="btn primary" onclick="saveWarehousePieceModal()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- MITARBEITER MODAL -->
+<div class="modal-bg" id="employeeModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">Mitarbeiter</h2>
+      <button class="close" onclick="closeEmployeeModal()">×</button>
+    </div>
+
+    <div class="subtitle">Neuer Mitarbeiter</div>
+
+    <label>Name</label>
+    <input id="newEmployeeName" placeholder="z. B. Thomas">
+
+    <button class="btn primary full" onclick="createEmployee()">
+      👷 Mitarbeiter hinzufügen
+    </button>
+  </div>
+</div>
+
+<!-- BAUSTELLEN MODAL -->
+<div class="modal-bg" id="siteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">
+        <span id="siteModalTitle">Neue Baustelle</span>
+      </h2>
+      <button class="close" onclick="closeSiteModal()">×</button>
+    </div>
+
+    <input type="hidden" id="editSiteId">
+
+    <label>Name der Baustelle</label>
+    <input id="siteName" placeholder="z. B. KMB RRR Rechts">
+
+    <label>Auftrag (Auftragsnummer)</label>
+    <input id="siteOrderNumber" placeholder="z. B. 4077858">
+
+    <label>Zusatz (Zusatz-Auftragsnummer)</label>
+    <input id="siteExtraOrderNumber" placeholder="z. B. 4046060">
+
+    <label>Adresse</label>
+    <input id="siteAddress" placeholder="Mühlheimer Freiheit, 51063 Köln">
+
+    <label>KM (Entfernung z. B. C 92, A 38, 24,5)</label>
+    <input id="siteDistanceKm" placeholder="z. B. C 92 oder 24,5">
+
+    <label>Polier / Ansprechpartner</label>
+    <input id="siteContactPerson" placeholder="z. B. Jürgen Kratz">
+
+    <div id="dynamicCustomFieldsArea"></div>
+
+    <button class="btn primary full" id="saveSiteButton" onclick="saveSite()">
+      💾 Baustelle Speichern
+    </button>
+  </div>
+</div>
+
+<!-- SPALTEN VERWALTUNG MODAL -->
+<div class="modal-bg" id="manageColumnsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 style="margin:0">⚙️ Tabelle nach rechts erweitern</h2>
+      <button class="close" onclick="closeManageColumnsModal()">×</button>
+    </div>
+
+    <div class="notice">
+      Hier kannst du neue Spalten für die Baustellentabelle anlegen (z. B. <i>"Projektleiter"</i>, <i>"Liefertermin"</i>, <i>"Besonderheiten"</i>).
+    </div>
+
+    <div style="margin-top:14px;">
+      <label>Neue Spalte rechts hinzufügen</label>
+      <div style="display:flex; gap:8px;">
+        <input id="newColumnNameInput" placeholder="z. B. Projektleiter">
+        <button class="btn primary" style="white-space:nowrap;" onclick="addNewCustomColumn()">+ Spalte anlegen</button>
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px; font-size:15px;">Bestehende Zusatz-Spalten</h3>
+    <div id="customColumnsList"></div>
+  </div>
+</div>
+
 <script>
-'use strict';
-const STORAGE_KEY = 'mv_montageberichte_v1';
-const ACTIVE_KEY = 'mv_montagebericht_aktiv_v1';
-const templateImg = document.querySelector('.template');
-const fieldSpecs = [];
-const sectionSpecs = [
- {title:'Baustelle / Einsatz', rows:[
-  ['Standort','standort',19,10.85,28.5,1.18],['Einsatz angeordnet von','angeordnet',19,12.97,28.5,1.18],['Einsatzort / Kunde','kunde',19,15.12,28.5,1.18],['Einsatzkostenstelle','kostenstelle',19,17.26,28.5,1.18],['Auftragsnummer','auftragsnummer',19,19.4,28.5,1.18]]},
- {title:'Gerät / Technik', rows:[
-  ['Gerät','geraet',72.2,9.25,22.3,1.1],['Geräteeigentümer','eigentuemer',72.2,11.35,22.3,1.1],['Equipment-Nr.','equipment',72.2,13.42,22.3,1.1],['Fabrikat','fabrikat',72.2,15.52,22.3,1.1],['Typ','typ',72.2,17.58,22.3,1.1],['Betriebsstunden','betriebsstunden',72.2,19.7,22.3,1.1]]},
- {title:'Fahrzeuge und Fahrtzeiten', rows:[
-  ['KFZ 1 Kennzeichen','kfz1',14,23.15,22,1.15],['Gefahrene KM 1','km1',75,23.15,17,1.15],
-  ['KFZ 2 Kennzeichen','kfz2',14,25.9,22,1.15],['Gefahrene KM 2','km2',75,25.9,17,1.15],
-  ['Abfahrt 1','abfahrt1',61,28.6,8,1.05],['Rückkehr 1','rueckkehr1',84,28.6,7,1.05],
-  ['Abfahrt 2','abfahrt2',61,30.9,8,1.05],['Rückkehr 2','rueckkehr2',84,30.9,7,1.05]]}
-];
-const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
-const SUMS=['Gesamt','Fahrstd.','Rüstzeit','Pause','Überstd.','Nacht'];
-const FIELD_FONT=1.05;
-function addSpec(spec){fieldSpecs.push(spec);return spec}
-sectionSpecs.forEach(sec=>sec.rows.forEach(([label,key,x,y,w,h])=>addSpec({label,key,x,y,w,h,font:FIELD_FONT})));
-addSpec({label:'Datum',key:'datum',x:14,y:34.9,w:4,h:1.05,font:.9});
-for(let r=0;r<4;r++){
- const rowY = 37.65+r*2.68;
- addSpec({label:`Monteur ${r+1} Name`,key:`monteur${r+1}`,x:5,y:rowY,w:12.7,h:1.35,font:1.0});
- for(let d=0;d<7;d++) addSpec({label:`Monteur ${r+1} ${DAYS[d]}`,key:`m${r+1}_${DAYS[d]}`,x:18.8+d*5.93,y:rowY,w:5.6,h:1.35,font:.95});
- for(let t=0;t<6;t++) addSpec({label:`Monteur ${r+1} ${SUMS[t]}`,key:`m${r+1}_sum${t}`,x:60.1+t*6.03,y:rowY,w:5.7,h:1.35,font:.9});
+const SUPABASE_URL = "https://zjomsuqowqgpzodawixw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD";
+
+let authSession = null;
+let isAdmin = false;
+
+let materials = [];
+let sites = [];
+let siteStocks = [];
+let movements = [];
+let employees = [];
+let vehicles = [];
+let vehicleRestockItems = [];
+let sharedNotes = [];
+let pendingReloadItemId = null;
+let selectedVehicleId = null;
+
+let bookingDirection = null;
+
+let historyMaterialFilter = "";
+let historySiteFilter = "";
+let historyEmployeeFilter = "";
+
+let siteViewMode = 'paper_table';
+let selectedSiteId = null;
+
+let customColumns = [];
+
+function saveAuthSession(session) {
+  authSession = session;
+  localStorage.setItem("materialverwaltung_auth", JSON.stringify(session));
 }
-addSpec({label:'Gewaltschaden Ja',key:'gewaltJa',x:39.8,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
-addSpec({label:'Gewaltschaden Nein',key:'gewaltNein',x:46.1,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
-addSpec({label:'Inspektion Ja',key:'inspektionJa',x:60.6,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
-addSpec({label:'Inspektion Nein',key:'inspektionNein',x:67.2,y:50.35,w:1.5,h:1.05,kind:'check',font:1.1});
-addSpec({label:'Ausgeführte Arbeiten',key:'arbeiten',x:4.6,y:52.2,w:89.5,h:12.9,font:1.12,kind:'multiline'});
-addSpec({label:'Weitere Mängel am Gerät',key:'maengel',x:4.6,y:67.5,w:89.5,h:3.15,font:1.1,kind:'multiline'});
-for(let i=0;i<10;i++){
- const y=74.2+i*1.94;
- addSpec({label:`Material ${i+1} Menge`,key:`mat${i+1}_menge`,x:4.6,y,w:8.5,h:1.25,font:1.0});
- addSpec({label:`Material ${i+1} Bezeichnung`,key:`mat${i+1}_name`,x:14.5,y,w:79.5,h:1.25,font:1.0});
+
+function clearAuthSession() {
+  authSession = null;
+  isAdmin = false;
+  localStorage.removeItem("materialverwaltung_auth");
+  updateAdminUI();
 }
-const SIG_FIELDS=[
- {key:'sign_monteur',label:'Unterschrift Monteur',x:4.8,y:91,w:25.8,h:3.25},
- {key:'sign_bauleitung',label:'Unterschrift Bauleitung',x:31.7,y:91,w:26.3,h:3.25},
- {key:'sign_meister',label:'Unterschrift Meister / MI',x:60.5,y:91,w:32.5,h:3.25}
-];
-let reports={};let activeId='';let data={};let activeSig=null;let unsaved=false;
-const $ = id=>document.getElementById(id);
-function uniqueId(){return 'bericht_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
-function str(v){return String(v??'')}
-function escapeText(s){return str(s).replace(/[&<>"']/g,chr=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[chr]))}
-function inputHtml(spec){
- if(spec.kind==='check')return `<div class="field"><label><input style="width:auto;min-height:0;margin-right:7px" type="checkbox" data-key="${spec.key}"> ${escapeText(spec.label)}</label></div>`;
- if(spec.kind==='multiline')return `<div class="field"><label for="f_${spec.key}">${escapeText(spec.label)}</label><textarea id="f_${spec.key}" data-key="${spec.key}" rows="5"></textarea></div>`;
- return `<div class="field"><label for="f_${spec.key}">${escapeText(spec.label)}</label><input id="f_${spec.key}" data-key="${spec.key}" type="text" autocomplete="off"></div>`;
+
+function loadStoredAuthSession() {
+  try {
+    const stored = localStorage.getItem("materialverwaltung_auth");
+    if (stored) {
+      authSession = JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error("Gespeicherte Anmeldung Fehler:", error);
+    clearAuthSession();
+  }
 }
-function renderEditor(){
- let h='';
- for(const [i,sec] of sectionSpecs.entries()){
-   h+=`<details ${i===0?'open':''}><summary>${escapeText(sec.title)}</summary><div class="inner"><div class="field-grid">${sec.rows.map(r=>inputHtml(fieldSpecs.find(f=>f.key===r[1]))).join('')}</div></div></details>`;
- }
- h+=`<details><summary>👷 Fahr- und Arbeitsstunden der Monteure</summary><div class="inner"><div class="field-grid one">${inputHtml(fieldSpecs.find(f=>f.key==='datum'))}</div>`;
- for(let r=1;r<=4;r++){
-   h+=`<p style="font-weight:700;font-size:13px;margin:16px 0 7px">Monteur ${r}</p>`;
-   h+=`<div class="field-grid one">${inputHtml(fieldSpecs.find(f=>f.key===`monteur${r}`))}</div>`;
-   h+='<div class="employee-days"><span></span>'+DAYS.map(d=>`<span>${d}</span>`).join('')+'</div>';
-   h+='<div class="employee-row"><span style="font-size:11px;color:var(--muted)">Stunden</span>'+DAYS.map(d=>`<input aria-label="Monteur ${r} ${d}" data-key="m${r}_${d}">`).join('')+'</div>';
-   h+=`<div class="field-grid">${SUMS.map((s,t)=>inputHtml(fieldSpecs.find(f=>f.key===`m${r}_sum${t}`))).join('')}</div>`;
- }
- h+='</div></details>';
- h+=`<details><summary>🛠️ Ausgeführte Arbeiten / Mängel</summary><div class="inner">`;
- h+=`<div class="field-grid two">${['gewaltJa','gewaltNein','inspektionJa','inspektionNein'].map(k=>inputHtml(fieldSpecs.find(f=>f.key===k))).join('')}</div><div class="field-grid one">${['arbeiten','maengel'].map(k=>inputHtml(fieldSpecs.find(f=>f.key===k))).join('')}</div></div></details>`;
- h+=`<details><summary>📦 Verwendetes Material</summary><div class="inner">`;
- for(let i=1;i<=10;i++) h+=`<div class="field-grid two" style="grid-template-columns:100px 1fr;margin-bottom:8px">${inputHtml(fieldSpecs.find(f=>f.key===`mat${i}_menge`))}${inputHtml(fieldSpecs.find(f=>f.key===`mat${i}_name`))}</div>`;
- h+='</div></details>';
- h+=`<details><summary>✍️ Unterschriften</summary><div class="inner"><div class="toolbar">${SIG_FIELDS.map(f=>`<button type="button" data-sign="${f.key}" class="btn">${escapeText(f.label)}</button>`).join('')}</div><p class="notice">Unterschriften sind handgezeichnete Bilder, keine qualifizierte elektronische Signatur.</p></div></details>`;
- $('editor').innerHTML=h;
- $('editor').addEventListener('input',e=>{if(e.target.dataset.key)updateField(e.target)});
- $('editor').addEventListener('change',e=>{if(e.target.dataset.key)updateField(e.target)});
- $('editor').addEventListener('click',e=>{const b=e.target.closest('button[data-sign]');if(b)openSignature(b.dataset.sign)});
+
+function loadStoredTextColor() {
+  const savedColor = localStorage.getItem("materialverwaltung_text_color");
+  if (savedColor) {
+    applyTextColor(savedColor);
+  }
 }
-function updateField(el){
- const key=el.dataset.key;
- data[key]=el.type==='checkbox'?el.checked:el.value;
- // mutually exclusive checkboxes
- if(key==='gewaltJa'&&el.checked)data.gewaltNein=false;
- if(key==='gewaltNein'&&el.checked)data.gewaltJa=false;
- if(key==='inspektionJa'&&el.checked)data.inspektionNein=false;
- if(key==='inspektionNein'&&el.checked)data.inspektionJa=false;
- if(key.endsWith('Ja')||key.endsWith('Nein'))syncInputs();
- unsaved=true;renderStamps();setStatus('Änderungen noch nicht gespeichert',false);
+
+function applyTextColor(color) {
+  document.documentElement.style.setProperty('--text', color);
+  document.documentElement.style.setProperty('--table-text-color', color);
+  const picker = document.getElementById("textColorPicker");
+  if (picker) picker.value = color;
 }
-function syncInputs(){for(const el of $('editor').querySelectorAll('[data-key]')){
- const v=data[el.dataset.key];if(el.type==='checkbox')el.checked=Boolean(v);else el.value=str(v);
-}}
-function setStatus(s,ok=true){$('status').textContent=s;$('status').style.color=ok?'#86efac':'#facc15'}
-function stampCss(s){return `left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%;font-size:${s.font||1.12}cqw`}
-function renderStamps(){
- let html='';
- for(const s of fieldSpecs){const v=data[s.key];if(v==null||v===''||v===false)continue;
-   const value=s.kind==='check'?'✓':str(v);
-   html+=`<div tabindex="0" role="button" aria-label="${escapeText(s.label)} bearbeiten" data-focus="${s.key}" class="stamp ${s.kind==='check'?'check':''}" style="${stampCss(s)}">${escapeText(value)}</div>`;
- }
- for(const s of SIG_FIELDS){if(!data[s.key])continue;html+=`<img class="stamp signature" alt="${escapeText(s.label)}" src="${data[s.key]}" style="left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%">`}
- $('stamps').innerHTML=html;
- $('stamps').querySelectorAll('[data-focus]').forEach(el=>el.onclick=()=>{const input=$('editor').querySelector('[data-key="'+el.dataset.focus+'"]');if(input){input.closest('details').open=true;input.scrollIntoView({behavior:'smooth',block:'center'});input.focus()}});
+
+function updateTextColor(color) {
+  applyTextColor(color);
+  localStorage.setItem("materialverwaltung_text_color", color);
 }
-function allReports(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
-function saveStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify(reports));localStorage.setItem(ACTIVE_KEY,activeId)}
-function saveReport(){
- try{reports[activeId]={data:structuredClone(data),updated:new Date().toISOString()};saveStorage();unsaved=false;renderSelect();setStatus('✓ Bericht auf diesem Gerät gespeichert')}catch(e){console.error(e);setStatus('Speichern fehlgeschlagen: Gerätespeicher möglicherweise voll',false)}
+
+function loadStoredCustomColumns() {
+  try {
+    const stored = localStorage.getItem("materialverwaltung_custom_columns");
+    if (stored) {
+      customColumns = JSON.parse(stored);
+    }
+  } catch (e) {
+    customColumns = [];
+  }
 }
-function newReport(confirmFirst=true){if(confirmFirst&&unsaved&&!confirm('Ungespeicherte Änderungen verwerfen und neuen Bericht erstellen?'))return;
- activeId=uniqueId();data={};unsaved=false;syncInputs();renderStamps();try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{}renderSelect();setStatus('Neuer Bericht bereit')}
-function renderSelect(){
- const list=Object.entries(reports).sort((a,b)=>str(b[1].updated).localeCompare(str(a[1].updated)));
- $('reportSelect').innerHTML='<option value="">Gespeicherten Bericht öffnen …</option>'+list.map(([id,r])=>{
-   const title=r?.data?.standort||r?.data?.kunde||r?.data?.auftragsnummer||'Ohne Bezeichnung';
-   const dt=r.updated?new Date(r.updated).toLocaleDateString('de-DE'):'';
-   return `<option value="${escapeText(id)}">${escapeText(title)} · ${dt}</option>`;
- }).join('');
- $('reportSelect').value=reports[activeId]?activeId:'';
+
+function saveCustomColumns() {
+  localStorage.setItem("materialverwaltung_custom_columns", JSON.stringify(customColumns));
 }
-function loadReport(id){if(unsaved&&!confirm('Ungespeicherte Änderungen verwerfen?')){renderSelect();return}
- if(!reports[id])return;activeId=id;data=structuredClone(reports[id].data||{});unsaved=false;syncInputs();renderStamps();renderSelect();try{localStorage.setItem(ACTIVE_KEY,activeId)}catch{}setStatus('Bericht geladen')}
-function deleteReport(){if(!reports[activeId]){newReport(false);return}if(!confirm('Diesen gespeicherten Bericht wirklich nur auf diesem Gerät löschen?'))return;
- delete reports[activeId];try{saveStorage()}catch{}newReport(false)}
-function openSignature(key){activeSig=key;$('sigTitle').textContent=SIG_FIELDS.find(x=>x.key===key)?.label||'Unterschrift';$('sigOverlay').classList.add('visible');
- const ctx=$('sigCanvas').getContext('2d');ctx.clearRect(0,0,900,285);ctx.lineWidth=4;ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#162230';
+
+function getWarehousePieces(materialId) {
+  try {
+    const data = JSON.parse(localStorage.getItem("materialverwaltung_pieces") || "{}");
+    return data[materialId] || [];
+  } catch (e) {
+    return [];
+  }
 }
-let drawing=false;
-function pointerPoint(e){const r=$('sigCanvas').getBoundingClientRect();return [(e.clientX-r.left)*900/r.width,(e.clientY-r.top)*285/r.height]}
-const sigCtx=$('sigCanvas').getContext('2d');
-$('sigCanvas').addEventListener('pointerdown',e=>{drawing=true;$('sigCanvas').setPointerCapture(e.pointerId);const [x,y]=pointerPoint(e);sigCtx.beginPath();sigCtx.moveTo(x,y);sigCtx.lineTo(x+.05,y+.05);sigCtx.stroke()});
-$('sigCanvas').addEventListener('pointermove',e=>{if(!drawing)return;const [x,y]=pointerPoint(e);sigCtx.lineTo(x,y);sigCtx.stroke()});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>$('sigCanvas').addEventListener(t,()=>{drawing=false}));
-$('sigClear').onclick=()=>sigCtx.clearRect(0,0,900,285);
-$('sigCancel').onclick=()=>$('sigOverlay').classList.remove('visible');
-$('sigSave').onclick=()=>{if(activeSig){data[activeSig]=$('sigCanvas').toDataURL('image/png');unsaved=true;renderStamps();setStatus('Unterschrift hinzugefügt, bitte speichern',false)}$('sigOverlay').classList.remove('visible')};
-// Draw the genuine photographed form and the entered values on a single canvas.
-async function exportCanvas(){
- if(!templateImg.complete||!templateImg.naturalWidth)await new Promise((ok,no)=>{templateImg.addEventListener('load',ok,{once:true});templateImg.addEventListener('error',no,{once:true})});
- const canvas=document.createElement('canvas');canvas.width=1054;canvas.height=1492;const ctx=canvas.getContext('2d');ctx.drawImage(templateImg,0,0,1054,1492);
- for(const s of fieldSpecs){const raw=data[s.key];if(raw===undefined||raw===null||raw===''||raw===false)continue;
-  const value=s.kind==='check'?'✓':str(raw); const x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
-  const fontsize=Math.max(11,(s.font||1.12)*12);ctx.font=`600 ${fontsize}px Arial, sans-serif`;ctx.fillStyle='#091524';ctx.textBaseline='top';
-  if(s.kind==='multiline'){
-   const lines=[];const maxLine=Math.max(4,Math.floor(w/(fontsize*.55)));const paras=value.split('\n');
-   for(const para of paras){let current='';for(const word of para.split(/\s+/)){if(!word)continue;const proposed=current?current+' '+word:word;if(ctx.measureText(proposed).width>w-8&&current){lines.push(current);current=word}else current=proposed}lines.push(current)}
-   const lineheight=fontsize*1.47;for(let i=0;i<lines.length&&i*lineheight+fontsize<=h;i++)ctx.fillText(lines[i],x+2,y+2+i*lineheight,w-4);
-  }else{const fontsizeMax=fontsize;let drawFont=fontsize;while(ctx.measureText(value).width>w&&drawFont>8){drawFont--;ctx.font=`600 ${drawFont}px Arial, sans-serif`}ctx.fillText(value,x+2,y+2,w-3);ctx.font=`600 ${fontsizeMax}px Arial, sans-serif`}
- }
- for(const s of SIG_FIELDS){if(!data[s.key])continue;try{const im=await new Promise((resolve,reject)=>{const i=new Image;i.onload=()=>resolve(i);i.onerror=reject;i.src=data[s.key]});ctx.drawImage(im,s.x*10.54,s.y*14.92,s.w*10.54,s.h*14.92)}catch(e){console.warn('Unterschrift übersprungen',e)}}
- return canvas;
+
+function saveWarehousePieces(materialId, pieces) {
+  try {
+    const data = JSON.parse(localStorage.getItem("materialverwaltung_pieces") || "{}");
+    data[materialId] = pieces.filter(p => p.count > 0 && p.length > 0);
+    localStorage.setItem("materialverwaltung_pieces", JSON.stringify(data));
+  } catch (e) {
+    console.error("Fehler beim Speichern der Stückelung:", e);
+  }
 }
-function bytes(s){return new TextEncoder().encode(s)}
-function concatBytes(parts){const size=parts.reduce((n,a)=>n+a.length,0);const result=new Uint8Array(size);let o=0;for(const p of parts){result.set(p,o);o+=p.length}return result}
-function pdfFromJpeg(jpg,w,h){
- const header=bytes('%PDF-1.4\n');const chunks=[header];const offsets=[0];let offset=header.length;
- function add(buffer){chunks.push(buffer);offset+=buffer.length}
- function obj(n,body){offsets[n]=offset;add(bytes(n+' 0 obj\n'));add(typeof body==='string'?bytes(body):body);add(bytes('\nendobj\n'))}
- obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>');
- obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
- const content=bytes('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n');
- obj(4,concatBytes([bytes('<< /Length '+content.length+' >>\nstream\n'),content,bytes('endstream')]));
- obj(5,concatBytes([bytes('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'),jpg,bytes('\nendstream')]));
- const start=offset;add(bytes('xref\n0 6\n0000000000 65535 f \n'));
- for(let n=1;n<=5;n++)add(bytes(String(offsets[n]).padStart(10,'0')+' 00000 n \n'));
- add(bytes('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));
- return new Blob(chunks,{type:'application/pdf'});
+
+function addPiecesToWarehouse(materialId, newPieces) {
+  const current = getWarehousePieces(materialId);
+  newPieces.forEach(np => {
+    const existing = current.find(p => Math.abs(p.length - np.length) < 0.01);
+    if (existing) {
+      existing.count += np.count;
+    } else {
+      current.push({ count: np.count, length: np.length });
+    }
+  });
+  saveWarehousePieces(materialId, current);
 }
-async function downloadPdf(){
- const b=$('downloadPdf');b.disabled=true;b.textContent='PDF wird erstellt …';
- try{
-  const c=await exportCanvas();const uri=c.toDataURL('image/jpeg',.94);const raw=atob(uri.split(',')[1]);const jpeg=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)jpeg[i]=raw.charCodeAt(i);
-  const pdf=pdfFromJpeg(jpeg,c.width,c.height);const url=URL.createObjectURL(pdf);const a=document.createElement('a');
-  const safe=str(data.standort||data.kunde||'Baustelle').replace(/[^a-zA-Z0-9äöüÄÖÜß_-]+/g,'_').slice(0,36);
-  a.href=url;a.download='Montagebericht_'+safe+'_'+new Date().toISOString().slice(0,10)+'.pdf';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-  setStatus('✓ PDF wurde erstellt. Zum Speichern ggf. Downloads öffnen.');
- }catch(e){console.error(e);setStatus('PDF konnte nicht erzeugt werden: '+e.message,false)}finally{b.disabled=false;b.textContent='📄 PDF herunterladen'}
+
+function deductPiecesFromWarehouse(materialId, piecesToDeduct, totalMeters) {
+  let current = getWarehousePieces(materialId);
+  
+  if (piecesToDeduct && piecesToDeduct.length > 0) {
+    piecesToDeduct.forEach(dp => {
+      const existing = current.find(p => Math.abs(p.length - dp.length) < 0.01);
+      if (existing) {
+        existing.count = Math.max(0, existing.count - dp.count);
+      }
+    });
+  } else if (totalMeters > 0) {
+    let remainingToDeduct = totalMeters;
+    current.sort((a, b) => b.length - a.length);
+    for (let p of current) {
+      while (p.count > 0 && remainingToDeduct >= p.length) {
+        p.count--;
+        remainingToDeduct -= p.length;
+      }
+    }
+  }
+
+  saveWarehousePieces(materialId, current);
 }
-$('saveReport').onclick=saveReport;$('newReport').onclick=()=>newReport();$('deleteReport').onclick=deleteReport;
-$('reportSelect').onchange=e=>{if(e.target.value)loadReport(e.target.value)};$('downloadPdf').onclick=downloadPdf;
-// Warn before closing only when there are unsaved modifications; saved reports are stored device-locally.
-window.addEventListener('beforeunload',e=>{if(unsaved){e.preventDefault();e.returnValue=''}});
-renderEditor();reports=allReports();const prior=localStorage.getItem(ACTIVE_KEY);
-if(prior&&reports[prior]){activeId=prior;data=structuredClone(reports[prior].data||{});syncInputs();renderStamps();renderSelect();setStatus('Letzten gespeicherten Bericht geladen')}
-else newReport(false);
+
+function openPieceEditor(materialId) {
+  const mat = materials.find(m => m.id === materialId);
+  if (!mat) return;
+
+  const currentPieces = getWarehousePieces(materialId);
+  let promptText = `Einzelstücke für "${mat.name}" bearbeiten:\n\nFormat: Anzahl x Länge (z. B. "2x20, 1x50")\nAktuell: ${currentPieces.map(p => `${p.count}x${p.length}`).join(", ") || "Keine"}`;
+  
+  const input = prompt(promptText, currentPieces.map(p => `${p.count}x${p.length}`).join(", "));
+  if (input === null) return;
+
+  const newPieces = [];
+  const parts = input.split(",");
+  parts.forEach(part => {
+    const match = part.trim().match(/^(\d+)\s*x\s*([\d\.\,]+)$/i);
+    if (match) {
+      const count = parseInt(match[1]);
+      const length = parseFloat(match[2].replace(",", "."));
+      if (count > 0 && length > 0) {
+        newPieces.push({ count, length });
+      }
+    }
+  });
+
+  saveWarehousePieces(materialId, newPieces);
+  renderWarehouseMaterials();
+}
+
+let warehousePieceMaterialId = null;
+let warehousePieceDraft = [];
+
+function openWarehousePieceModal(materialId) {
+  const mat = materials.find(m => String(m.id) === String(materialId));
+  if (!mat) return;
+  warehousePieceMaterialId = mat.id;
+  warehousePieceDraft = [];
+  getWarehousePieces(mat.id).forEach(group => {
+    const count = Math.max(0, parseInt(group.count, 10) || 0);
+    const length = Number(group.length) || 0;
+    for (let i = 0; i < count; i++) warehousePieceDraft.push({ length });
+  });
+  document.getElementById('warehousePieceTitle').textContent = mat.name;
+  document.getElementById('warehousePieceSubtitle').textContent = 'Einzelstücke im Lager verwalten';
+  renderWarehousePieceRows();
+  document.getElementById('warehousePieceModal').classList.add('show');
+}
+
+function closeWarehousePieceModal() {
+  document.getElementById('warehousePieceModal')?.classList.remove('show');
+  warehousePieceMaterialId = null;
+  warehousePieceDraft = [];
+}
+
+function renderWarehousePieceRows() {
+  const rows = document.getElementById('warehousePieceRows');
+  if (!rows) return;
+  if (!warehousePieceDraft.length) {
+    rows.innerHTML = '<div class="warehouse-piece-empty">Noch keine Kabelstücke vorhanden.<br>Tippe auf „Kabelstück hinzufügen“, um das erste Stück einzutragen.</div>';
+  } else {
+    rows.innerHTML = warehousePieceDraft.map((piece, index) => `
+      <div class="warehouse-piece-row">
+        <div class="warehouse-piece-number">${index + 1}</div>
+        <div>
+          <label for="warehousePieceLength${index}" style="font-size:12px; margin:0 0 5px;">Länge in Metern</label>
+          <input id="warehousePieceLength${index}" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="z. B. 12,5" value="${piece.length > 0 ? piece.length : ''}" oninput="updateWarehousePieceLength(${index}, this.value)">
+        </div>
+        <button type="button" class="btn red small" onclick="removeWarehousePieceRow(${index})" aria-label="Kabelstück ${index + 1} löschen">🗑</button>
+      </div>
+    `).join('');
+  }
+  updateWarehousePieceSummary();
+}
+
+function updateWarehousePieceLength(index, value) {
+  if (!warehousePieceDraft[index]) return;
+  warehousePieceDraft[index].length = Number(String(value).replace(',', '.')) || 0;
+  updateWarehousePieceSummary();
+}
+
+function addWarehousePieceRow() {
+  warehousePieceDraft.push({ length: 0 });
+  renderWarehousePieceRows();
+  const input = document.getElementById(`warehousePieceLength${warehousePieceDraft.length - 1}`);
+  input?.focus();
+}
+
+function removeWarehousePieceRow(index) {
+  warehousePieceDraft.splice(index, 1);
+  renderWarehousePieceRows();
+}
+
+function updateWarehousePieceSummary() {
+  const valid = warehousePieceDraft.filter(p => Number(p.length) > 0);
+  const total = valid.reduce((sum, p) => sum + Number(p.length), 0);
+  const count = document.getElementById('warehousePieceCount');
+  const length = document.getElementById('warehousePieceTotal');
+  if (count) count.textContent = String(valid.length);
+  if (length) length.textContent = `${formatNumber(total)} m`;
+}
+
+function saveWarehousePieceModal() {
+  if (warehousePieceMaterialId === null) return;
+  const invalid = warehousePieceDraft.findIndex(p => !(Number(p.length) > 0));
+  if (invalid !== -1) {
+    alert(`Bitte gib für Kabelstück ${invalid + 1} eine Länge größer als 0 ein oder lösche die Zeile.`);
+    document.getElementById(`warehousePieceLength${invalid}`)?.focus();
+    return;
+  }
+  // Die bestehende Speicherstruktur (Anzahl + Länge) bleibt erhalten,
+  // damit Buchungen und bisherige Daten weiterhin funktionieren.
+  const grouped = [];
+  warehousePieceDraft.forEach(piece => {
+    const length = Number(Number(piece.length).toFixed(2));
+    const existing = grouped.find(p => Math.abs(p.length - length) < 0.001);
+    if (existing) existing.count++;
+    else grouped.push({ count: 1, length });
+  });
+  saveWarehousePieces(warehousePieceMaterialId, grouped);
+  closeWarehousePieceModal();
+  renderWarehouseMaterials();
+}
+
+async function refreshAuthSession() {
+  if (!authSession || !authSession.refresh_token) return false;
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ refresh_token: authSession.refresh_token })
+    });
+    if (!response.ok) {
+      clearAuthSession();
+      return false;
+    }
+    const session = await response.json();
+    saveAuthSession(session);
+    return true;
+  } catch (error) {
+    console.error("Session Refresh Fehler:", error);
+    clearAuthSession();
+    return false;
+  }
+}
+
+async function getAuthToken() {
+  if (!authSession) return SUPABASE_KEY;
+  const expiresAt = Number(authSession.expires_at || 0);
+  const now = Math.floor(Date.now() / 1000);
+
+  if (expiresAt && expiresAt > now + 60) {
+    return authSession.access_token;
+  }
+
+  const refreshed = await refreshAuthSession();
+  if (refreshed && authSession) {
+    return authSession.access_token;
+  }
+  return SUPABASE_KEY;
+}
+
+async function authFetch(path, options = {}) {
+  const token = await getAuthToken();
+  return fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+}
+
+async function supabase(path, options = {}) {
+  const token = await getAuthToken();
+  const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation",
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Supabase Fehler");
+  }
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function rpc(functionName, body) {
+  const token = await getAuthToken();
+  const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `RPC-Fehler (${response.status})`);
+  }
+
+  // PostgreSQL-Funktionen mit RETURNS void antworten oft mit HTTP 204
+  // und einem leeren Body. response.json() würde dann einen Fehler werfen,
+  // obwohl die Buchung in Supabase bereits erfolgreich war.
+  const responseText = await response.text();
+  if (!responseText.trim()) return null;
+
+  try {
+    return JSON.parse(responseText);
+  } catch (_) {
+    return responseText;
+  }
+}
+
+async function loginAdmin() {
+  const email = document.getElementById("adminEmail").value.trim();
+  const password = document.getElementById("adminPassword").value;
+
+  if (!email || !password) {
+    alert("Bitte E-Mail und Passwort eingeben.");
+    return;
+  }
+
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Anmeldung fehlgeschlagen");
+    }
+
+    const session = await response.json();
+    saveAuthSession(session);
+
+    const adminCheck = await authFetch("/rest/v1/rpc/is_admin", {
+      method: "POST",
+      body: "{}"
+    });
+
+    if (!adminCheck.ok) {
+      clearAuthSession();
+      throw new Error("Admin-Berechtigung konnte nicht geprüft werden.");
+    }
+
+    const result = await adminCheck.json();
+    if (result !== true) {
+      clearAuthSession();
+      throw new Error("Dieser Benutzer besitzt keine Admin-Berechtigung.");
+    }
+
+    isAdmin = true;
+    updateAdminUI();
+    document.getElementById("adminPassword").value = "";
+    closeAdminModal();
+    renderAll();
+    alert("🔐 Admin-Modus aktiviert!");
+  } catch (error) {
+    console.error(error);
+    alert("❌ Anmeldung fehlgeschlagen:\n\n" + error.message);
+  }
+}
+
+async function verifyAdminSession() {
+  if (!authSession) {
+    isAdmin = false;
+    updateAdminUI();
+    return;
+  }
+  try {
+    const response = await authFetch("/rest/v1/rpc/is_admin", {
+      method: "POST",
+      body: "{}"
+    });
+
+    if (!response.ok) {
+      clearAuthSession();
+      return;
+    }
+    const result = await response.json();
+    isAdmin = (result === true);
+    if (!isAdmin) clearAuthSession();
+    updateAdminUI();
+  } catch (error) {
+    console.error("Admin-Prüfung fehlgeschlagen:", error);
+    clearAuthSession();
+  }
+}
+
+async function logoutAdmin() {
+  try {
+    if (authSession?.access_token) {
+      await fetch(SUPABASE_URL + "/auth/v1/logout", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + authSession.access_token
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Logout Fehler:", error);
+  } finally {
+    clearAuthSession();
+    closeAdminModal();
+    renderAll();
+    alert("🔓 Admin-Modus beendet.");
+  }
+}
+
+function updateAdminUI() {
+  const button = document.getElementById("adminButton");
+  if (button) {
+    if (isAdmin) {
+      button.textContent = "🔓 Admin";
+      button.classList.add("active");
+    } else {
+      button.textContent = "🔐 Admin";
+      button.classList.remove("active");
+    }
+  }
+
+  const addEmployeeButton = document.getElementById("addEmployeeButton");
+  if (addEmployeeButton) {
+    addEmployeeButton.style.display = isAdmin ? "block" : "none";
+  }
+
+  const loggedOut = document.getElementById("adminLoggedOut");
+  const loggedIn = document.getElementById("adminLoggedIn");
+  if (loggedOut && loggedIn) {
+    if (isAdmin) {
+      loggedOut.classList.add("hidden");
+      loggedIn.classList.remove("hidden");
+    } else {
+      loggedOut.classList.remove("hidden");
+      loggedIn.classList.add("hidden");
+    }
+  }
+}
+
+function openAdminModal() {
+  updateAdminUI();
+  document.getElementById("adminModal").classList.add("show");
+}
+
+function closeAdminModal() {
+  document.getElementById("adminModal").classList.remove("show");
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  loadStoredAuthSession();
+  loadStoredTextColor();
+  loadStoredCustomColumns();
+  await verifyAdminSession();
+  await loadAll();
+});
+
+async function loadAll() {
+  try {
+    document.getElementById("lager").innerHTML = '<div class="loading">Lade Daten...</div>';
+
+    await Promise.all([
+      loadMaterials(),
+      loadSites(),
+      loadMovements(),
+      loadEmployees(),
+      loadVehicles(),
+      loadVehicleRestockItems(),
+      loadNotes().catch(error => { sharedNotes = []; console.warn("Notizen noch nicht verfügbar:", error.message); })
+    ]);
+
+    await loadSiteStocks();
+    renderAll();
+  } catch (error) {
+    console.error(error);
+    document.getElementById("lager").innerHTML = `
+      <div class="card">
+        <h2>Fehler</h2>
+        <div class="muted">${escapeHtml(error.message)}</div>
+      </div>`;
+  }
+}
+
+async function loadMaterials() {
+  materials = await supabase("materials?select=id,name,unit,stock&order=id");
+}
+
+async function loadSites() {
+  sites = await supabase("sites?select=id,name,address,active,created_at,order_number,extra_order_number,distance_km,contact_person,custom_fields,sort_order&order=sort_order.asc.nullslast,name.asc");
+  sites.forEach(s => {
+    if (typeof s.custom_fields === 'string') {
+      try { s.custom_fields = JSON.parse(s.custom_fields); } catch (e) { s.custom_fields = {}; }
+    } else if (!s.custom_fields) {
+      s.custom_fields = {};
+    }
+  });
+}
+
+async function loadSiteStocks() {
+  siteStocks = await supabase("site_stock?select=site_id,material_id,stock");
+}
+
+async function loadMovements() {
+  movements = await supabase("stock_movements?select=id,material_id,amount,type,employee,created_at,from_site_id,to_site_id&order=created_at.desc&limit=100");
+}
+
+async function loadEmployees() {
+  employees = await supabase("employees?select=id,name,active&active=eq.true&order=name");
+}
+
+async function loadVehicles() {
+  vehicles = await supabase("vehicles?select=id,name,plate,active,created_at&order=name");
+}
+
+async function loadVehicleRestockItems() {
+  vehicleRestockItems = await supabase("vehicle_restock_items?select=id,vehicle_id,material_id,material_name,unit,amount,note,status,created_at,reloaded_at,taken_by,reloaded_by&order=created_at.desc");
+}
+
+async function loadNotes() {
+  sharedNotes = await supabase("work_notes?select=id,title,body,author,site_id,status,created_at,completed_at,completed_by&order=status.asc,created_at.desc");
+}
+
+async function loadAndRenderNotes() {
+  try { await loadNotes(); renderNotes(); }
+  catch (error) { const c=document.getElementById("notizen"); if(c) c.innerHTML=`<div class="card"><h2>Notizen nicht verfügbar</h2><p>Bitte führe die neue SQL-Erweiterung in Supabase aus.</p><div class="muted">${escapeHtml(error.message)}</div></div>`; }
+}
+
+async function loadAndRenderVehicles() {
+  try {
+    await Promise.all([loadVehicles(), loadVehicleRestockItems()]);
+    renderVehicles();
+  } catch (error) {
+    const container = document.getElementById("fahrzeuge");
+    if (container) container.innerHTML = `<div class="card"><h2>Fahrzeugliste nicht verfügbar</h2><p>Bitte zuerst die Fahrzeug-Tabellen in Supabase anlegen. Die benötigte SQL-Datei ist separat bereitgestellt.</p><div class="muted">${escapeHtml(error.message)}</div></div>`;
+  }
+}
+
+function showTab(tab, button) {
+  document.querySelectorAll(".content section").forEach(section => section.style.display = "none");
+  document.getElementById(tab).style.display = "block";
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+}
+
+function renderAll() {
+  renderWarehouse();
+  renderSites();
+  renderHistory();
+  renderVehicles();
+  renderNotes();
+  updateAdminUI();
+}
+
+function renderWarehouse() {
+  const container = document.getElementById("lager");
+  const totalMaterials = materials.length;
+  const totalSites = sites.filter(s => s.active).length;
+
+  const today = new Date();
+  const todayCount = movements.filter(m => {
+    const date = new Date(m.created_at);
+    return date.getFullYear() === today.getFullYear() &&
+           date.getMonth() === today.getMonth() &&
+           date.getDate() === today.getDate();
+  }).length;
+
+  container.innerHTML = `
+    <div class="dashboard">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-number">${totalMaterials}</div>
+        <div class="stat-label">Materialien</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏗️</div>
+        <div class="stat-number">${totalSites}</div>
+        <div class="stat-label">Baustellen</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-number">${todayCount}</div>
+        <div class="stat-label">Heute</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h2 style="margin:0;">📦 Lagerbestand</h2>
+          <div class="muted">Aktueller zentraler Lagerbestand</div>
+        </div>
+        ${isAdmin ? `<button class="btn green small" onclick="openMaterialModal()">➕ Neues Material anlegen</button>` : ''}
+      </div>
+      <div class="search-box">
+        <span class="search-icon">🔎</span>
+        <input id="materialSearch" type="search" placeholder="Material suchen..." oninput="renderWarehouseMaterials()">
+      </div>
+    </div>
+
+    <div id="warehouseMaterials"></div>
+  `;
+
+  renderWarehouseMaterials();
+}
+
+function renderWarehouseMaterials() {
+  const container = document.getElementById("warehouseMaterials");
+  if (!container) return;
+
+  const search = (document.getElementById("materialSearch")?.value || "").trim().toLowerCase();
+  const filtered = materials.filter(m => m.name.toLowerCase().includes(search));
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty">Kein Material gefunden.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const pieces = getWarehousePieces(m.id);
+    const pieceCount = pieces.reduce((sum, p) => sum + (Number(p.count) || 0), 0);
+    const pieceLength = pieces.reduce((sum, p) => sum + ((Number(p.count) || 0) * (Number(p.length) || 0)), 0);
+    return `
+      <div class="card material-card material-card-clickable" role="button" tabindex="0"
+           aria-label="${escapeHtml(m.name)} öffnen und Kabellängen verwalten"
+           onclick="openWarehousePieceModal(${m.id})"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openWarehousePieceModal(${m.id});}">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%;">
+          <div class="material-info">
+            <div class="material-name">${escapeHtml(m.name)}</div>
+            <div class="material-unit">Einheit: ${escapeHtml(m.unit || "m")}</div>
+          </div>
+          <div class="material-stock">
+            <div class="material-stock-number">${formatNumber(m.stock)}</div>
+            <div class="material-stock-unit">Gesamt in ${escapeHtml(m.unit || "m")}</div>
+          </div>
+        </div>
+        <div class="material-card-hint">
+          <span>✂️ ${pieceCount ? `${pieceCount} Einzelstücke · ${formatNumber(pieceLength)} m erfasst` : 'Noch keine Einzelstücke erfasst'}</span>
+          <strong style="color:var(--accent); white-space:nowrap;">Öffnen ›</strong>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderSites() {
+  const container = document.getElementById("baustellen");
+  if (!container) return;
+
+  const search = (document.getElementById("siteDirectorySearch")?.value || "").trim().toLowerCase();
+  
+  const matchesSearch = site => {
+    const baseMatch = [
+      site.name, site.address, site.order_number, site.extra_order_number,
+      site.contact_person, site.distance_km
+    ].some(value => String(value ?? "").toLowerCase().includes(search));
+
+    if (baseMatch) return true;
+
+    if (site.custom_fields) {
+      return Object.values(site.custom_fields).some(val => String(val ?? "").toLowerCase().includes(search));
+    }
+    return false;
+  };
+
+  const filtered = sites.filter(matchesSearch);
+
+  let html = `
+    <div class="card">
+      <div class="site-card-top">
+        <div>
+          <h2>🏗️ Baustellen-Übersicht</h2>
+          <div class="subtitle">Übersicht & Detailverwaltung</div>
+        </div>
+      </div>
+
+      <div class="view-toggle">
+        <button class="view-toggle-btn ${siteViewMode === 'paper_table' ? 'active' : ''}" onclick="setSiteViewMode('paper_table')">
+          📊 Tabelle
+        </button>
+        <button class="view-toggle-btn ${siteViewMode === 'list' ? 'active' : ''}" onclick="setSiteViewMode('list')">
+          📋 Einzelansicht
+        </button>
+      </div>
+
+      <div class="table-toolbar">
+        <div style="display:flex; gap:8px; align-items:center;">
+          ${isAdmin ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle hinzufügen</button>` : ''}
+          ${isAdmin ? `<button class="btn primary small" onclick="openManageColumnsModal()">⚙️ Spalte (nach rechts)</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (siteViewMode === 'paper_table') {
+    html += renderPaperTableView(filtered);
+  } else {
+    html += renderSiteListView(filtered);
+  }
+
+  container.innerHTML = html;
+}
+
+async function moveSite(siteId, direction) {
+  if (!isAdmin) { alert("Nur Admins können die Reihenfolge ändern."); return; }
+  const ordered = [...sites].sort((a,b) => (Number(a.sort_order ?? 999999) - Number(b.sort_order ?? 999999)) || String(a.name).localeCompare(String(b.name), "de"));
+  const from = ordered.findIndex(site => Number(site.id) === Number(siteId));
+  const to = from + Number(direction);
+  if (from < 0 || to < 0 || to >= ordered.length) return;
+  [ordered[from], ordered[to]] = [ordered[to], ordered[from]];
+  try {
+    for (let i=0; i<ordered.length; i++) {
+      await supabase(`sites?id=eq.${ordered[i].id}`, { method:"PATCH", body:JSON.stringify({sort_order:i+1}) });
+      ordered[i].sort_order = i+1;
+    }
+    sites = ordered;
+    renderSites();
+  } catch (error) { alert("Reihenfolge konnte nicht gespeichert werden: " + error.message); }
+}
+
+function setSiteViewMode(mode) {
+  siteViewMode = mode;
+  renderSites();
+}
+
+function toggleSiteListExpand(siteId) {
+  if (selectedSiteId === siteId) {
+    selectedSiteId = null;
+  } else {
+    selectedSiteId = siteId;
+  }
+  renderSites();
+}
+
+function renderPaperTableView(filteredSites) {
+  let html = `
+    <div class="search-box site-directory-search">
+      <span class="search-icon">🔎</span>
+      <input id="siteDirectorySearch" type="search" placeholder="Baustelle, Auftrag, Ort, Polier suchen..." oninput="renderSites()" value="${escapeHtml(document.getElementById("siteDirectorySearch")?.value || "")}">
+    </div>
+
+    <div class="paper-table-container">
+      <table class="paper-table">
+        <thead>
+          <tr>
+            <th>Baustellen</th>
+            <th>Auftrag</th>
+            <th>Zusatz</th>
+            <th>Adresse</th>
+            <th>KM</th>
+            <th>Polier</th>
+            ${customColumns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
+            ${isAdmin ? '<th>Aktionen</th>' : ''}
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  if (!filteredSites.length) {
+    html += `<tr><td colspan="${6 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
+  } else {
+    filteredSites.forEach(site => {
+      html += `
+        <tr>
+          <td class="highlight-cell">${escapeHtml(site.name)}</td>
+          <td>${escapeHtml(site.order_number || '')}</td>
+          <td>${escapeHtml(site.extra_order_number || '')}</td>
+          <td>${escapeHtml(site.address || '')}</td>
+          <td>${escapeHtml(site.distance_km != null ? String(site.distance_km) : '')}</td>
+          <td>${escapeHtml(site.contact_person || '')}</td>
+          ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '')}</td>`).join('')}
+          ${isAdmin ? `
+            <td>
+              <div class="site-order-actions">
+                <button class="btn small" onclick="moveSite(${site.id}, -1)" title="Eine Zeile nach oben">⬆️</button>
+                <button class="btn small" onclick="moveSite(${site.id}, 1)" title="Eine Zeile nach unten">⬇️</button>
+                <button class="btn small" onclick="openEditSiteModal(${site.id})" style="padding:4px 8px; font-size:11px;">✏️ Bearbeiten</button>
+              </div>
+            </td>
+          ` : ''}
+        </tr>
+      `;
+    });
+  }
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return html;
+}
+
+function renderSiteListView(filteredSites) {
+  const activeSites = filteredSites.filter(s => s.active);
+  const closedSites = filteredSites.filter(s => !s.active);
+
+  let html = `
+    <div class="search-box site-directory-search">
+      <span class="search-icon">🔎</span>
+      <input id="siteDirectorySearch" type="search" placeholder="Baustelle suchen..." oninput="renderSites()" value="${escapeHtml(document.getElementById("siteDirectorySearch")?.value || "")}">
+    </div>
+  `;
+
+  if (!filteredSites.length) {
+    return html + `<div class="empty">Keine Baustellen gefunden.</div>`;
+  }
+
+  if (activeSites.length > 0) {
+    html += activeSites.map(site => `
+      <div class="site-list-item" onclick="toggleSiteListExpand(${site.id})">
+        <div class="site-list-header">
+          <div class="site-list-name">🏗️ ${escapeHtml(site.name)}</div>
+          <span class="badge">${selectedSiteId === site.id ? '▲ Einklappen' : '▼ Details'}</span>
+        </div>
+        ${selectedSiteId === site.id ? `<div style="margin-top:12px;" onclick="event.stopPropagation()">${renderSiteCardContent(site)}</div>` : ''}
+      </div>
+    `).join("");
+  }
+
+  if (closedSites.length > 0) {
+    html += `<h3 style="margin: 25px 0 10px; font-size:15px; color:var(--muted);">Abgeschlossene Baustellen (${closedSites.length})</h3>`;
+    html += closedSites.map(site => `
+      <div class="site-list-item" style="opacity:0.75;" onclick="toggleSiteListExpand(${site.id})">
+        <div class="site-list-header">
+          <div class="site-list-name">⚪ ${escapeHtml(site.name)}</div>
+          <span class="badge">${selectedSiteId === site.id ? '▲ Einklappen' : '▼ Details'}</span>
+        </div>
+        ${selectedSiteId === site.id ? `<div style="margin-top:12px;" onclick="event.stopPropagation()">${renderSiteCardContent(site)}</div>` : ''}
+      </div>
+    `).join("");
+  }
+
+  return html;
+}
+
+function renderSiteCardContent(site) {
+  const currentStocks = siteStocks.filter(s => s.site_id === site.id && Number(s.stock) > 0);
+
+  return `
+    <div style="border-top:1px solid var(--border); padding-top:12px;">
+      <div class="site-details">
+        ${site.order_number ? `
+          <div class="site-detail">
+            <span class="site-detail-icon">📄</span>
+            <span><strong>Auftrag:</strong> ${escapeHtml(site.order_number)}
+            ${site.extra_order_number ? ` (Zusatz: ${escapeHtml(site.extra_order_number)})` : ''}</span>
+          </div>
+        ` : ''}
+
+        ${site.address ? `
+          <div class="site-detail">
+            <span class="site-detail-icon">📍</span>
+            <span><strong>Adresse:</strong> ${escapeHtml(site.address)}</span>
+          </div>
+        ` : ''}
+
+        ${site.distance_km != null ? `
+          <div class="site-detail">
+            <span class="site-detail-icon">🚗</span>
+            <span><strong>KM:</strong> ${escapeHtml(String(site.distance_km))}</span>
+          </div>
+        ` : ''}
+
+        ${site.contact_person ? `
+          <div class="site-detail">
+            <span class="site-detail-icon">👷</span>
+            <span><strong>Polier / Ansprechpartner:</strong> ${escapeHtml(site.contact_person)}</span>
+          </div>
+        ` : ''}
+
+        ${customColumns.map(col => {
+          const val = site.custom_fields?.[col.key];
+          if (!val) return '';
+          return `
+            <div class="site-detail">
+              <span class="site-detail-icon">📌</span>
+              <span><strong>${escapeHtml(col.label)}:</strong> ${escapeHtml(val)}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="site-stock">
+        <strong style="font-size:13px; color:var(--muted);">Materialbestand vor Ort:</strong>
+        ${currentStocks.length ? currentStocks.map(st => {
+          const mat = materials.find(m => m.id === st.material_id);
+          return `
+            <div class="site-material">
+              <span>${escapeHtml(mat ? mat.name : 'Material #' + st.material_id)}</span>
+              <strong>${formatNumber(st.stock)} ${escapeHtml(mat?.unit || 'm')}</strong>
+            </div>
+          `;
+        }).join('') : '<div class="muted" style="font-size:12px; margin-top:5px;">Kein Material vorhanden</div>'}
+      </div>
+
+      ${isAdmin ? `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+          <button class="btn small" onclick="openEditSiteModal(${site.id})">✏️ Bearbeiten</button>
+          <button class="btn small ${site.active ? 'orange' : 'green'}" onclick="toggleSiteActive(${site.id}, ${!site.active})">
+            ${site.active ? '📁 Schließen' : '🟢 Aktivieren'}
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderDynamicCustomFieldsInModal(existingCustomFields = {}) {
+  const container = document.getElementById("dynamicCustomFieldsArea");
+  if (!container) return;
+
+  if (!customColumns.length) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = customColumns.map(col => `
+    <label>${escapeHtml(col.label)} (Zusatzspalte rechts)</label>
+    <input class="custom-field-input" data-key="${escapeHtml(col.key)}" value="${escapeHtml(existingCustomFields[col.key] || '')}" placeholder="Angabe für ${escapeHtml(col.label)}">
+  `).join('');
+}
+
+function openSiteModal(siteId = null) {
+  if (!isAdmin) {
+    alert("Nur Administratoren können Baustellen verwalten.");
+    return;
+  }
+
+  const title = document.getElementById("siteModalTitle");
+  const editIdInput = document.getElementById("editSiteId");
+
+  if (siteId) {
+    const site = sites.find(s => s.id === siteId);
+    if (!site) return;
+
+    title.textContent = "Baustelle bearbeiten";
+    editIdInput.value = site.id;
+    document.getElementById("siteName").value = site.name || "";
+    document.getElementById("siteOrderNumber").value = site.order_number || "";
+    document.getElementById("siteExtraOrderNumber").value = site.extra_order_number || "";
+    document.getElementById("siteAddress").value = site.address || "";
+    document.getElementById("siteDistanceKm").value = site.distance_km ?? "";
+    document.getElementById("siteContactPerson").value = site.contact_person || "";
+    renderDynamicCustomFieldsInModal(site.custom_fields || {});
+  } else {
+    title.textContent = "Neue Baustelle hinzufügen";
+    editIdInput.value = "";
+    document.getElementById("siteName").value = "";
+    document.getElementById("siteOrderNumber").value = "";
+    document.getElementById("siteExtraOrderNumber").value = "";
+    document.getElementById("siteAddress").value = "";
+    document.getElementById("siteDistanceKm").value = "";
+    document.getElementById("siteContactPerson").value = "";
+    renderDynamicCustomFieldsInModal({});
+  }
+
+  document.getElementById("siteModal").classList.add("show");
+}
+
+function openEditSiteModal(siteId) {
+  openSiteModal(siteId);
+}
+
+function closeSiteModal() {
+  document.getElementById("siteModal").classList.remove("show");
+}
+
+async function saveSite() {
+  if (!isAdmin) {
+    alert("Keine Admin-Berechtigung.");
+    return;
+  }
+
+  const siteId = document.getElementById("editSiteId").value;
+  const name = document.getElementById("siteName").value.trim();
+  const order_number = document.getElementById("siteOrderNumber").value.trim();
+  const extra_order_number = document.getElementById("siteExtraOrderNumber").value.trim();
+  const address = document.getElementById("siteAddress").value.trim();
+  const distance_km_val = document.getElementById("siteDistanceKm").value.trim();
+  const contact_person = document.getElementById("siteContactPerson").value.trim();
+
+  if (!name) {
+    alert("Bitte Name der Baustelle eingeben.");
+    return;
+  }
+
+  const custom_fields = {};
+  document.querySelectorAll(".custom-field-input").forEach(input => {
+    const key = input.getAttribute("data-key");
+    if (key) {
+      custom_fields[key] = input.value.trim();
+    }
+  });
+
+  const payload = {
+    name,
+    address,
+    order_number,
+    extra_order_number,
+    distance_km: distance_km_val || null,
+    contact_person,
+    custom_fields
+  };
+
+  try {
+    if (siteId) {
+      await supabase(`sites?id=eq.${siteId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+    } else {
+      payload.active = true;
+      payload.sort_order = Math.max(0, ...sites.map(site => Number(site.sort_order) || 0)) + 1;
+      await supabase("sites", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+    }
+
+    closeSiteModal();
+    await loadSites();
+    renderAll();
+  } catch (error) {
+    alert("Fehler beim Speichern der Baustelle: " + error.message);
+  }
+}
+
+async function toggleSiteActive(siteId, active) {
+  if (!isAdmin) return;
+  try {
+    await supabase(`sites?id=eq.${siteId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ active })
+    });
+    await loadSites();
+    renderAll();
+  } catch (error) {
+    alert("Fehler beim Ändern des Baustellen-Status: " + error.message);
+  }
+}
+
+function openManageColumnsModal() {
+  if (!isAdmin) {
+    alert("Nur Admins können Tabellenspalten verwalten.");
+    return;
+  }
+  document.getElementById("newColumnNameInput").value = "";
+  renderCustomColumnsList();
+  document.getElementById("manageColumnsModal").classList.add("show");
+}
+
+function closeManageColumnsModal() {
+  document.getElementById("manageColumnsModal").classList.remove("show");
+  renderSites();
+}
+
+function renderCustomColumnsList() {
+  const container = document.getElementById("customColumnsList");
+  if (!container) return;
+
+  if (!customColumns.length) {
+    container.innerHTML = `<div class="muted" style="padding:10px 0;">Noch keine Zusatzspalten angelegt.</div>`;
+    return;
+  }
+
+  container.innerHTML = customColumns.map(col => `
+    <div class="custom-col-item">
+      <span>📌 <strong>${escapeHtml(col.label)}</strong></span>
+      <button class="btn red small" style="padding:4px 8px; font-size:11px;" onclick="deleteCustomColumn('${col.key}')">Entfernen</button>
+    </div>
+  `).join('');
+}
+
+function addNewCustomColumn() {
+  const nameInput = document.getElementById("newColumnNameInput");
+  const label = nameInput.value.trim();
+
+  if (!label) {
+    alert("Bitte einen Spaltennamen eingeben.");
+    return;
+  }
+
+  const key = "col_" + Date.now();
+  customColumns.push({ key, label });
+  saveCustomColumns();
+  nameInput.value = "";
+  renderCustomColumnsList();
+  renderSites();
+}
+
+function deleteCustomColumn(key) {
+  if (!confirm("Spalte wirklich entfernen?")) return;
+  customColumns = customColumns.filter(c => c.key !== key);
+  saveCustomColumns();
+  renderCustomColumnsList();
+  renderSites();
+}
+
+function addBookingPieceRow(count = 1, length = '') {
+  const container = document.getElementById("bookingPieceRows");
+  if (!container) return;
+
+  const rowId = 'piece_row_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+  const rowNumber = container.querySelectorAll("div[id^='piece_row_']").length + 1;
+  const rowHtml = `
+    <div id="${rowId}" class="piece-entry">
+      <div class="piece-entry-head">
+        <span>Einzelstück ${rowNumber}</span>
+        <button type="button" class="btn red small" onclick="removeBookingPieceRow('${rowId}')" aria-label="Einzelstück ${rowNumber} löschen">🗑 Löschen</button>
+      </div>
+      <div class="piece-entry-fields">
+        <div>
+          <label for="${rowId}_count">Anzahl gleicher Stücke</label>
+          <input id="${rowId}_count" type="number" min="1" step="1" value="${count}" inputmode="numeric" placeholder="z. B. 2" oninput="calculateBookingPiecesTotal()">
+        </div>
+        <div>
+          <label for="${rowId}_length">Länge pro Stück (m)</label>
+          <input id="${rowId}_length" type="number" min="0.01" step="0.01" value="${length}" inputmode="decimal" placeholder="z. B. 12,5" oninput="calculateBookingPiecesTotal()">
+        </div>
+      </div>
+      <div class="piece-entry-footer">
+        <span>Zwischensumme</span>
+        <strong class="row-subtotal">0 m</strong>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', rowHtml);
+  calculateBookingPiecesTotal();
+}
+
+function removeBookingPieceRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (row) row.remove();
+  // Nummern nach dem Löschen sauber neu vergeben.
+  const container = document.getElementById("bookingPieceRows");
+  if (container) {
+    container.querySelectorAll("div[id^='piece_row_']").forEach((row, index) => {
+      const title = row.querySelector('.piece-entry-head span');
+      if (title) title.textContent = `Einzelstück ${index + 1}`;
+      const button = row.querySelector('.piece-entry-head button');
+      if (button) button.setAttribute('aria-label', `Einzelstück ${index + 1} löschen`);
+    });
+  }
+  calculateBookingPiecesTotal();
+}
+
+function splitBookingAmountIntoPieces() {
+  const amountInput = document.getElementById('bookingAmount');
+  const countInput = document.getElementById('bookingSplitCount');
+  const total = Number(String(amountInput?.value || '').replace(',', '.'));
+  const count = parseInt(countInput?.value, 10);
+
+  if (!Number.isFinite(total) || total <= 0) {
+    alert('Bitte zuerst oben eine gültige Gesamtlänge in Metern eingeben.');
+    amountInput?.focus();
+    return;
+  }
+  if (!Number.isInteger(count) || count < 1 || count > 500) {
+    alert('Bitte eine Stückzahl zwischen 1 und 500 eingeben.');
+    countInput?.focus();
+    return;
+  }
+  const container = document.getElementById('bookingPieceRows');
+  if (!container) return;
+  const hasExistingRows = container.querySelectorAll("div[id^='piece_row_']").length > 0;
+  if (hasExistingRows && !confirm(`Die vorhandene Aufteilung durch ${count} Stücke ersetzen und insgesamt ${formatNumber(total)} m verteilen?`)) return;
+  container.innerHTML = '';
+
+  // Auf Cent genau verteilen, damit die Summe trotz Rundung exakt gleich bleibt.
+  const totalCents = Math.round(total * 100);
+  const baseCents = Math.floor(totalCents / count);
+  const extraCents = totalCents - baseCents * count;
+  for (let i = 0; i < count; i++) {
+    const cents = baseCents + (i < extraCents ? 1 : 0);
+    addBookingPieceRow(1, (cents / 100).toFixed(2));
+  }
+  calculateBookingPiecesTotal();
+}
+
+function getBookingPiecesFromUI() {
+  const container = document.getElementById("bookingPieceRows");
+  if (!container) return [];
+
+  const pieces = [];
+  const rows = container.querySelectorAll("div[id^='piece_row_']");
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll("input");
+    const count = parseInt(inputs[0]?.value, 10) || 0;
+    const length = parseFloat(inputs[1]?.value) || 0;
+    if (count > 0 && length > 0) pieces.push({ count, length });
+  });
+  return pieces;
+}
+
+function calculateBookingPiecesTotal() {
+  const container = document.getElementById("bookingPieceRows");
+  const rows = container ? container.querySelectorAll("div[id^='piece_row_']") : [];
+  let total = 0;
+  let totalCount = 0;
+
+  rows.forEach((row, index) => {
+    const inputs = row.querySelectorAll("input");
+    const count = parseInt(inputs[0]?.value, 10) || 0;
+    const length = parseFloat(inputs[1]?.value) || 0;
+    const subtotal = count > 0 && length > 0 ? count * length : 0;
+    total += subtotal;
+    if (count > 0 && length > 0) totalCount += count;
+
+    const sub = row.querySelector(".row-subtotal");
+    if (sub) sub.textContent = `${formatNumber(subtotal)} m`;
+    const title = row.querySelector('.piece-entry-head span');
+    if (title) title.textContent = `Einzelstück ${index + 1}`;
+  });
+
+  const totalText = `${formatNumber(total)} m`;
+  const countText = totalCount === 1 ? '1 Stück' : `${totalCount} Stück`;
+  const editorTotal = document.getElementById('pieceEditorTotal');
+  const editorCount = document.getElementById('pieceEditorCount');
+  if (editorTotal) editorTotal.textContent = totalText;
+  if (editorCount) editorCount.textContent = countText;
+
+  const managerTotal = document.getElementById('pieceManagerTotal');
+  const managerCount = document.getElementById('pieceManagerCount');
+  const managerPreview = document.getElementById('pieceManagerPreview');
+  if (managerTotal) managerTotal.textContent = totalText;
+  if (managerCount) managerCount.textContent = totalCount ? countText : 'Noch keine';
+  if (managerPreview) {
+    const validPieces = getBookingPiecesFromUI();
+    if (!validPieces.length) {
+      managerPreview.innerHTML = '<div class="muted" style="font-size:13px;">Optional: Einzelstücke hinzufügen, damit ihre Längen separat gespeichert werden.</div>';
+    } else {
+      managerPreview.innerHTML = validPieces.map((piece, index) =>
+        `<div class="piece-preview-row"><span>${index + 1}. ${piece.count} × ${formatNumber(piece.length)} m</span><strong>${formatNumber(piece.count * piece.length)} m</strong></div>`
+      ).join('');
+    }
+  }
+
+  // Die eingegebene Gesamtlänge bleibt unverändert. Nur warnen, wenn die
+  // Summe der Einzelstücke größer ist als die festgelegte Gesamtmenge.
+  const amountInput = document.getElementById("bookingAmount");
+  if (amountInput) {
+    const enteredTotal = Number(String(amountInput.value || '').replace(',', '.'));
+    const exceedsTotal = Number.isFinite(enteredTotal) && enteredTotal > 0 && total > enteredTotal + 0.0001;
+    amountInput.classList.toggle('booking-amount-overflow', exceedsTotal);
+    amountInput.setAttribute('aria-invalid', exceedsTotal ? 'true' : 'false');
+    amountInput.title = exceedsTotal
+      ? `Achtung: Die Stücke ergeben ${formatNumber(total)} m, eingegeben sind aber nur ${formatNumber(enteredTotal)} m.`
+      : '';
+  }
+}
+
+function openBookingPiecesModal() {
+  const container = document.getElementById('bookingPieceRows');
+  if (!container) return;
+  if (!container.querySelector("div[id^='piece_row_']")) addBookingPieceRow();
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  calculateBookingPiecesTotal();
+}
+
+function closeBookingPiecesModal() {
+  // Rückwärtskompatibilität: Die Stückelung liegt jetzt direkt im Buchungsfenster.
+  calculateBookingPiecesTotal();
+}
+
+function openBooking() {
+  closeWarehousePieceModal();
+  bookingDirection = null;
+  document.getElementById("directionWarehouse").classList.remove("active");
+  document.getElementById("directionSite").classList.remove("active");
+  document.getElementById("bookingFields").style.display = "none";
+  document.getElementById("bookingPieceRows").innerHTML = "";
+  const amountInput = document.getElementById("bookingAmount");
+  if (amountInput) delete amountInput.dataset.piecesCalculated;
+  document.getElementById("bookingPiecesModal")?.classList.remove("show");
+  calculateBookingPiecesTotal();
+
+  populateBookingOptions();
+  document.getElementById("bookingModal").classList.add("show");
+}
+
+function closeBooking() {
+  document.getElementById("bookingModal").classList.remove("show");
+  document.getElementById("bookingPiecesModal")?.classList.remove("show");
+}
+
+function populateBookingOptions() {
+  const matSelect = document.getElementById("bookingMaterial");
+  if (matSelect) {
+    matSelect.innerHTML = materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.unit || 'm')})</option>`).join("");
+  }
+
+  const empSelect = document.getElementById("bookingEmployee");
+  if (empSelect) {
+    empSelect.innerHTML = `<option value="">Mitarbeiter auswählen</option>` +
+      employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+  }
+}
+
+function selectDirection(dir) {
+  bookingDirection = dir;
+  const btnWh = document.getElementById("directionWarehouse");
+  const btnSite = document.getElementById("directionSite");
+
+  if (dir === 'warehouse') {
+    btnWh.classList.add("active");
+    btnSite.classList.remove("active");
+    document.getElementById("siteSelectionArea").innerHTML = `
+      <label>Ziel-Baustelle</label>
+      <select id="targetSite" onchange="updateBookingInfo()">
+        <option value="">Baustelle auswählen</option>
+        ${sites.filter(s => s.active).map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+      </select>
+    `;
+  } else {
+    btnWh.classList.remove("active");
+    btnSite.classList.add("active");
+    document.getElementById("siteSelectionArea").innerHTML = `
+      <label>Quell-Baustelle</label>
+      <select id="sourceSite" onchange="updateBookingInfo()">
+        <option value="">Baustelle auswählen</option>
+        ${sites.filter(s => s.active).map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+      </select>
+    `;
+  }
+
+  document.getElementById("bookingFields").style.display = "block";
+  updateBookingInfo();
+}
+
+function openMaterialModal() {
+  document.getElementById("newMaterialName").value = "";
+  document.getElementById("newMaterialStock").value = "0";
+  document.getElementById("materialModal").classList.add("show");
+}
+
+function closeMaterialModal() {
+  document.getElementById("materialModal").classList.remove("show");
+}
+
+async function createMaterial() {
+  const name = document.getElementById("newMaterialName").value.trim();
+  const unit = document.getElementById("newMaterialUnit").value;
+  const stock = parseFloat(document.getElementById("newMaterialStock").value) || 0;
+
+  if (!name) {
+    alert("Bitte eine Materialbezeichnung eingeben.");
+    return;
+  }
+
+  try {
+    const inserted = await supabase("materials", {
+      method: "POST",
+      body: JSON.stringify({ name, unit, stock })
+    });
+
+    closeMaterialModal();
+    await loadMaterials();
+    populateBookingOptions();
+    renderWarehouse();
+
+    if (inserted && inserted[0] && document.getElementById("bookingMaterial")) {
+      document.getElementById("bookingMaterial").value = inserted[0].id;
+      updateBookingInfo();
+    }
+
+    alert("✅ Neues Material wurde erfolgreich im System angelegt!");
+  } catch (error) {
+    alert("Fehler beim Erstellen des Materials: " + error.message);
+  }
+}
+
+function updateBookingInfo() {
+  const matId = parseInt(document.getElementById("bookingMaterial")?.value);
+  const mat = materials.find(m => m.id === matId);
+  const infoBox = document.getElementById("bookingInfo");
+  const routeBox = document.getElementById("routePreview");
+
+  if (!infoBox || !routeBox) return;
+
+  let siteId = null;
+  if (bookingDirection === 'warehouse') {
+    siteId = parseInt(document.getElementById("targetSite")?.value);
+  } else if (bookingDirection === 'site') {
+    siteId = parseInt(document.getElementById("sourceSite")?.value);
+  }
+
+  const site = sites.find(s => s.id === siteId);
+
+  if (bookingDirection === 'warehouse') {
+    routeBox.innerHTML = `📦 LAGER ➔ 🏗️ ${site ? escapeHtml(site.name) : '...'}`;
+    infoBox.innerHTML = mat ? `Lagerbestand: <strong>${formatNumber(mat.stock)} ${escapeHtml(mat.unit||'m')}</strong>` : '';
+  } else if (bookingDirection === 'site') {
+    routeBox.innerHTML = `🏗️ ${site ? escapeHtml(site.name) : '...'} ➔ 📦 LAGER`;
+    const siteStock = siteStocks.find(s => s.site_id === siteId && s.material_id === matId);
+    if (siteStock && Number(siteStock.stock) > 0) {
+      infoBox.innerHTML = `Bestand vor Ort: <strong>${formatNumber(siteStock.stock)} ${escapeHtml(mat?.unit||'m')}</strong>`;
+    } else {
+      infoBox.innerHTML = `<span style="color:var(--orange);">⚠️ Nicht im Baustellenbestand verzeichnet. Rückbuchung ins Zentrallager ist trotzdem möglich!</span>`;
+    }
+  }
+}
+
+async function submitBooking() {
+  const matId = parseInt(document.getElementById("bookingMaterial").value);
+  const amount = parseFloat(document.getElementById("bookingAmount").value);
+  const employee = document.getElementById("bookingEmployee").value;
+  const pieces = getBookingPiecesFromUI();
+
+  if (!matId || isNaN(amount) || amount <= 0) {
+    alert("Bitte ein Material und eine gültige Menge eingeben.");
+    return;
+  }
+
+  const piecesTotal = pieces.reduce((sum, piece) => sum + (Number(piece.count) || 0) * (Number(piece.length) || 0), 0);
+  if (pieces.length && piecesTotal > amount + 0.0001) {
+    document.getElementById("bookingAmount")?.classList.add('booking-amount-overflow');
+    alert(`Die Einzelstücke ergeben ${formatNumber(piecesTotal)} m, die Gesamtlänge beträgt aber nur ${formatNumber(amount)} m. Bitte korrigiere die Stücklängen oder die Gesamtlänge.`);
+    return;
+  }
+
+  if (!employee) {
+    alert("Bitte wähle einen Mitarbeiter aus.");
+    return;
+  }
+
+  let rpcName = "";
+  let payload = {};
+
+  if (bookingDirection === 'warehouse') {
+    const siteId = parseInt(document.getElementById("targetSite").value);
+    if (!siteId) {
+      alert("Bitte Baustelle auswählen.");
+      return;
+    }
+    rpcName = "book_warehouse_to_site";
+    payload = {
+      p_material_id: matId,
+      p_site_id: siteId,
+      p_amount: amount,
+      p_employee: employee
+    };
+  } else if (bookingDirection === 'site') {
+    const siteId = parseInt(document.getElementById("sourceSite").value);
+    if (!siteId) {
+      alert("Bitte Baustelle auswählen.");
+      return;
+    }
+    rpcName = "book_site_to_warehouse";
+    payload = {
+      p_material_id: matId,
+      p_site_id: siteId,
+      p_amount: amount,
+      p_employee: employee
+    };
+  }
+
+  try {
+    await rpc(rpcName, payload);
+
+    if (bookingDirection === 'site') {
+      if (pieces.length > 0) {
+        addPiecesToWarehouse(matId, pieces);
+      } else {
+        addPiecesToWarehouse(matId, [{ count: 1, length: amount }]);
+      }
+    } else if (bookingDirection === 'warehouse') {
+      deductPiecesFromWarehouse(matId, pieces, amount);
+    }
+
+    closeBooking();
+    await loadAll();
+    alert("✅ Buchung erfolgreich durchgeführt!");
+  } catch (error) {
+    console.error("Buchung Fehler:", error);
+    alert("❌ Buchungsfehler:\n\n" + error.message);
+  }
+}
+
+function openEmployeeModal() {
+  if (!isAdmin) {
+    alert("Nur Administratoren können Mitarbeiter hinzufügen.");
+    return;
+  }
+  document.getElementById("newEmployeeName").value = "";
+  document.getElementById("employeeModal").classList.add("show");
+}
+
+function closeEmployeeModal() {
+  document.getElementById("employeeModal").classList.remove("show");
+}
+
+async function createEmployee() {
+  const name = document.getElementById("newEmployeeName").value.trim();
+  if (!name) {
+    alert("Bitte einen Namen eingeben.");
+    return;
+  }
+
+  try {
+    await supabase("employees", {
+      method: "POST",
+      body: JSON.stringify({ name, active: true })
+    });
+
+    closeEmployeeModal();
+    await loadEmployees();
+    populateBookingOptions();
+    alert("👷 Mitarbeiter hinzugefügt!");
+  } catch (error) {
+    alert("Fehler beim Erstellen des Mitarbeiters: " + error.message);
+  }
+}
+
+function renderVehicles() {
+  const container = document.getElementById("fahrzeuge");
+  if (!container) return;
+  if (selectedVehicleId && !vehicles.some(v => Number(v.id) === Number(selectedVehicleId))) selectedVehicleId = null;
+
+  const activeVehicles = vehicles.filter(v => v.active !== false);
+  const pending = vehicleRestockItems.filter(item => item.status === "needs_restock");
+  const pendingForVehicle = selectedVehicleId ? pending.filter(item => Number(item.vehicle_id) === Number(selectedVehicleId)) : [];
+  const selectedVehicle = activeVehicles.find(v => Number(v.id) === Number(selectedVehicleId));
+
+  let html = `
+    <div class="card">
+      <div class="site-card-top">
+        <div><h2>🚐 Einsatzfahrzeuge</h2><div class="subtitle">Entnommenes Material erfassen und späteres Nachladen nicht vergessen.</div></div>
+        ${isAdmin ? `<button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>` : ''}
+      </div>
+      <div class="stats-grid" style="margin-top:14px;">
+        <div class="stat-card"><div class="stat-number">${activeVehicles.length}</div><div class="stat-label">Fahrzeuge</div></div>
+        <div class="stat-card"><div class="stat-number">${pending.length}</div><div class="stat-label">Offene Nachladungen</div></div>
+      </div>
+    </div>
+  `;
+
+  if (!activeVehicles.length) {
+    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong>${isAdmin ? `<p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button>` : `<p>Ein Administrator kann hier Fahrzeuge hinzufügen.</p>`}</div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  html += `<div class="card"><h3 style="margin-top:0;">Fahrzeug auswählen</h3><div class="filter-grid"><select id="selectedVehicleSelect" onchange="selectVehicle(this.value)"><option value="">Alle Fahrzeuge anzeigen</option>${activeVehicles.map(v => `<option value="${v.id}" ${Number(v.id) === Number(selectedVehicleId) ? 'selected' : ''}>${escapeHtml(v.name)}${v.plate ? ' · ' + escapeHtml(v.plate) : ''}</option>`).join('')}</select></div><div class="vehicle-grid">`;
+  activeVehicles.forEach(vehicle => {
+    const count = pending.filter(item => Number(item.vehicle_id) === Number(vehicle.id)).length;
+    html += `<div class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}"><button style="width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>${isAdmin ? `<button class="btn red small" style="margin-top:8px;" onclick="archiveVehicle(${vehicle.id})">Fahrzeug entfernen</button>` : ''}</div>`;
+  });
+  html += `</div></div>`;
+
+  const displayedItems = selectedVehicleId ? vehicleRestockItems.filter(item => Number(item.vehicle_id) === Number(selectedVehicleId)) : vehicleRestockItems;
+  html += `<div class="card"><div class="site-card-top"><div><h2 style="margin:0;">${selectedVehicle ? '📋 ' + escapeHtml(selectedVehicle.name) : '📋 Nachlade-Liste'}</h2><div class="subtitle">${selectedVehicle ? 'Material, das für dieses Fahrzeug wieder eingeladen werden muss.' : 'Offene und erledigte Einträge aller Fahrzeuge.'}</div></div>${selectedVehicle ? `<button class="btn green" onclick="openVehicleItemModal(${selectedVehicle.id})">➕ Material entnommen</button>` : ''}</div>`;
+  if (!selectedVehicleId) {
+    html += `<p class="muted" style="margin-bottom:0;">Wähle ein Fahrzeug aus, um Materialentnahmen einzutragen. Die offenen Nachladungen aller Fahrzeuge werden unten zusammengefasst.</p>`;
+  }
+  const itemsToShow = selectedVehicleId ? displayedItems : displayedItems.filter(item => item.status === 'needs_restock');
+  if (!itemsToShow.length) {
+    html += `<div class="empty">${selectedVehicleId ? 'Für dieses Fahrzeug gibt es keine Einträge.' : 'Aktuell muss bei keinem Fahrzeug Material nachgeladen werden.'}</div>`;
+  } else {
+    html += `<div class="vehicle-item-list">` + itemsToShow.map(item => {
+      const vehicle = vehicles.find(v => Number(v.id) === Number(item.vehicle_id));
+      const material = materials.find(m => Number(m.id) === Number(item.material_id));
+      const materialName = item.material_name || material?.name || 'Material #' + item.material_id;
+      const materialUnit = item.unit || material?.unit || 'Stk';
+      const done = item.status === 'reloaded';
+      return `<div class="vehicle-item ${done ? 'vehicle-item-done' : ''}"><div class="vehicle-item-main"><strong>${escapeHtml(materialName)}</strong><span class="vehicle-item-amount">${formatNumber(item.amount)} ${escapeHtml(materialUnit)}</span><div class="muted" style="font-size:12px;">🚐 ${escapeHtml(vehicle?.name || 'Fahrzeug')} ${vehicle?.plate ? '· ' + escapeHtml(vehicle.plate) : ''} · ${formatDate(item.created_at)}</div><div class="vehicle-item-note">👷 Entnommen von: ${escapeHtml(item.taken_by || 'Nicht angegeben')}</div>${item.note ? `<div class="vehicle-item-note">Notiz: ${escapeHtml(item.note)}</div>` : ''}${done ? `<div class="vehicle-item-note">✅ Wieder eingeladen von: ${escapeHtml(item.reloaded_by || 'Nicht angegeben')}${item.reloaded_at ? ' · ' + formatDate(item.reloaded_at) : ''}</div>` : ''}</div><div class="vehicle-item-actions">${done ? `<button class="btn small" onclick="reopenVehicleItem(${item.id})">Wieder öffnen</button>` : `<button class="btn green small" onclick="markVehicleItemReloaded(${item.id})">✓ Wieder eingeladen</button>`}<button class="btn red small" onclick="deleteVehicleItem(${item.id})">Löschen</button></div></div>`;
+    }).join('') + `</div>`;
+  }
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function selectVehicle(vehicleId) {
+  selectedVehicleId = vehicleId ? Number(vehicleId) : null;
+  renderVehicles();
+}
+
+function openVehicleModal() {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge hinzufügen.'); return; }
+  document.getElementById('newVehicleName').value = '';
+  document.getElementById('newVehiclePlate').value = '';
+  document.getElementById('vehicleModal').classList.add('show');
+}
+function closeVehicleModal() { document.getElementById('vehicleModal').classList.remove('show'); }
+
+async function createVehicle() {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge hinzufügen.'); return; }
+  const name = document.getElementById('newVehicleName').value.trim();
+  const plate = document.getElementById('newVehiclePlate').value.trim();
+  if (!name) { alert('Bitte einen Fahrzeugnamen eingeben.'); return; }
+  try {
+    const inserted = await supabase('vehicles', { method: 'POST', body: JSON.stringify({ name, plate: plate || null, active: true }) });
+    closeVehicleModal();
+    await loadVehicles();
+    if (inserted?.[0]) selectedVehicleId = Number(inserted[0].id);
+    renderVehicles();
+  } catch (error) { alert('Fahrzeug konnte nicht gespeichert werden: ' + error.message); }
+}
+
+async function archiveVehicle(vehicleId) {
+  if (!isAdmin) { alert('Nur Administratoren können Fahrzeuge entfernen.'); return; }
+  const vehicle = vehicles.find(v => Number(v.id) === Number(vehicleId));
+  if (!vehicle) return;
+  if (!confirm(`Fahrzeug „${vehicle.name}“ aus der aktiven Liste entfernen? Die bisherige Nachlade-Historie bleibt erhalten.`)) return;
+  try {
+    await supabase(`vehicles?id=eq.${vehicleId}`, {method:'PATCH', body:JSON.stringify({active:false})});
+    if (Number(selectedVehicleId) === Number(vehicleId)) selectedVehicleId = null;
+    await loadVehicles(); renderVehicles();
+  } catch(error) { alert('Fahrzeug konnte nicht entfernt werden: ' + error.message); }
+}
+
+function openVehicleItemModal(vehicleId) {
+  const vehicle = vehicles.find(v => Number(v.id) === Number(vehicleId));
+  if (!vehicle) return;
+  selectedVehicleId = Number(vehicleId);
+  document.getElementById('vehicleItemVehicleLabel').textContent = 'Fahrzeug: ' + vehicle.name + (vehicle.plate ? ' · ' + vehicle.plate : '');
+  document.getElementById('vehicleItemMaterialName').value = '';
+  document.getElementById('vehicleItemUnit').value = 'Stk';
+  document.getElementById('vehicleItemTakenBy').innerHTML = employeeOptionsHtml();
+  document.getElementById('vehicleItemAmount').value = '';
+  document.getElementById('vehicleItemNote').value = '';
+  document.getElementById('vehicleItemModal').classList.add('show');
+}
+function closeVehicleItemModal() { document.getElementById('vehicleItemModal').classList.remove('show'); }
+
+async function createVehicleItem() {
+  const materialName = document.getElementById('vehicleItemMaterialName').value.trim();
+  const unit = document.getElementById('vehicleItemUnit').value || 'Stk';
+  const amount = Number(String(document.getElementById('vehicleItemAmount').value || '').replace(',', '.'));
+  const note = document.getElementById('vehicleItemNote').value.trim();
+  const takenBy = document.getElementById('vehicleItemTakenBy').value;
+  if (!selectedVehicleId) { alert('Bitte zuerst ein Fahrzeug auswählen.'); return; }
+  if (!materialName || !Number.isFinite(amount) || amount <= 0) { alert('Bitte Materialbezeichnung und eine gültige Menge eingeben.'); return; }
+  if (!takenBy) { alert('Bitte den Kollegen auswählen, der das Material entnommen hat.'); return; }
+  try {
+    await supabase('vehicle_restock_items', { method: 'POST', body: JSON.stringify({ vehicle_id: selectedVehicleId, material_id: null, material_name: materialName, unit, amount, note: note || null, taken_by: takenBy, status: 'needs_restock' }) });
+    closeVehicleItemModal();
+    await loadVehicleRestockItems();
+    renderVehicles();
+  } catch (error) { alert('Materialentnahme konnte nicht gespeichert werden: ' + error.message); }
+}
+
+function employeeOptionsHtml() {
+  return `<option value="">Kollege auswählen</option>` + employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join('');
+}
+
+function markVehicleItemReloaded(itemId) {
+  const item = vehicleRestockItems.find(x => Number(x.id) === Number(itemId));
+  if (!item) return;
+  pendingReloadItemId = Number(itemId);
+  document.getElementById('vehicleReloadItemLabel').textContent = `${item.material_name || 'Material'} · ${formatNumber(item.amount)} ${item.unit || ''}`;
+  document.getElementById('vehicleReloadedBy').innerHTML = employeeOptionsHtml();
+  document.getElementById('vehicleReloadModal').classList.add('show');
+}
+function closeVehicleReloadModal() { document.getElementById('vehicleReloadModal').classList.remove('show'); pendingReloadItemId = null; }
+async function confirmVehicleReloaded() {
+  const reloadedBy = document.getElementById('vehicleReloadedBy').value;
+  if (!pendingReloadItemId) return;
+  if (!reloadedBy) { alert('Bitte den Kollegen auswählen, der aufgefüllt hat.'); return; }
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${pendingReloadItemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'reloaded', reloaded_at: new Date().toISOString(), reloaded_by: reloadedBy }) });
+    closeVehicleReloadModal(); await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Status konnte nicht geändert werden: ' + error.message); }
+}
+async function reopenVehicleItem(itemId) {
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'PATCH', body: JSON.stringify({ status: 'needs_restock', reloaded_at: null, reloaded_by: null }) });
+    await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Eintrag konnte nicht wieder geöffnet werden: ' + error.message); }
+}
+async function deleteVehicleItem(itemId) {
+  if (!confirm('Diesen Eintrag wirklich löschen?')) return;
+  try {
+    await supabase(`vehicle_restock_items?id=eq.${itemId}`, { method: 'DELETE' });
+    await loadVehicleRestockItems(); renderVehicles();
+  } catch (error) { alert('Eintrag konnte nicht gelöscht werden: ' + error.message); }
+}
+
+function openNoteModal() {
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteBody').value = '';
+  document.getElementById('noteAuthor').innerHTML = employeeOptionsHtml();
+  document.getElementById('noteSite').innerHTML = `<option value="">Keine bestimmte Baustelle</option>` + sites.filter(s=>s.active).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+  document.getElementById('noteModal').classList.add('show');
+}
+function closeNoteModal() { document.getElementById('noteModal').classList.remove('show'); }
+async function createNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  const body = document.getElementById('noteBody').value.trim();
+  const author = document.getElementById('noteAuthor').value;
+  const siteValue = document.getElementById('noteSite').value;
+  if (!title || !body) { alert('Bitte Überschrift und Beschreibung eingeben.'); return; }
+  if (!author) { alert('Bitte auswählen, welcher Kollege die Notiz erstellt.'); return; }
+  try {
+    await supabase('work_notes', {method:'POST', body:JSON.stringify({title, body, author, site_id:siteValue ? Number(siteValue) : null, status:'open'})});
+    closeNoteModal(); await loadNotes(); renderNotes();
+  } catch(error) { alert('Notiz konnte nicht gespeichert werden: ' + error.message); }
+}
+async function toggleNoteDone(noteId) {
+  const note = sharedNotes.find(n=>Number(n.id)===Number(noteId));
+  if (!note) return;
+  if (note.status === 'done') {
+    try { await supabase(`work_notes?id=eq.${noteId}`, {method:'PATCH',body:JSON.stringify({status:'open',completed_at:null,completed_by:null})}); await loadNotes(); renderNotes(); }
+    catch(error) { alert('Notiz konnte nicht geöffnet werden: '+error.message); }
+    return;
+  }
+  const completedBy = prompt('Welcher Kollege hat die Arbeit erledigt?');
+  if (!completedBy || !completedBy.trim()) return;
+  try { await supabase(`work_notes?id=eq.${noteId}`, {method:'PATCH',body:JSON.stringify({status:'done',completed_at:new Date().toISOString(),completed_by:completedBy.trim()})}); await loadNotes(); renderNotes(); }
+  catch(error) { alert('Notiz konnte nicht abgeschlossen werden: '+error.message); }
+}
+async function deleteNote(noteId) {
+  if (!confirm('Diese Notiz wirklich löschen?')) return;
+  try { await supabase(`work_notes?id=eq.${noteId}`, {method:'DELETE'}); await loadNotes(); renderNotes(); }
+  catch(error) { alert('Notiz konnte nicht gelöscht werden: '+error.message); }
+}
+function renderNotes() {
+  const c=document.getElementById('notizen'); if(!c) return;
+  const open=sharedNotes.filter(n=>n.status!=='done');
+  const done=sharedNotes.filter(n=>n.status==='done');
+  const noteCard = n => {
+    const site=sites.find(s=>Number(s.id)===Number(n.site_id));
+    return `<div class="note-card ${n.status==='done'?'note-done':''}"><div class="note-card-top"><div><div class="note-card-title">${n.status==='done'?'✅ ': '📝 '}${escapeHtml(n.title)}</div><div class="movement-meta">Von ${escapeHtml(n.author||'Unbekannt')} · ${formatDate(n.created_at)}${site?' · 🏗️ '+escapeHtml(site.name):''}</div></div><span class="badge">${n.status==='done'?'Erledigt':'Offen'}</span></div><div class="note-card-body">${escapeHtml(n.body)}</div>${n.status==='done'?`<div class="movement-meta">Erledigt von ${escapeHtml(n.completed_by||'Unbekannt')}${n.completed_at?' · '+formatDate(n.completed_at):''}</div>`:''}<div class="vehicle-item-actions" style="margin-top:12px;"><button class="btn ${n.status==='done'?'small':'green small'}" onclick="toggleNoteDone(${n.id})">${n.status==='done'?'Wieder öffnen':'✓ Als erledigt markieren'}</button>${isAdmin?`<button class="btn red small" onclick="deleteNote(${n.id})">Löschen</button>`:''}</div></div>`;
+  };
+  c.innerHTML=`<div class="card"><div class="site-card-top"><div><h2>📝 Notizen & anstehende Arbeiten</h2><div class="subtitle">Für alle Kollegen sichtbar, damit keine Aufgabe untergeht.</div></div><button class="btn primary" onclick="openNoteModal()">➕ Notiz erstellen</button></div><div class="stats-grid" style="margin-top:14px;"><div class="stat-card"><div class="stat-number">${open.length}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-number">${done.length}</div><div class="stat-label">Erledigt</div></div></div></div>${open.length?open.map(noteCard).join(''):'<div class="empty">Aktuell stehen keine Arbeiten an. 🎉</div>'}${done.length?`<h3 style="margin:22px 4px 8px;">Erledigte Arbeiten</h3>${done.map(noteCard).join('')}`:''}`;
+}
+
+function renderHistory() {
+  const container = document.getElementById("historie");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="card">
+      <h2>📜 Buchungs-Historie</h2>
+      <div class="muted">Protokoll aller Materialbewegungen</div>
+      <div class="filter-grid">
+        <select id="histMatFilter" onchange="applyHistoryFilters()">
+          <option value="">Alle Materialien</option>
+          ${materials.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join("")}
+        </select>
+        <select id="histEmpFilter" onchange="applyHistoryFilters()">
+          <option value="">Alle Mitarbeiter</option>
+          ${employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    <div id="historyMovements"></div>
+  `;
+
+  renderHistoryList();
+}
+
+function applyHistoryFilters() {
+  historyMaterialFilter = document.getElementById("histMatFilter")?.value || "";
+  historyEmployeeFilter = document.getElementById("histEmpFilter")?.value || "";
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const container = document.getElementById("historyMovements");
+  if (!container) return;
+
+  let filtered = movements;
+  if (historyMaterialFilter) {
+    filtered = filtered.filter(m => m.material_id === parseInt(historyMaterialFilter));
+  }
+  if (historyEmployeeFilter) {
+    filtered = filtered.filter(m => m.employee === historyEmployeeFilter);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty">Keine Buchungen vorhanden.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(m => {
+    const mat = materials.find(x => x.id === m.material_id);
+    const fromSite = sites.find(s => s.id === m.from_site_id);
+    const toSite = sites.find(s => s.id === m.to_site_id);
+
+    let routeText = "";
+    if (m.type === "OUT" || m.from_site_id === null) {
+      routeText = `📦 Lager ➔ 🏗️ ${toSite ? escapeHtml(toSite.name) : "Baustelle"}`;
+    } else {
+      routeText = `🏗️ ${fromSite ? escapeHtml(fromSite.name) : "Baustelle"} ➔ 📦 Lager`;
+    }
+
+    return `
+      <div class="card movement">
+        <div class="movement-main">
+          <strong>${escapeHtml(mat ? mat.name : "Material #" + m.material_id)}</strong>
+          <span style="font-weight:800; color:var(--accent);">${formatNumber(m.amount)} ${escapeHtml(mat?.unit || "m")}</span>
+        </div>
+        <div class="movement-route">${routeText}</div>
+        <div class="movement-meta">
+          👷 ${escapeHtml(m.employee || "Unbekannt")} • 📅 ${formatDate(m.created_at)}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function formatNumber(num) {
+  if (num == null || isNaN(num)) return "0";
+  return Number(num).toLocaleString("de-DE", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }) + ", " + d.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Diese Kennung steht für genau diese ausgelieferte index.html.
+const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || "unbekannt";
+
+function setVersionStatus(state, message) {
+  const badge = document.getElementById("versionStatus");
+  if (!badge) return;
+  badge.classList.remove("online", "update", "offline");
+  if (state) badge.classList.add(state);
+  badge.textContent = message;
+}
+
+async function checkAppVersion() {
+  const reloadButton = document.getElementById("reloadAppButton");
+  const versionLabel = document.getElementById("appVersionLabel");
+  if (reloadButton) reloadButton.hidden = true;
+  if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION;
+
+  if (!navigator.onLine) {
+    setVersionStatus("offline", "📴 Offline");
+    return;
+  }
+
+  setVersionStatus("", "⏳ Prüfe Online-Version …");
+  let checkUrl;
+  try {
+    // Ein wechselnder Parameter umgeht Browser- und Service-Worker-Cache-Treffer.
+    checkUrl = new URL("./index.html", location.href);
+    checkUrl.searchParams.set("__version_check", String(Date.now()));
+    const response = await fetch(checkUrl.href, { cache: "no-store", credentials: "same-origin" });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const html = await response.text();
+    const match = html.match(/<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i);
+    if (!match) throw new Error("Versionskennung fehlt in der Online-Datei");
+    const onlineVersion = match[1];
+
+    if (onlineVersion === APP_VERSION) {
+      setVersionStatus("online", "🟢 Online · aktuell");
+      if (versionLabel) versionLabel.textContent = "Version: " + APP_VERSION;
+    } else {
+      setVersionStatus("update", "🟡 Update verfügbar");
+      if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION + " · Online: " + onlineVersion;
+      if (reloadButton) reloadButton.hidden = false;
+    }
+  } catch (error) {
+    setVersionStatus("offline", "⚠️ Version ungeprüft");
+    if (versionLabel) versionLabel.textContent = "Geladen: " + APP_VERSION + " · Online-Prüfung fehlgeschlagen";
+  } finally {
+    // Verhindert, dass der Service Worker pro Prüfung einen Cache-Eintrag behält.
+    if (checkUrl && window.caches) {
+      caches.keys().then(names => Promise.all(names.map(async name => {
+        try { await (await caches.open(name)).delete(checkUrl.href); } catch (_) {}
+      }))).catch(() => {});
+    }
+  }
+}
+
+window.addEventListener("online", checkAppVersion);
+window.addEventListener("offline", () => setVersionStatus("offline", "📴 Offline"));
+checkAppVersion();
 </script>
+
 </body>
 </html>
