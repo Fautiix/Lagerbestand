@@ -24,6 +24,11 @@ details{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow
 .day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:8px}.day-box{background:#0b111a;border:1px solid var(--line);border-radius:10px;padding:8px}.day-box h4{margin:0 0 8px;font-size:12px;text-align:center;color:#d6deea}.day-box input{margin-bottom:6px}
 .employee-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:#0d131e}.employee-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.employee-head strong{font-size:14px}.hours-grid{display:grid;grid-template-columns:1.2fr repeat(7,minmax(42px,1fr));gap:6px;align-items:end}.hours-grid .mini-label{font-size:11px;color:var(--muted);text-align:center}.hours-grid input{min-width:0;text-align:center;padding:9px 6px;border:1px solid var(--line);background:#06090f;color:#fff;border-radius:8px}.totals-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}
 .flexrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.range-wrap{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.range-wrap output{min-width:44px;text-align:right;color:#dbe6f3}.inline-toggle{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.inline-toggle label{display:flex;gap:8px;align-items:center;font-size:13px;color:#d6deea}
+.weight-group{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}
+.weight-group legend{color:#dbeafe;font-size:14px;font-weight:700;padding:0 5px}
+.weight-choices{display:flex;flex-wrap:wrap;gap:12px}
+.weight-choices label{display:flex;align-items:center;gap:8px;color:#e4eaf3;font-size:14px;cursor:pointer;user-select:none}
+.weight-choices input{accent-color:var(--accent);width:19px;height:19px;cursor:pointer}
 #sigOverlay{position:fixed;inset:0;background:#000c;display:none;z-index:20;align-items:center;justify-content:center;padding:20px}#sigOverlay.visible{display:flex}.sigdialog{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:16px;width:100%;max-width:620px}.sigdialog canvas{touch-action:none;background:#fff;border:2px solid #8290a0;border-radius:6px;width:100%;height:190px}
 @media(max-width:900px){main{grid-template-columns:1fr}.preview-panel{position:static}.paper-frame{padding:6px}.paper{max-width:760px}}
 @media(max-width:520px){main{padding:10px;gap:10px}.card{padding:12px}.field-grid,.field-grid.three{grid-template-columns:1fr}.hours-grid{grid-template-columns:1fr}.totals-grid{grid-template-columns:1fr 1fr}.day-grid{grid-template-columns:1fr 1fr}.paper-frame{padding:3px}}
@@ -139,7 +144,14 @@ function renderEditor(){
    if(sec.optional){
      extra=`<div class="inline-toggle" style="margin-bottom:10px"><label><input type="checkbox" data-key="showTech"> Sektion anzeigen, wenn sie gebraucht wird</label></div>`;
    }
-   h+=`<details ${sec.open?'open':''}><summary>${escapeText(sec.title)}</summary><div class="inner">${extra}<div class="field-grid">${sec.rows.map(r=>inputHtml(r)).join('')}</div></div></details>`;
+   if(sec.title==='Fahrzeuge und Fahrtzeiten'){
+     extra+=`<p class="notice" style="margin-top:14px">Gewichtsklasse je Fahrzeug auswählen. Pro Fahrzeug ist nur ein Häkchen möglich.</p>`;
+     for(let n=1;n<=2;n++)extra+=`<fieldset class="weight-group"><legend>Fahrzeug ${n} · Gewichtsklasse</legend><div class="weight-choices">
+       <label><input type="checkbox" data-key="kfz${n}_bis15"> bis 1,5 t</label>
+       <label><input type="checkbox" data-key="kfz${n}_ueber15"> über 1,5 t</label>
+     </div></fieldset>`;
+   }
+   h+=`<details ${sec.open?'open':''}><summary>${escapeText(sec.title)}</summary><div class="inner"><div class="field-grid">${sec.rows.map(r=>inputHtml(r)).join('')}</div>${extra}</div></details>`;
  }
  
  h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inner">
@@ -179,6 +191,13 @@ function updateField(el){
  if(key==='gewaltNein'&&el.checked)data.gewaltJa=false;
  if(key==='inspektionJa'&&el.checked)data.inspektionNein=false;
  if(key==='inspektionNein'&&el.checked)data.inspektionJa=false;
+ // Je Fahrzeug nur eine Gewichtsklasse (oder keine) auswählen.
+ const weightMatch=key.match(/^kfz([12])_(bis15|ueber15)$/);
+ if(weightMatch&&el.checked){
+   const other=weightMatch[2]==='bis15'?'ueber15':'bis15';
+   data[`kfz${weightMatch[1]}_${other}`]=false;
+   syncInputs();
+ }
  if(key==='employeeCount'){ renderEditor(); renderStamps(); setStatus('Monteure angepasst – bitte speichern',false); unsaved=true; return; }
  if(key.endsWith('Ja')||key.endsWith('Nein')) syncInputs();
  unsaved=true; updateOutputs(); updateLinesHint(); renderStamps(); setStatus('Änderungen noch nicht gespeichert',false);
@@ -348,6 +367,41 @@ function getSignatureImage(src){
  imageCache.set(src,promise);
  return promise;
 }
+// Die Originalvorlage enthält an diesen vier Stellen gedruckte Nullen.
+// Nur diese Ziffern werden auf der Vorschau/PDF maskiert und durch Kästchen ersetzt.
+// Das Quellbild selbst bleibt unverändert.
+function drawVehicleWeightBoxes(ctx){
+ const spots=[
+   {key:'kfz1_bis15',x:512,y:361},
+   {key:'kfz1_ueber15',x:599,y:361},
+   {key:'kfz2_bis15',x:512,y:402},
+   {key:'kfz2_ueber15',x:599,y:402}
+ ];
+ ctx.save();
+ for(const spot of spots){
+   const px=Math.round(spot.x), py=Math.round(spot.y);
+   // Hintergrund unmittelbar ober- und unterhalb der alten Ziffer abtasten.
+   const top=ctx.getImageData(px,py-15,1,1).data;
+   const bottom=ctx.getImageData(px,py+15,1,1).data;
+   const gradient=ctx.createLinearGradient(0,py-12,0,py+12);
+   gradient.addColorStop(0,`rgb(${top[0]},${top[1]},${top[2]})`);
+   gradient.addColorStop(1,`rgb(${bottom[0]},${bottom[1]},${bottom[2]})`);
+   ctx.fillStyle=gradient;
+   ctx.fillRect(px-11,py-12,22,24);
+   const boxSize=14;
+   ctx.lineWidth=1.4;ctx.strokeStyle='#18232a';
+   ctx.strokeRect(px-boxSize/2,py-boxSize/2,boxSize,boxSize);
+   if(data[spot.key]){
+     ctx.strokeStyle='#081c31';ctx.lineWidth=2.3;
+     ctx.lineCap='round';ctx.lineJoin='round';
+     ctx.beginPath();
+     ctx.moveTo(px-4.0,py);ctx.lineTo(px-0.6,py+3.5);ctx.lineTo(px+5.2,py-4.0);
+     ctx.stroke();
+   }
+ }
+ ctx.restore();
+}
+
 async function renderPageTo(canvas){
  if(!templateImg.complete||!templateImg.naturalWidth){
    await new Promise((resolve,reject)=>{templateImg.addEventListener('load',resolve,{once:true});templateImg.addEventListener('error',reject,{once:true})});
@@ -355,6 +409,7 @@ async function renderPageTo(canvas){
  canvas.width=1054;canvas.height=1492;
  const ctx=canvas.getContext('2d');
  ctx.drawImage(templateImg,0,0,1054,1492);
+ drawVehicleWeightBoxes(ctx);
  for(const spec of getVisibleSpecs())drawField(ctx,spec);
  drawMaterials(ctx);
  for(const spec of SIG_FIELDS){
@@ -385,6 +440,16 @@ function renderStamps(){
 $('previewCanvas').addEventListener('click',e=>{
  const bounds=e.currentTarget.getBoundingClientRect();
  const x=100*(e.clientX-bounds.left)/bounds.width,y=100*(e.clientY-bounds.top)/bounds.height;
+ // Auch per Klick auf die Kästchen in der Vorschau auswählbar.
+ const weightSpot=[
+   {key:'kfz1_bis15',x:512,y:361},{key:'kfz1_ueber15',x:599,y:361},
+   {key:'kfz2_bis15',x:512,y:402},{key:'kfz2_ueber15',x:599,y:402}
+ ].find(s=>Math.abs(s.x-x*10.54)<14&&Math.abs(s.y-y*14.92)<15);
+ if(weightSpot){
+   const input=$('editor').querySelector(`[data-key="${weightSpot.key}"]`);
+   if(input){input.closest('details').open=true;input.checked=!input.checked;updateField(input)}
+   return;
+ }
  const field=getVisibleSpecs().find(s=>{
    const top=s.kind==='ruled'?s.firstCenter-.95:s.y;
    const height=s.kind==='ruled'?s.lines*s.rowStep:s.h;
