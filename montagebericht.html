@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-2">
+<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-3">
 <title>Blauer Montagebericht · Materialverwaltung</title>
 <style>
 :root{color-scheme:dark;--bg:#0b0d10;--panel:#121824;--ink:#f4f6fb;--muted:#b0bfd5;--line:#29354a;--accent:#2563eb}
@@ -18,14 +18,14 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 </style>
 </head>
 <body>
-<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU 2 · 18.10.2026</span></header>
+<header class="top"><a href="./index.html">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version NEU 3 · 18.10.2026</span></header>
 <main>
 <section class="panel">
 <div class="buttons"><select class="selectReport" id="saved" aria-label="Gespeicherten Bericht öffnen"></select><button id="add" type="button">＋ Neuer Bericht</button></div>
 <div class="buttons"><button class="primary" id="pdf" type="button">📄 PDF herunterladen</button><button id="save" type="button">💾 Speichern</button><button id="remove" class="delete" type="button">🗑️ Löschen</button></div>
 <div id="status" class="status" role="status"></div>
 <h2>Bericht ausfüllen</h2><div id="editor"></div>
-<p class="tiny">Der blaue Originalzettel bleibt unverändert. Berichtsdaten werden aktuell nur auf diesem Gerät gespeichert. Die Berichtsnummer 0116300 auf der Vorlage wird noch nicht automatisch vergeben.</p>
+<p class="tiny">Der blaue Originalzettel bleibt unverändert. Baustellen werden aus Supabase geladen; Berichte selbst werden weiterhin nur auf diesem Gerät gespeichert. Die Berichtsnummer 0116300 auf der Vorlage wird noch nicht automatisch vergeben.</p>
 </section>
 <section class="panel preview"><div class="previewTitle"><h2>Vorschau auf dem Originalzettel</h2><span class="version">PDF = Vorschau</span></div><div class="sheetFrame"><canvas id="page" class="sheetCanvas" width="1054" height="1492" aria-label="Vorschau des blauen Montageberichts"></canvas></div><p class="tiny">Die Positionen stammen aus den Tabellenlinien des Originalbildes. Für eine größere Ansicht kannst du auf dem Handy zoomen.</p></section>
 </main>
@@ -35,11 +35,18 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 'use strict';
 // Neue Rendering-Engine: alle Positionen sind echte Pixel in derselben 1054x1492-Vorlage.
 // EIN Canvas ist die einzige Quelle für Vorschau und PDF. Keine zweiten CSS-Positionen.
-const VERSION='2026-10-18-NEU-2', W=1054,H=1492;
+const VERSION='2026-10-18-NEU-3', W=1054,H=1492;
 const STORAGE='mv_montageberichte_v2', ACTIVE='mv_montagebericht_aktiv_v2';
 const $=id=>document.getElementById(id);
 const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const SUMS=['Gesamtstd.','Fahrstd.','Rüstzeit','Pause','Überstd.','Nacht'];
+// Dies sind dieselben öffentlichen Supabase-Konfigurationswerte wie in der Haupt-App.
+const SITE_SUPABASE_URL='https://zjomsuqowqgpzodawixw.supabase.co';
+const SITE_SUPABASE_KEY='sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD';
+const HOME_LOCATION_KEY='mv_bericht_standort_v1';
+let availableSites=[];
+let sitesState='loading';
+const pauseValues=Array.from({length:17},(_,i)=>(i*.25).toFixed(2).replace('.',','));
 const FIELD_FONT='600 16px Arial, sans-serif';
 const DAY_EDGES=[194,256,318,381,443,505,568,631];
 const SUM_EDGES=[631,693,756,819,881,944,1009];
@@ -68,20 +75,35 @@ function field(label,key,type='text',placeholder=''){
  if(type==='textarea')return `<div class="field"><label for="f_${key}">${esc(label)}</label><textarea data-field="${key}" id="f_${key}" rows="4" placeholder="${esc(placeholder)}"></textarea></div>`;
  return `<div class="field"><label for="f_${key}">${esc(label)}</label><input data-field="${key}" id="f_${key}" type="${type}" autocomplete="off" placeholder="${esc(placeholder)}"></div>`;
 }
+function siteChoice(){
+ const opts=availableSites.filter(s=>s.active!==false||String(s.id)===String(model.siteId))
+  .map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+ const selected=model.siteId?String(model.siteId):'';
+ const missing=selected&&!availableSites.some(s=>String(s.id)===selected)?`<option value="${esc(selected)}">Bisherige Baustelle (nicht mehr verfügbar)</option>`:'';
+ const desc=sitesState==='loading'?'Baustellen werden geladen …':sitesState==='error'?'Baustellen konnten nicht geladen werden. In der Materialverwaltung anmelden und erneut versuchen.':availableSites.length?'Baustelle auswählen: Einsatzort, Kilometer und Auftragsnummer werden übernommen. Du kannst sie danach noch ändern.':'Keine Baustellen gefunden.';
+ return `<div class="field" style="grid-column:1/-1"><label for="f_siteId">Baustelle aus der Materialverwaltung</label><select id="f_siteId" data-field="siteId"><option value="">Bitte Baustelle auswählen …</option>${missing}${opts}</select><div class="tiny">${esc(desc)} <button type="button" id="reloadSites" style="padding:3px 8px;font-size:12px">↻ Aktualisieren</button></div></div>`;
+}
+function orderChoice(){return `<div class="field"><label for="f_orderType">Auftragsart</label><select id="f_orderType" data-field="orderType"><option value="auftrag">Auftrag</option><option value="zusatz">Zusatz</option></select></div>`}
+function pauseChoice(r){
+ const key=`m${r}_sum3`,val=safe(model[key]).trim().replace('.',',');
+ const isKnown=val===''||pauseValues.includes(val)||pauseValues.some(v=>Number(v.replace(',','.'))===Number(val.replace(',','.')));
+ const options=pauseValues.map(v=>`<option value="${v}">${v} Std.</option>`).join('');
+ const custom= !isKnown || model[`pauseCustom${r}`]===true;
+ return `<div class="field"><label for="pauseSelect${r}">Pause</label><select id="pauseSelect${r}" data-pause="${r}"><option value="">Bitte wählen …</option>${options}<option value="custom">Eigener Wert …</option></select><div id="pauseCustom${r}" style="${custom?'':'display:none;'}margin-top:7px"><input id="pauseInput${r}" type="text" inputmode="decimal" placeholder="z. B. 0,75" data-pause-custom="${r}" value="${custom?esc(model[key]||''):''}"></div></div>`;
+}
 function selectEmployee(){return `<div class="field"><label for="f_employeeCount">Anzahl Monteure</label><select id="f_employeeCount" data-field="employeeCount">${[1,2,3,4].map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>`}
 function checkbox(label,key){return `<label style="display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px"><input data-field="${key}" type="checkbox">${esc(label)}</label>`}
 function weightRadios(i){return `<div class="field"><label>Fahrzeug ${i} · Gewichtsklasse</label><div style="display:flex;flex-wrap:wrap;gap:14px">${checkbox('bis 1,5 t',`kfz${i}_bis15`)}${checkbox('über 1,5 t',`kfz${i}_ueber15`)}</div></div>`}
 function range(label,key,min,max){return `<div class="field"><label for="f_${key}">${esc(label)} <output id="out_${key}"></output></label><input id="f_${key}" data-field="${key}" type="range" min="${min}" max="${max}" step="1"></div>`}
 function buildEditor(){
  defaults();
- let h=`<details open><summary>🏗️ Baustelle / Einsatz</summary><div class="inside cols">${[
- ['Standort','standort'],['Einsatz angeordnet von','angeordnet'],['Einsatzort / Kunde','kunde'],['Einsatzkostenstelle','kostenstelle'],['Auftragsnummer','auftragsnummer']].map(a=>field(...a)).join('')}</div></details>`;
+ let h=`<details open><summary>🏗️ Baustelle / Einsatz</summary><div class="inside cols">${siteChoice()}${field('Standort (wird gemerkt)','standort')}${field('Einsatz angeordnet von','angeordnet')}${field('Einsatzort / Kunde','kunde')}${field('Einsatzkostenstelle','kostenstelle')}${orderChoice()}${field('Auftragsnummer','auftragsnummer')}</div></details>`;
  h+=`<details open><summary>🚐 Fahrzeuge und Fahrtzeiten</summary><div class="inside"><div class="cols">${field('KFZ 1 Kennzeichen','kfz1')}${field('Gefahrene KM 1','km1')}${field('KFZ 2 Kennzeichen','kfz2')}${field('Gefahrene KM 2','km2')}${field('Abfahrt 1','abfahrt1','time')}${field('Rückkehr 1','rueckkehr1','time')}${field('Abfahrt 2','abfahrt2','time')}${field('Rückkehr 2','rueckkehr2','time')}</div><div style="margin-top:10px">${weightRadios(1)}${weightRadios(2)}</div></div></details>`;
  h+=`<details><summary>🔧 Gerät / Technik (optional)</summary><div class="inside"><p class="tiny">Nur öffnen und ausfüllen, wenn ihr diesen Bereich benötigt.</p><div class="cols">${[
  ['Gerät','geraet'],['Geräteeigentümer','eigentuemer'],['Equipment-Nr.','equipment'],['Fabrikat','fabrikat'],['Typ','typ'],['Betriebsstunden','betriebsstunden']].map(a=>field(...a)).join('')}</div></div></details>`;
  h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inside"><div class="cols">${selectEmployee()}${field('Jahreszahl','jahr','number')}</div><p class="tiny">Datum steht direkt unter dem Wochentag. Kollegen 2–4 nur nach Bedarf hinzufügen.</p><div class="days">${DAYS.map(d=>field(d,`date_${d}`,'text','17/10')).join('')}</div>`;
  for(let i=1;i<=Number(model.employeeCount);i++){
-  h+=`<div class="emp"><strong>Monteur ${i}</strong>${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days">${DAYS.map(d=>field(d,`m${i}_${d}`,'text','9,25')).join('')}</div><div class="totals">${SUMS.map((s,j)=>field(s,`m${i}_sum${j}`)).join('')}</div></div>`;
+  h+=`<div class="emp"><strong>Monteur ${i}</strong>${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days">${DAYS.map(d=>field(d,`m${i}_${d}`,'text','9,25')).join('')}</div><div class="totals">${SUMS.map((s,j)=>j===3?pauseChoice(i):field(s,`m${i}_sum${j}`)).join('')}</div></div>`;
  }
  h+=`</div></details>`;
  h+=`<details open><summary>🛠️ Ausgeführte Arbeiten</summary><div class="inside"><div class="cols">${checkbox('Gewaltschaden: Ja','gewaltJa')}${checkbox('Gewaltschaden: Nein','gewaltNein')}${checkbox('Inspektion: Ja','inspektionJa')}${checkbox('Inspektion: Nein','inspektionNein')}</div>${field('Ausgeführte Arbeiten','arbeiten','textarea','Eine Zeile nach der anderen …')}${range('Schriftgröße Arbeiten','arbeiten_font',12,19)}<p class="tiny" id="workHint"></p>${field('Weitere Mängel am Gerät','maengel','textarea')}<p class="tiny" id="defectHint"></p></div></details>`;
@@ -94,15 +116,92 @@ function buildEditor(){
  $('editor').innerHTML=h;
  syncEditor();
 }
-function syncEditor(){for(const el of document.querySelectorAll('#editor [data-field]')){const value=model[el.dataset.field];if(el.type==='checkbox')el.checked=!!value;else el.value=value==null?'':value;}for(const o of document.querySelectorAll('output[id^="out_"]'))o.textContent=model[o.id.slice(4)]??'';}
-$('editor').addEventListener('input',e=>{if(e.target.matches('[data-field]'))editValue(e.target)});
-$('editor').addEventListener('change',e=>{if(e.target.matches('[data-field]'))editValue(e.target)});
-$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){openSign(sign.dataset.sign);return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
+function syncEditor(){
+ for(const el of document.querySelectorAll('#editor [data-field]')){const value=model[el.dataset.field];if(el.type==='checkbox')el.checked=!!value;else el.value=value==null?'':value;}
+ for(const o of document.querySelectorAll('output[id^="out_"]'))o.textContent=model[o.id.slice(4)]??'';
+ for(const el of document.querySelectorAll('[data-pause]')){
+   const r=el.dataset.pause, raw=safe(model[`m${r}_sum3`]).trim().replace('.',',');
+   const match=pauseValues.find(v=>raw!=='' && Number(v.replace(',','.'))===Number(raw.replace(',','.')));
+   const custom=Boolean(model[`pauseCustom${r}`])||Boolean(raw && !match);
+   el.value=custom?'custom':match||'';
+   const holder=$('pauseCustom'+r);if(holder)holder.style.display=custom?'block':'none';
+   const input=$('pauseInput'+r);if(input)input.value=custom?safe(model[`m${r}_sum3`]):'';
+ }
+}
+$('editor').addEventListener('input',e=>{
+ if(e.target.matches('[data-pause-custom]')){
+  const r=e.target.dataset.pauseCustom;model[`m${r}_sum3`]=e.target.value;dirty();return;
+ }
+ if(e.target.matches('[data-field]') && e.target.type!=='select')editValue(e.target);
+});
+$('editor').addEventListener('change',e=>{
+ if(e.target.matches('[data-pause]')){
+  const r=e.target.dataset.pause, val=e.target.value;
+  model[`pauseCustom${r}`]=val==='custom';
+  if(val!=='custom')model[`m${r}_sum3`]=val;
+  syncEditor();if(val==='custom')$('pauseInput'+r)?.focus();dirty();return;
+ }
+ if(e.target.matches('[data-field]'))editValue(e.target);
+});
+$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){openSign(sign.dataset.sign);return;}if(e.target.closest('#reloadSites')){loadAvailableSites();return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
 function editValue(el){const key=el.dataset.field;model[key]=el.type==='checkbox'?el.checked:el.value;
+ if(key==='siteId'){applySiteSelection();syncEditor()}
+ if(key==='orderType'){applyOrderType();syncEditor()}
+ if(key==='standort')try{localStorage.setItem(HOME_LOCATION_KEY,safe(model.standort))}catch{}
  if(el.checked&&/^(gewalt|inspektion)(Ja|Nein)$/.test(key)){model[key.replace(/Ja$/,'TEMP').replace(/Nein$/,'Ja').replace(/TEMP$/,'Nein')]=false;syncEditor()}
  const match=key.match(/^kfz([12])_(bis15|ueber15)$/);if(match&&el.checked){model[`kfz${match[1]}_${match[2]==='bis15'?'ueber15':'bis15'}`]=false;syncEditor()}
  if(key==='employeeCount'){buildEditor()}
  const o=$('out_'+key);if(o)o.textContent=model[key];dirty();
+}
+function applySiteSelection(){
+ const site=availableSites.find(s=>String(s.id)===String(model.siteId));
+ if(!site)return;
+ model.kunde=safe(site.name);
+ // Die KM-Spalte der Baustellenverwaltung wird wie gespeichert übernommen.
+ model.km1=safe(site.distance_km);
+ model.orderType=site.order_number?'auftrag':site.extra_order_number?'zusatz':'auftrag';
+ applyOrderType();
+}
+function applyOrderType(){
+ const site=availableSites.find(s=>String(s.id)===String(model.siteId));
+ if(!site)return;
+ model.auftragsnummer=safe(model.orderType==='zusatz'?site.extra_order_number:site.order_number);
+}
+async function getSiteToken(){
+ let session;
+ try{session=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')}catch{}
+ if(!session?.access_token)return SITE_SUPABASE_KEY;
+ const expires=Number(session.expires_at||0);
+ if(!expires||expires>Math.floor(Date.now()/1000)+60)return session.access_token;
+ if(!session.refresh_token)return SITE_SUPABASE_KEY;
+ try{
+  const resp=await fetch(SITE_SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+   method:'POST',headers:{'apikey':SITE_SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh_token})
+  });
+  if(!resp.ok)throw new Error('Anmeldung abgelaufen');
+  const newSession=await resp.json();localStorage.setItem('materialverwaltung_auth',JSON.stringify(newSession));
+  return newSession.access_token;
+ }catch(e){throw new Error('Bitte zunächst in der Materialverwaltung anmelden. '+e.message)}
+}
+async function loadAvailableSites(){
+ sitesState='loading';
+ try{
+  const token=await getSiteToken();
+  const response=await fetch(SITE_SUPABASE_URL+'/rest/v1/sites?select=id,name,active,order_number,extra_order_number,distance_km,sort_order&order=sort_order.asc.nullslast,name.asc',{
+   headers:{'apikey':SITE_SUPABASE_KEY,'Authorization':'Bearer '+token}
+  });
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  availableSites=await response.json();sitesState='ready';
+  const selected=availableSites.find(s=>String(s.id)===String(model.siteId));
+  if(selected && !model.kunde)applySiteSelection();
+ }catch(e){sitesState='error';console.warn('Baustellen laden:',e);setStatus('Baustellen nicht verfügbar: '+e.message,false)}
+ // Die Formularwerte einschließlich bereits bearbeiteter Einträge bleiben erhalten.
+ const siteBox=$('f_siteId');if(siteBox){
+  const parent=siteBox.closest('.field');const temp=document.createElement('div');temp.innerHTML=siteChoice();parent.replaceWith(temp.firstElementChild);
+  $('f_siteId').value=safe(model.siteId);
+ }
+ if(sitesState==='ready'&&availableSites.length) setStatus('Baustellen aus der Materialverwaltung geladen');
+ queuePaint();
 }
 function dirty(){changed=true;setStatus('Änderungen noch nicht gespeichert',false);queuePaint()}
 function setStatus(msg,ok=true){$('status').textContent=msg;$('status').style.color=ok?'#9fe2ae':'#ffdb84'}
@@ -206,7 +305,7 @@ function uid(){return `bericht_${Date.now().toString(36)}_${Math.random().toStri
 function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]?.updated).localeCompare(safe(a[1]?.updated)));
  $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
 function saveCurrent(){try{reports[currentId]={data:structuredClone(model),updated:new Date().toISOString()};localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);changed=false;updateSaved();setStatus('✓ Auf diesem Gerät gespeichert')}catch(e){setStatus('Speichern fehlgeschlagen: '+e.message,false)}}
-function fresh(ask=true){if(ask&&changed&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;currentId=uid();model={employeeCount:1,jahr:String(new Date().getFullYear()),arbeiten_font:16,material_font:16};defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Neuer Bericht bereit');localStorage.setItem(ACTIVE,currentId)}
+function fresh(ask=true){if(ask&&changed&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;currentId=uid();model={employeeCount:1,jahr:String(new Date().getFullYear()),arbeiten_font:16,material_font:16,standort:localStorage.getItem(HOME_LOCATION_KEY)||''};defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Neuer Bericht bereit');localStorage.setItem(ACTIVE,currentId)}
 function restore(id){if(changed&&!confirm('Ungespeicherte Änderungen verwerfen?')){updateSaved();return}const rec=reports[id];if(!rec)return;currentId=id;model=structuredClone(rec.data||{});defaults();changed=false;buildEditor();queuePaint();updateSaved();setStatus('Bericht geladen');localStorage.setItem(ACTIVE,id)}
 $('saved').addEventListener('change',e=>{if(e.target.value)restore(e.target.value)});
 $('add').onclick=()=>fresh();$('save').onclick=saveCurrent;$('remove').onclick=()=>{if(!reports[currentId]){fresh(false);return}if(!confirm('Gespeicherten Bericht auf diesem Gerät löschen?'))return;delete reports[currentId];localStorage.setItem(STORAGE,JSON.stringify(reports));changed=false;fresh(false)};
@@ -231,8 +330,14 @@ pad.addEventListener('pointermove',e=>{if(!isDrawing)return;const [x,y]=pointerX
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])pad.addEventListener(ev,()=>isDrawing=false);
 $('sigClear').onclick=()=>pctx.clearRect(0,0,pad.width,pad.height);$('sigCancel').onclick=()=>$('sigModal').classList.remove('visible');$('sigDone').onclick=()=>{if(signatureKey){model[signatureKey]=pad.toDataURL('image/png');dirty()}$('sigModal').classList.remove('visible')};
 window.addEventListener('beforeunload',e=>{if(changed){e.preventDefault();e.returnValue=''}});
-reports=allReports();const old=localStorage.getItem(ACTIVE);
+reports=allReports();
+if(!localStorage.getItem(HOME_LOCATION_KEY)){
+ const last=Object.values(reports).sort((a,b)=>safe(b.updated).localeCompare(safe(a.updated)))[0];
+ if(last?.data?.standort)try{localStorage.setItem(HOME_LOCATION_KEY,safe(last.data.standort))}catch{}
+}
+const old=localStorage.getItem(ACTIVE);
 if(old&&reports[old]){currentId=old;model=structuredClone(reports[old].data||{});defaults();changed=false;buildEditor();updateSaved();queuePaint();setStatus('Gespeicherten Bericht geladen')}else fresh(false);
+loadAvailableSites();
 </script>
 </body>
 </html>
