@@ -80,10 +80,10 @@ const sectionSpecs=[
   {label:'Auftragsnummer',key:'auftragsnummer',x:19.1,y:19.35,w:28.8,h:1.45,font:1.42}
  ]},
  {title:'Fahrzeuge und Fahrtzeiten',open:true,rows:[
-  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:22.55,w:27,h:1.8,font:1.95},
-  {label:'Gefahrene KM 1',key:'km1',x:73.8,y:22.55,w:10.6,h:1.8,font:2.06,align:'center'},
-  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.3,w:27,h:1.8,font:1.95},
-  {label:'Gefahrene KM 2',key:'km2',x:73.8,y:25.3,w:10.6,h:1.8,font:2.06,align:'center'},
+  {label:'KFZ 1 Kennzeichen',key:'kfz1',x:14.0,y:22.55,w:28,h:1.8,font:1.35,align:'center',weight:500},
+  {label:'Gefahrene KM 1',key:'km1',x:73.5,y:22.55,w:20,h:1.8,font:1.35,align:'center',weight:500},
+  {label:'KFZ 2 Kennzeichen',key:'kfz2',x:14.0,y:25.3,w:28,h:1.8,font:1.35,align:'center',weight:500},
+  {label:'Gefahrene KM 2',key:'km2',x:73.5,y:25.3,w:20,h:1.8,font:1.35,align:'center',weight:500},
   {label:'Abfahrt 1',key:'abfahrt1',x:56.9,y:28.06,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
   {label:'Rückkehr 1',key:'rueckkehr1',x:79.2,y:28.06,w:12.3,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
   {label:'Abfahrt 2',key:'abfahrt2',x:56.9,y:30.35,w:11.9,h:1.8,font:1.9,align:'center',input:'time',kind:'printed-time'},
@@ -99,14 +99,14 @@ const sectionSpecs=[
  ]}
 ];
 
-const yearSpec={label:'Jahreszahl',key:'jahr',x:28.2,y:28.35,w:18.0,h:3.45,font:3.18,align:'center'};
+const yearSpec={label:'Jahreszahl',key:'jahr',x:27.4,y:29.3,w:20.0,h:2.2,font:1.45,align:'center',weight:500};
 const dateSpecs=DAYS.map((d,i)=>({label:`Datum ${d}`,key:`date_${d}`,x:18.95+i*5.93,y:35.72,w:5.45,h:1.3,font:1.42,align:'center'}));
-const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.0,y:37.88+i*2.68,w:10.6,h:1.9,font:1.77}));
+const employeeNameSpecs=[1,2,3,4].map((n,i)=>({label:`Monteur ${n} Name`,key:`monteur${n}`,x:7.0,y:37.88+i*2.68,w:10.6,h:1.9,font:1.35,weight:500}));
 const employeeHourSpecs=[]; const employeeTotalSpecs=[];
 for(let r=1;r<=4;r++){
- const rowY=37.62+(r-1)*2.68;
- for(let i=0;i<7;i++) employeeHourSpecs.push({label:`Monteur ${r} ${DAYS[i]}`,key:`m${r}_${DAYS[i]}`,x:18.95+i*5.93,y:rowY,w:5.45,h:1.38,font:1.24,align:'center'});
- for(let t=0;t<6;t++) employeeTotalSpecs.push({label:`Monteur ${r} ${SUMS[t]}`,key:`m${r}_sum${t}`,x:60.25+t*6.0,y:rowY,w:5.65,h:1.38,font:1.18,align:'center'});
+ const rowY=38.15+(r-1)*2.68;
+ for(let i=0;i<7;i++) employeeHourSpecs.push({label:`Monteur ${r} ${DAYS[i]}`,key:`m${r}_${DAYS[i]}`,x:18.95+i*5.93,y:rowY,w:5.45,h:1.38,font:1.22,align:'center',weight:500});
+ for(let t=0;t<6;t++) employeeTotalSpecs.push({label:`Monteur ${r} ${SUMS[t]}`,key:`m${r}_sum${t}`,x:60.25+t*6.0,y:rowY,w:5.65,h:1.38,font:1.18,align:'center',weight:500});
 }
 const extraSpecs=[
  {label:'Gewaltschaden Ja',key:'gewaltJa',x:39.8,y:50.25,w:1.5,h:1.1,kind:'check',font:1.18},
@@ -346,7 +346,7 @@ function drawPrintedTime(ctx,s,value){
  const isSecond=s.key.endsWith('2');
  const colonX=isReturn?882:639;
  const yy=isSecond?475:443;
- const hourX=colonX-(isReturn?23:36), minuteX=colonX+37;
+ const hourX=colonX-36, minuteX=colonX+37;
  ctx.save();
  ctx.font='700 23px Arial, sans-serif';
  ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.textAlign='center';
@@ -360,7 +360,8 @@ function drawField(ctx,s){
  const value=formatValue(s,raw),x=s.x*10.54,y=s.y*14.92,w=s.w*10.54,h=s.h*14.92;
  if(s.kind==='printed-time'){drawPrintedTime(ctx,s,value);return;}
  const baseFont=getFont(s);
- ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`700 ${baseFont}px Arial, sans-serif`;
+ const weight=s.weight||700;
+ ctx.save();ctx.fillStyle='#091524';ctx.textBaseline='middle';ctx.font=`${weight} ${baseFont}px Arial, sans-serif`;
  if(s.kind!=='ruled'){ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();}
  if(s.kind==='ruled'){
    const font=fontForRuled(s);ctx.font=`500 ${font}px Arial, sans-serif`;const lines=wrapLines(ctx,value,w-15);
@@ -373,7 +374,7 @@ function drawField(ctx,s){
    }
  }else{
    let drawFont=baseFont;
-   while(ctx.measureText(value).width>w-6&&drawFont>9){drawFont-=.5;ctx.font=`700 ${drawFont}px Arial, sans-serif`}
+   while(ctx.measureText(value).width>w-6&&drawFont>9){drawFont-=.5;ctx.font=`${weight} ${drawFont}px Arial, sans-serif`}
    const tw=ctx.measureText(value).width;
    const tx=s.align==='center'?x+(w-tw)/2:x+2;
    ctx.fillText(value,tx,y+h/2,w-4);
