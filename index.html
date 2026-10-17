@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.json">
 
 <meta name="theme-color" content="#000000">
-<meta name="app-version" content="2026-10-14-fahrzeuge-02">
+<meta name="app-version" content="2026-10-17-montagebericht-01">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Material">
@@ -209,6 +209,15 @@ h1 {
   border-color: var(--accent);
   color: white;
   font-weight: 700;
+}
+
+/* Blauer Original-Montagebericht: öffnet eigene Berichtseite in der PWA. */
+.report-tab-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-align: center;
 }
 
 .card {
@@ -903,7 +912,7 @@ label {
     <div class="header-actions">
       <div class="version-box">
         <button type="button" id="versionStatus" class="version-status" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen">⏳ Prüfe Version …</button>
-        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-14-fahrzeuge-02</div>
+        <div id="appVersionLabel" class="app-version-label">App-Version: 2026-10-17-montagebericht-01</div>
         <button type="button" id="reloadAppButton" class="reload-app-button" onclick="location.reload()" hidden>↻ Neue Version laden</button>
       </div>
       <button
@@ -941,6 +950,10 @@ label {
             onclick="showTab('notizen', this); loadAndRenderNotes()">
       📝 Notizen
     </button>
+
+    <a class="tab report-tab-link" href="./montagebericht.html" aria-label="Blauen Montagebericht öffnen">
+      📄 Bericht
+    </a>
   </div>
 
   <section id="lager"></section>
