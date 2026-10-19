@@ -6,8 +6,8 @@
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <title>Materialverwaltung</title>
 <link href="./manifest.json" rel="manifest"/>
-<meta content="#000000" name="theme-color"/>
-<meta content="2026-10-18-blau-mobil-15" name="app-version"/>
+<meta content="#0b1423" name="theme-color"/>
+<meta content="2026-10-19-design-23" name="app-version"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -909,6 +909,24 @@ label {
 .account-management h3{margin-top:0}.account-management input{width:100%;min-height:42px}
 .account-list-row{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding:10px 0;font-size:13px}
 .account-list-row button{flex-shrink:0}
+
+/* V23 – moderne Oberfläche, vorhandene Fachfunktionen bleiben erhalten */
+:root{--bg:#0a1220;--card:#142133;--card2:#1b2a3d;--border:#2a3b50;--muted:#a6b7ca;--accent:#2487ff;--radius:18px;--table-row-even:#111d2e;--table-row-odd:#16243a;--table-row-hover:#223852}
+body{background:linear-gradient(150deg,#0c1829 0%,#09111d 50%,#0c1524 100%) fixed;font-size:15px}
+.app{max-width:1080px;padding-bottom:130px}
+header{background:rgba(11,20,34,.95);border-bottom:1px solid rgba(135,167,209,.09);padding:17px 22px}
+h1{font-size:22px;letter-spacing:-.6px}.subtitle{font-size:13px}.content{padding:22px}
+.tabs{display:none!important}.card{background:linear-gradient(155deg,#17263a,#121f31);border:1px solid #293b51;box-shadow:0 10px 26px rgba(0,0,0,.10);border-radius:19px;padding:19px}
+.card h2{font-size:19px}.btn{border-radius:12px;min-height:42px}.btn.primary,.tab.active{background:#1879f6;color:white;border-color:#1879f6}
+button,input,select,textarea{accent-color:#2487ff}input,select,textarea{max-width:100%}
+.fab{bottom:99px;right:max(22px,calc((100vw - 1020px)/2))}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,1080px);z-index:65;background:rgba(12,23,38,.98);border:1px solid #293d55;border-radius:21px 21px 0 0;display:grid;grid-template-columns:repeat(5,1fr);padding:9px 8px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -12px 40px rgba(0,0,0,.3);backdrop-filter:blur(15px)}
+.bottom-link{border:0;background:transparent;color:#aabbd0;border-radius:13px;display:flex;gap:5px;align-items:center;justify-content:center;flex-direction:column;font-size:11px;font-weight:700;padding:8px 0;min-height:54px}.bottom-link span{font-size:24px;line-height:25px}.bottom-link.active{background:#14365c;color:#69b0ff}
+.more-backdrop:not([hidden]){position:fixed;inset:0;background:#020711aa;z-index:66}.more-sheet:not([hidden]){position:fixed;bottom:85px;left:50%;transform:translateX(-50%);width:min(calc(100% - 24px),550px);background:#16243a;border:1px solid #35516f;box-shadow:0 20px 50px #0009;padding:17px;border-radius:21px;z-index:67}.more-sheet h3{margin:0 0 10px}.more-sheet button{display:flex;justify-content:space-between;align-items:center;width:100%;background:#1d3049;border:1px solid #334761;color:#f5f9ff;border-radius:13px;padding:14px;margin-top:8px;text-align:left}
+.home-view{display:block}.home-hello{padding:8px 2px 22px}.home-hello h2{font-size:clamp(25px,4vw,34px);letter-spacing:-.6px;margin:6px 0}.home-hello p{margin:0;color:var(--muted)}.eyebrow{color:#69b1ff;font-size:11px;font-weight:800;letter-spacing:1.6px}.home-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.home-tile{display:flex;flex-direction:column;text-align:left;align-items:flex-start;gap:8px;padding:19px 17px;background:linear-gradient(140deg,#1c3048,#142237);border:1px solid #30445a;color:white;border-radius:19px;min-height:177px;box-shadow:0 10px 26px #0001}.home-tile:hover{border-color:#438dcb}.tile-icon{font-size:27px}.home-tile strong{font-size:32px;line-height:1.1}.home-tile small{font-size:13px;color:#b2c2d5}.tile-label{margin-top:auto;color:#80bdff;font-size:12px;font-weight:700}.home-tile .home-tile-word{font-size:24px}.home-actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 29px}.home-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.home-section-heading h3{font-size:18px}.home-section-heading button{border:0;background:none;color:#85bfff;font-size:13px}.home-activities{background:#152338;border:1px solid #2a3d54;border-radius:18px;overflow:hidden}.home-activity{display:flex;align-items:center;gap:13px;padding:15px 17px;border-bottom:1px solid #273951}.home-activity:last-child{border:0}.home-activity>div:nth-child(2){flex:1;min-width:0}.home-activity strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.home-activity small{display:block;color:#aabbcb;padding-top:5px;font-size:12px}.activity-icon{width:40px;height:40px;display:grid;place-items:center;background:#203750;border-radius:12px;font-size:19px}.activity-date{font-size:11px;color:#9aadc1;white-space:nowrap}.account-row-actions{display:flex;gap:6px;flex-wrap:wrap}.account-list-row{flex-wrap:wrap}
+.admin-button{background:#1c2e44;border-color:#33475d}.admin-button.active{background:#124d40;border-color:#2b8e75}.modal{background:#122036}
+@media(max-width:720px){.home-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.content{padding:16px 12px}header{padding:12px}.home-tile{padding:15px 13px;min-height:163px}.home-tile strong{font-size:28px}.home-hello{padding-bottom:18px}.header-actions .version-box{max-width:95px}.app-version-label{display:none}.version-status{font-size:9px!important}.home-actions .btn{flex:1}.bottom-link{font-size:10px}.bottom-link span{font-size:22px}}
+
 </style>
 </head>
 <body>
@@ -931,7 +949,7 @@ label {
 <div class="header-actions">
 <div class="version-box">
 <button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button>
-<div class="app-version-label" id="appVersionLabel">App-Version: 2026-10-19-accounts-22</div>
+<div class="app-version-label" id="appVersionLabel">App-Version: 2026-10-19-design-23</div>
 <button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">↻ Neue Version laden</button>
 </div>
 <button class="admin-button" id="adminButton" onclick="openAdminModal()">
@@ -941,8 +959,9 @@ label {
 </div>
 </header>
 <div class="content">
-<div class="tabs">
-<button class="tab active" onclick="showTab('lager', this)">
+<section id="startseite" class="home-view"></section>
+<div class="tabs" id="sectionTabs">
+<button class="tab" onclick="showTab('lager', this)">
       📦 Lager
     </button>
 <button class="tab" onclick="showTab('baustellen', this)">
@@ -961,12 +980,26 @@ label {
       📄 Bericht
     </button>
 </div>
-<section id="lager"></section>
+<section id="lager" style="display:none"></section>
 <section id="baustellen" style="display:none"></section>
 <section id="historie" style="display:none"></section>
 <section id="fahrzeuge" style="display:none"></section>
 <section id="notizen" style="display:none"></section>
 </div>
+</div>
+<nav class="bottom-nav" aria-label="Hauptnavigation">
+<button class="bottom-link active" data-dest="startseite" onclick="navigateApp('startseite')"><span>⌂</span>Start</button>
+<button class="bottom-link" data-dest="lager" onclick="navigateApp('lager')"><span>▣</span>Lager</button>
+<button class="bottom-link" data-dest="baustellen" onclick="navigateApp('baustellen')"><span>♜</span>Baustellen</button>
+<button class="bottom-link" data-dest="fahrzeuge" onclick="navigateApp('fahrzeuge')"><span>▰</span>Fahrzeuge</button>
+<button class="bottom-link" data-dest="mehr" onclick="toggleAppMore()"><span>☷</span>Mehr</button>
+</nav>
+<div class="more-backdrop" id="moreBackdrop" hidden onclick="closeAppMore()"></div><div class="more-sheet" id="moreSheet" hidden>
+<h3>Weitere Bereiche</h3>
+<button onclick="navigateApp('historie')">📜 Buchungshistorie <span>›</span></button>
+<button onclick="navigateApp('notizen')">📝 Notizen & Aufgaben <span>›</span></button>
+<button onclick="closeAppMore();openMontagebericht()">📄 Montagebericht <span>›</span></button>
+<button onclick="closeAppMore();openAdminModal()">👤 Profil & Verwaltung <span>›</span></button>
 </div>
 <button class="fab" onclick="openBooking()">
   +
@@ -1083,9 +1116,9 @@ label {
 <button type="button" class="btn full" onclick="logoutEmployee()" style="margin-top:12px;">🚪 Mein Konto abmelden</button>
 </div>
 <div class="hidden" id="adminLoggedIn">
-<div class="admin-badge">
-        🟢 Admin-Modus aktiv
-      </div>
+<div class="admin-badge" id="adminModeBadge">🟢 Adminrechte vorhanden</div>
+<button class="btn primary full" id="adminModeSwitch" onclick="toggleAdminView()" style="margin-top:12px">Admin-Modus einschalten</button>
+<div class="notice" style="margin-top:12px">Der Schalter blendet Verwaltungsfunktionen ein oder aus. Deine tatsächlichen Rechte bleiben geschützt.</div>
 <div class="notice">
         Du bist als Administrator angemeldet. Verwaltungsfunktionen sind freigeschaltet.
       </div>
@@ -1106,7 +1139,7 @@ label {
 <button class="btn small" onclick="updateTextColor('#cbd5e1')" style="background:#cbd5e1; color:#000;">Silber</button>
 </div>
 </div>
-<div class="account-management">
+<div class="account-management" id="adminAccountManagement">
 <h3>👥 Mitarbeiter-Accounts</h3><p class="muted">Nur Administratoren können Benutzer anlegen oder deaktivieren. Bereits bestehende Material-Mitarbeiternamen sind nicht automatisch Accounts.</p>
 <label for="createAccountName">Name des Mitarbeiters</label><input id="createAccountName" placeholder="Vorname Nachname" autocomplete="off">
 <label for="createAccountEmail">E-Mail</label><input id="createAccountEmail" type="email" placeholder="mitarbeiter@firma.de" autocomplete="off">
@@ -1320,6 +1353,8 @@ const SUPABASE_KEY = "sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD";
 
 let authSession = null;
 let isAdmin = false;
+let adminViewEnabled = false;
+const adminModeVisible=()=>isAdmin && adminViewEnabled;
 let currentUserProfile=null;
 
 let materials = [];
@@ -1352,6 +1387,7 @@ function saveAuthSession(session) {
 function clearAuthSession() {
   authSession = null;
   isAdmin = false;
+  adminViewEnabled = false;
   localStorage.removeItem("materialverwaltung_auth");
   updateAdminUI();
 }
@@ -1710,6 +1746,7 @@ async function verifyAdminSession() {
     }
     const result = await response.json();
     isAdmin = (result === true);
+    adminViewEnabled = false;
     updateAdminUI();
   } catch (error) {
     console.error("Admin-Prüfung fehlgeschlagen:", error);
@@ -1719,12 +1756,19 @@ async function verifyAdminSession() {
 
 async function logoutAdmin(){await logoutEmployee();}
 
+function toggleAdminView(){
+ if(!isAdmin)return;
+ adminViewEnabled=!adminViewEnabled;
+ updateAdminUI();
+ renderAll();
+}
+
 function updateAdminUI() {
   const button = document.getElementById("adminButton");
   if (button) {
     if (isAdmin) {
-      button.textContent = "🔓 Admin";
-      button.classList.add("active");
+      button.textContent = adminViewEnabled ? "⚙️ Admin an" : "👤 " + (currentUserProfile?.name || "Profil");
+      button.classList.toggle("active",adminViewEnabled);
     } else {
       button.textContent = currentUserProfile ? "👤 " + currentUserProfile.name : "🔐 Anmelden";
       button.classList.remove("active");
@@ -1733,9 +1777,13 @@ function updateAdminUI() {
 
   const addEmployeeButton = document.getElementById("addEmployeeButton");
   if (addEmployeeButton) {
-    addEmployeeButton.style.display = isAdmin ? "block" : "none";
+    addEmployeeButton.style.display = adminModeVisible() ? "block" : "none";
   }
 
+  const modeButton=document.getElementById("adminModeSwitch");
+  if(modeButton)modeButton.textContent=adminViewEnabled ? "✓ Admin-Modus ausschalten" : "⚙️ Admin-Modus einschalten";
+  const management=document.getElementById("adminAccountManagement");
+  if(management)management.style.display=adminModeVisible()?"block":"none";
   const loggedOut = document.getElementById("adminLoggedOut");
   const loggedIn = document.getElementById("adminLoggedIn");
   if (loggedOut && loggedIn) {
@@ -1752,7 +1800,7 @@ function updateAdminUI() {
 function openAdminModal() {
   if(!currentUserProfile){document.getElementById('accountGate').hidden=false;return;}
   updateAdminUI();
-  if(isAdmin)loadEmployeeAccounts();
+  if(adminModeVisible())loadEmployeeAccounts();
   document.getElementById("adminModal").classList.add("show");
 }
 
@@ -1839,8 +1887,22 @@ async function loadEmployeeAccounts(){
  const list=document.getElementById('accountList');list.textContent='Lade Accounts …';
  try{
   const profiles=await supabase('app_user_profiles?select=user_id,name,email,is_active&order=name.asc');
-  list.innerHTML=profiles.map(p=>`<div class="account-list-row"><div><strong>${escapeHtml(p.name)}</strong><br><span class="muted">${escapeHtml(p.email||'')} · ${p.is_active?'Aktiv':'Deaktiviert'}</span></div>${p.is_active&&p.user_id!==currentUserProfile?.user_id?`<button type="button" class="btn small" onclick="deactivateEmployeeAccount('${p.user_id}')">Sperren</button>`:''}</div>`).join('') || '<p>Noch keine Accounts vorhanden.</p>';
+  list.innerHTML=profiles.map(p=>`<div class="account-list-row"><div><strong>${escapeHtml(p.name)}</strong><br><span class="muted">${escapeHtml(p.email||'')} · ${p.is_active?'Aktiv':'Deaktiviert'}</span></div><div class="account-row-actions"><button type="button" class="btn small" onclick="renameEmployeeAccount('${p.user_id}')">✎ Name</button>${p.is_active&&p.user_id!==currentUserProfile?.user_id?`<button type="button" class="btn small" onclick="deactivateEmployeeAccount('${p.user_id}')">Sperren</button>`:''}</div></div>`).join('') || '<p>Noch keine Accounts vorhanden.</p>';
  }catch(e){list.textContent='Accountliste nicht verfügbar: '+e.message;}
+}
+async function renameEmployeeAccount(userId){
+ if(!adminModeVisible())return;
+ const row=(await supabase('app_user_profiles?select=user_id,name&user_id=eq.'+encodeURIComponent(userId)))[0];
+ if(!row)return alert('Profil nicht gefunden');
+ const name=prompt('Neuer Anzeigename für '+row.name+':',row.name);
+ if(name===null)return;
+ const clean=name.trim();
+ if(clean.length<2||clean.length>120)return alert('Bitte 2 bis 120 Zeichen eingeben.');
+ try{
+  await manageAccountRequest({action:'rename',user_id:userId,name:clean});
+  if(currentUserProfile?.user_id===userId)currentUserProfile.name=clean;
+  updateAdminUI();await loadEmployeeAccounts();renderAll();
+ }catch(e){alert('Name konnte nicht geändert werden: '+e.message)}
 }
 async function deactivateEmployeeAccount(userId){
  if(!isAdmin||!confirm('Diesen Mitarbeiter-Account sperren?'))return;
@@ -1935,20 +1997,44 @@ async function loadAndRenderVehicles() {
   }
 }
 
-function showTab(tab, button) {
-  document.querySelectorAll(".content section").forEach(section => section.style.display = "none");
-  document.getElementById(tab).style.display = "block";
-  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
-  button.classList.add("active");
+let currentAppPage='startseite';
+function closeAppMore(){document.getElementById('moreBackdrop').hidden=true;document.getElementById('moreSheet').hidden=true;}
+function toggleAppMore(){const e=document.getElementById('moreSheet');const next=e.hidden;closeAppMore();if(next){e.hidden=false;document.getElementById('moreBackdrop').hidden=false;}}
+function navigateApp(tab){
+ closeAppMore();currentAppPage=tab;
+ document.querySelectorAll('.content section').forEach(section=>section.style.display='none');
+ const target=document.getElementById(tab);if(target)target.style.display='block';
+ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',(b.getAttribute('onclick')||'').includes("'"+tab+"'")));
+ document.querySelectorAll('.bottom-link').forEach(b=>b.classList.toggle('active',b.dataset.dest===tab || (b.dataset.dest==='mehr'&&['historie','notizen'].includes(tab))));
+ if(tab==='fahrzeuge')loadAndRenderVehicles();
+ if(tab==='notizen')loadAndRenderNotes();
+ if(tab==='startseite')renderStartseite();
+ window.scrollTo({top:0,behavior:'instant'});
 }
-
+function showTab(tab,button){navigateApp(tab);}
+function renderStartseite(){
+ const activeSites=sites.filter(s=>s.active).length;
+ const openItems=vehicleRestockItems.filter(x=>!x.restocked_at && x.status!=='done' && !x.is_restocked).length;
+ const name=escapeHtml(currentUserProfile?.name?.split(' ')[0]||'Kollege');
+ const recent=movements.slice(0,4).map(m=>{
+  const mat=materials.find(x=>x.id===m.material_id);
+  const site=sites.find(x=>x.id===(m.to_site_id||m.from_site_id));
+  return `<div class="home-activity"><div class="activity-icon">📦</div><div><strong>${escapeHtml(mat?.name||'Material')}</strong><small>${formatNumber(m.amount)} ${escapeHtml(mat?.unit||'')} · ${escapeHtml(site?.name||'Lager')}</small></div><span class="activity-date">${formatDate(m.created_at).split(',')[0]}</span></div>`;
+ }).join('');
+ document.getElementById('startseite').innerHTML=`
+ <div class="home-hello"><span class="eyebrow">DEINE ÜBERSICHT</span><h2>Hallo, ${name}! 👋</h2><p>Alles Wichtige für deinen Arbeitstag.</p></div>
+ <div class="home-tiles">
+  <button class="home-tile" onclick="navigateApp('lager')"><span class="tile-icon">📦</span><strong>${materials.length}</strong><small>Materialien im Lager</small><span class="tile-label">Lagerbestand ↗</span></button>
+  <button class="home-tile" onclick="navigateApp('baustellen')"><span class="tile-icon">🏗️</span><strong>${activeSites}</strong><small>Aktive Baustellen</small><span class="tile-label">Baustellen ↗</span></button>
+  <button class="home-tile" onclick="navigateApp('fahrzeuge')"><span class="tile-icon">🚐</span><strong>${vehicles.length}</strong><small>Fahrzeuge · ${openItems} Entnahmen</small><span class="tile-label">Fahrzeuge ↗</span></button>
+  <button class="home-tile" onclick="openMontagebericht()"><span class="tile-icon">📄</span><strong class="home-tile-word">Neuer</strong><small>Blauer Montagebericht</small><span class="tile-label">Bericht erstellen ↗</span></button>
+ </div>
+ <div class="home-actions"><button class="btn primary" onclick="openBooking()">＋ Material buchen</button><button class="btn" onclick="navigateApp('notizen')">📝 Notizen</button></div>
+ <div class="home-section-heading"><h3>Letzte Buchungen</h3><button onclick="navigateApp('historie')">Alle anzeigen ›</button></div>
+ <div class="home-activities">${recent||'<p class="muted" style="padding:18px">Noch keine Buchungen vorhanden.</p>'}</div>`;
+}
 function renderAll() {
-  renderWarehouse();
-  renderSites();
-  renderHistory();
-  renderVehicles();
-  renderNotes();
-  updateAdminUI();
+  renderWarehouse();renderSites();renderHistory();renderVehicles();renderNotes();renderStartseite();updateAdminUI();
 }
 
 function renderWarehouse() {
@@ -1989,7 +2075,7 @@ function renderWarehouse() {
           <h2 style="margin:0;">📦 Lagerbestand</h2>
           <div class="muted">Aktueller zentraler Lagerbestand</div>
         </div>
-        ${isAdmin ? `<button class="btn green small" onclick="openMaterialModal()">➕ Neues Material anlegen</button>` : ''}
+        ${adminModeVisible() ? `<button class="btn green small" onclick="openMaterialModal()">➕ Neues Material anlegen</button>` : ''}
       </div>
       <div class="search-box">
         <span class="search-icon">🔎</span>
@@ -2085,8 +2171,8 @@ function renderSites() {
 
       <div class="table-toolbar">
         <div style="display:flex; gap:8px; align-items:center;">
-          ${isAdmin ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle hinzufügen</button>` : ''}
-          ${isAdmin ? `<button class="btn primary small" onclick="openManageColumnsModal()">⚙️ Spalte (nach rechts)</button>` : ''}
+          ${adminModeVisible() ? `<button class="btn green small" onclick="openSiteModal()">➕ Baustelle hinzufügen</button>` : ''}
+          ${adminModeVisible() ? `<button class="btn primary small" onclick="openManageColumnsModal()">⚙️ Spalte (nach rechts)</button>` : ''}
         </div>
       </div>
     </div>
@@ -2153,7 +2239,7 @@ function renderSiteNotes(site) {
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;"><strong>${n.status==='done'?'✅':'🟡'} ${escapeHtml(n.title)}</strong><span class="muted" style="font-size:12px">${n.status==='done'?'Erledigt':'Offen'}</span></div>
       <div style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;margin-top:5px">${escapeHtml(n.body)}</div>
       <div class="muted" style="font-size:12px;margin-top:6px">Von ${escapeHtml(n.author||'Unbekannt')} · ${formatDate(n.created_at)}</div>
-      ${(isAdmin || n.author_user_id===currentUserProfile?.user_id)?`<button type="button" class="btn small" style="margin-top:8px" onclick="event.stopPropagation();editNote(${Number(n.id)})">✏️ Bearbeiten</button>`:''}
+      ${(adminModeVisible() || n.author_user_id===currentUserProfile?.user_id)?`<button type="button" class="btn small" style="margin-top:8px" onclick="event.stopPropagation();editNote(${Number(n.id)})">✏️ Bearbeiten</button>`:''}
       ${n.status==='done'?`<div class="muted" style="font-size:12px">Erledigt von ${escapeHtml(n.completed_by||'Unbekannt')}</div>`:`<button type="button" class="btn small" style="margin-top:8px" onclick="event.stopPropagation();toggleNoteDone(${Number(n.id)})">✓ Als erledigt markieren</button>`}
     </div>`).join('')}
   </div>`;
@@ -2177,14 +2263,14 @@ function renderPaperTableView(filteredSites) {
             <th>KM</th>
             <th>Polier</th>
             ${customColumns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
-            ${isAdmin ? '<th>Aktionen</th>' : ''}
+            ${adminModeVisible() ? '<th>Aktionen</th>' : ''}
           </tr>
         </thead>
         <tbody>
   `;
 
   if (!filteredSites.length) {
-    html += `<tr><td colspan="${6 + customColumns.length + (isAdmin ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
+    html += `<tr><td colspan="${6 + customColumns.length + (adminModeVisible() ? 1 : 0)}" style="text-align:center; padding:20px;" class="muted">Keine Baustellen eingetragen</td></tr>`;
   } else {
     filteredSites.forEach(site => {
       html += `
@@ -2196,7 +2282,7 @@ function renderPaperTableView(filteredSites) {
           <td>${escapeHtml(site.distance_km != null ? String(site.distance_km) : '')}</td>
           <td>${escapeHtml(site.contact_person || '')}</td>
           ${customColumns.map(col => `<td>${escapeHtml(site.custom_fields?.[col.key] || '')}</td>`).join('')}
-          ${isAdmin ? `
+          ${adminModeVisible() ? `
             <td>
               <div class="site-order-actions">
                 <button class="btn small" onclick="moveSite(${site.id}, -1)" title="Eine Zeile nach oben">⬆️</button>
@@ -2330,7 +2416,7 @@ function renderSiteCardContent(site) {
         }).join('') : '<div class="muted" style="font-size:12px; margin-top:5px;">Kein Material vorhanden</div>'}
       </div>
 
-      ${isAdmin ? `
+      ${adminModeVisible() ? `
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
           <button class="btn small" onclick="openEditSiteModal(${site.id})">✏️ Bearbeiten</button>
           <button class="btn small ${site.active ? 'orange' : 'green'}" onclick="toggleSiteActive(${site.id}, ${!site.active})">
@@ -2962,7 +3048,7 @@ function renderVehicles() {
     <div class="card">
       <div class="site-card-top">
         <div><h2>🚐 Einsatzfahrzeuge</h2><div class="subtitle">Entnommenes Material erfassen und späteres Nachladen nicht vergessen.</div></div>
-        ${isAdmin ? `<button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>` : ''}
+        ${adminModeVisible() ? `<button class="btn primary" onclick="openVehicleModal()">➕ Fahrzeug hinzufügen</button>` : ''}
       </div>
       <div class="stats-grid" style="margin-top:14px;">
         <div class="stat-card"><div class="stat-number">${activeVehicles.length}</div><div class="stat-label">Fahrzeuge</div></div>
@@ -2972,7 +3058,7 @@ function renderVehicles() {
   `;
 
   if (!activeVehicles.length) {
-    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong>${isAdmin ? `<p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button>` : `<p>Ein Administrator kann hier Fahrzeuge hinzufügen.</p>`}</div>`;
+    html += `<div class="empty"><div style="font-size:32px;">🚐</div><strong>Noch keine Einsatzfahrzeuge angelegt</strong>${adminModeVisible() ? `<p>Lege dein erstes Fahrzeug an, um die Nachlade-Liste zu starten.</p><button class="btn primary" onclick="openVehicleModal()">➕ Erstes Fahrzeug hinzufügen</button>` : `<p>Ein Administrator kann hier Fahrzeuge hinzufügen.</p>`}</div>`;
     container.innerHTML = html;
     return;
   }
@@ -2980,7 +3066,7 @@ function renderVehicles() {
   html += `<div class="card"><h3 style="margin-top:0;">Fahrzeug auswählen</h3><div class="filter-grid"><select id="selectedVehicleSelect" onchange="selectVehicle(this.value)"><option value="">Alle Fahrzeuge anzeigen</option>${activeVehicles.map(v => `<option value="${v.id}" ${Number(v.id) === Number(selectedVehicleId) ? 'selected' : ''}>${escapeHtml(v.name)}${v.plate ? ' · ' + escapeHtml(v.plate) : ''}</option>`).join('')}</select></div><div class="vehicle-grid">`;
   activeVehicles.forEach(vehicle => {
     const count = pending.filter(item => Number(item.vehicle_id) === Number(vehicle.id)).length;
-    html += `<div class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}"><button style="width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>${isAdmin ? `<button class="btn red small" style="margin-top:8px;" onclick="archiveVehicle(${vehicle.id})">Fahrzeug entfernen</button>` : ''}</div>`;
+    html += `<div class="vehicle-card ${Number(vehicle.id) === Number(selectedVehicleId) ? 'selected' : ''}"><button style="width:100%;text-align:left;border:0;background:transparent;color:inherit;padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px;" onclick="selectVehicle('${vehicle.id}')"><span class="vehicle-card-icon">🚐</span><span class="vehicle-card-name">${escapeHtml(vehicle.name)}</span><span class="muted">${escapeHtml(vehicle.plate || 'Kein Kennzeichen')}</span><strong>${count} offen</strong></button>${adminModeVisible() ? `<button class="btn red small" style="margin-top:8px;" onclick="archiveVehicle(${vehicle.id})">Fahrzeug entfernen</button>` : ''}</div>`;
   });
   html += `</div></div>`;
 
@@ -3194,7 +3280,7 @@ function renderNotes() {
   const done=sharedNotes.filter(n=>n.status==='done');
   const noteCard = n => {
     const site=sites.find(s=>Number(s.id)===Number(n.site_id));
-    return `<div class="note-card ${n.status==='done'?'note-done':''}"><div class="note-card-top"><div><div class="note-card-title">${n.status==='done'?'✅ ': '📝 '}${escapeHtml(n.title)}</div><div class="movement-meta">Von ${escapeHtml(n.author||'Unbekannt')} · ${formatDate(n.created_at)}${site?' · 🏗️ '+escapeHtml(site.name):''}</div></div><span class="badge">${n.status==='done'?'Erledigt':'Offen'}</span></div><div class="note-card-body">${escapeHtml(n.body)}</div>${n.status==='done'?`<div class="movement-meta">Erledigt von ${escapeHtml(n.completed_by||'Unbekannt')}${n.completed_at?' · '+formatDate(n.completed_at):''}</div>`:''}<div class="vehicle-item-actions" style="margin-top:12px;">${(isAdmin || n.author_user_id===currentUserProfile?.user_id)?`<button class="btn small" onclick="editNote(${n.id})">✏️ Bearbeiten</button>`:''}<button class="btn ${n.status==='done'?'small':'green small'}" onclick="toggleNoteDone(${n.id})">${n.status==='done'?'Wieder öffnen':'✓ Als erledigt markieren'}</button>${isAdmin?`<button class="btn red small" onclick="deleteNote(${n.id})">Löschen</button>`:''}</div></div>`;
+    return `<div class="note-card ${n.status==='done'?'note-done':''}"><div class="note-card-top"><div><div class="note-card-title">${n.status==='done'?'✅ ': '📝 '}${escapeHtml(n.title)}</div><div class="movement-meta">Von ${escapeHtml(n.author||'Unbekannt')} · ${formatDate(n.created_at)}${site?' · 🏗️ '+escapeHtml(site.name):''}</div></div><span class="badge">${n.status==='done'?'Erledigt':'Offen'}</span></div><div class="note-card-body">${escapeHtml(n.body)}</div>${n.status==='done'?`<div class="movement-meta">Erledigt von ${escapeHtml(n.completed_by||'Unbekannt')}${n.completed_at?' · '+formatDate(n.completed_at):''}</div>`:''}<div class="vehicle-item-actions" style="margin-top:12px;">${(adminModeVisible() || n.author_user_id===currentUserProfile?.user_id)?`<button class="btn small" onclick="editNote(${n.id})">✏️ Bearbeiten</button>`:''}<button class="btn ${n.status==='done'?'small':'green small'}" onclick="toggleNoteDone(${n.id})">${n.status==='done'?'Wieder öffnen':'✓ Als erledigt markieren'}</button>${adminModeVisible()?`<button class="btn red small" onclick="deleteNote(${n.id})">Löschen</button>`:''}</div></div>`;
   };
   c.innerHTML=`<div class="card"><div class="site-card-top"><div><h2>📝 Notizen & anstehende Arbeiten</h2><div class="subtitle">Für alle Kollegen sichtbar, damit keine Aufgabe untergeht.</div></div><button class="btn primary" onclick="openNoteModal()">➕ Notiz erstellen</button></div><div class="stats-grid" style="margin-top:14px;"><div class="stat-card"><div class="stat-number">${open.length}</div><div class="stat-label">Offen</div></div><div class="stat-card"><div class="stat-number">${done.length}</div><div class="stat-label">Erledigt</div></div></div></div>${open.length?open.map(noteCard).join(''):'<div class="empty">Aktuell stehen keine Arbeiten an. 🎉</div>'}${done.length?`<h3 style="margin:22px 4px 8px;">Erledigte Arbeiten</h3>${done.map(noteCard).join('')}`:''}`;
 }
