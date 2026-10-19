@@ -4,10 +4,10 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<title>Materialverwaltung</title>
+<title>Materialverwaltung V24</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta content="2026-10-19-design-23" name="app-version"/>
+<meta content="2026-10-19-design-24" name="app-version"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -927,6 +927,26 @@ button,input,select,textarea{accent-color:#2487ff}input,select,textarea{max-widt
 .admin-button{background:#1c2e44;border-color:#33475d}.admin-button.active{background:#124d40;border-color:#2b8e75}.modal{background:#122036}
 @media(max-width:720px){.home-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.content{padding:16px 12px}header{padding:12px}.home-tile{padding:15px 13px;min-height:163px}.home-tile strong{font-size:28px}.home-hello{padding-bottom:18px}.header-actions .version-box{max-width:95px}.app-version-label{display:none}.version-status{font-size:9px!important}.home-actions .btn{flex:1}.bottom-link{font-size:10px}.bottom-link span{font-size:22px}}
 
+
+/* V24: eigenständige visuelle Ebene. Bestehende Daten- und Berichtsfunktionen bleiben unverändert. */
+:root{--bg:#07111f;--card:#101f32;--card2:#182b43;--text:#f4f8ff;--muted:#9caec5;--border:#233954;--accent:#1688ff;--green:#25d392;--red:#fa647b;--orange:#ffb949;--radius:21px;--table-header-bg:#173455;--table-row-even:#0c192a;--table-row-odd:#12233a;--table-row-hover:#1b3856;color-scheme:dark}
+html{background:var(--bg)}body{background:radial-gradient(ellipse 80% 470px at 50% -150px,#163968 0%,transparent 75%),var(--bg);min-height:100vh;font-size:14px;line-height:1.47}
+.app{max-width:1060px;padding-bottom:120px}
+header{background:rgba(7,17,31,.91);border-bottom:1px solid rgba(87,137,193,.12);padding:19px 22px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+h1{font-size:22px;letter-spacing:-.65px;display:flex;align-items:center;gap:10px;line-height:1.2}.brand-mark{width:37px;height:37px;display:inline-grid;place-items:center;background:linear-gradient(145deg,#32bcff,#0865e6);border:1px solid #5daeff;border-radius:12px;box-shadow:0 7px 19px #0069ee38;font-size:27px;color:#effbff}.v24-label{font-size:10px;font-weight:800;letter-spacing:.7px;color:#99c9ff;border:1px solid #315c89;padding:4px 7px;border-radius:7px;background:#142f50}.subtitle{font-size:12px;margin-top:4px}.content{padding:25px 21px}.tabs{display:none!important}
+.home-hello{position:relative;padding:29px 28px 31px;border-radius:25px;margin-bottom:20px;overflow:hidden;border:1px solid #28517b;background:linear-gradient(102deg,rgba(13,40,77,.95) 0%,rgba(13,38,70,.98) 56%,rgba(18,68,111,.9) 100%);box-shadow:0 12px 40px #0002}.home-hello:after{content:'🏗';position:absolute;right:20px;bottom:-45px;font-size:150px;opacity:.085;pointer-events:none}.home-hello h2{font-size:clamp(26px,5vw,36px);font-weight:790;line-height:1.17;margin:9px 0}.home-hello p{font-size:14px;color:#bfcee1}.eyebrow{color:#80c6ff;letter-spacing:2px}
+.home-tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.home-tile{min-height:205px;padding:19px 18px;position:relative;border-radius:22px;display:flex;gap:7px;box-shadow:0 9px 28px #0004,inset 0 1px 0 #ffffff11;transition:transform .15s,border-color .15s}.home-tile:hover{transform:translateY(-3px)}.home-tile:focus-visible,.bottom-link:focus-visible,.btn:focus-visible{outline:3px solid #8ecaff;outline-offset:3px}.home-tile:nth-child(1){background:linear-gradient(145deg,#203249,#102037);border-color:#354962;border-bottom:3px solid #ffb54d}.home-tile:nth-child(2){background:linear-gradient(145deg,#173657,#102139);border-color:#28619b;border-bottom:3px solid #298aff}.home-tile:nth-child(3){background:linear-gradient(145deg,#103e42,#0e2638);border-color:#226b67;border-bottom:3px solid #36dc9b}.home-tile:nth-child(4){background:linear-gradient(145deg,#282750,#15223b);border-color:#51418a;border-bottom:3px solid #ad83ff}.tile-icon{font-size:32px;filter:drop-shadow(0 4px 6px #0005)}.home-tile-title{font-size:14px;font-weight:780;margin-top:3px;display:flex;width:100%;justify-content:space-between;align-items:center}.home-tile-title b{color:#b1d7ff;font-size:19px}.home-tile strong{font-size:35px;margin-top:auto;letter-spacing:-1px}.home-tile strong.home-tile-word{font-size:27px}.home-tile small{color:#b7c9dd;font-size:12px}.home-actions{margin:20px 0 26px;gap:11px}.home-actions>.btn{min-height:48px}.home-section-heading h3{font-size:20px;letter-spacing:-.4px}.home-activities{background:transparent;border:0;border-radius:0;display:grid;gap:9px}.home-activity{border:1px solid #28415e!important;border-radius:16px;background:linear-gradient(110deg,#14273e,#0e1d30);box-shadow:0 5px 22px #0002;min-height:74px;padding:13px 16px}.activity-icon{background:#213e60;width:45px;height:45px;border-radius:14px}.activity-date{color:#a2bbd6}
+.card{background:linear-gradient(145deg,#14243a,#0f1d30);border:1px solid #2a3d57;box-shadow:0 8px 23px #0002;padding:19px;border-radius:20px;margin-bottom:13px}.card h2{font-size:19px}.btn{border:1px solid #30465f;min-height:45px;border-radius:12px;background:#20334b;transition:filter .15s,transform .15s}.btn:hover{filter:brightness(1.16)}.btn:active{transform:scale(.985)}.btn.primary,.tab.active{background:linear-gradient(125deg,#0871ed,#2999ff);color:white;border-color:#3399ff;box-shadow:0 6px 19px #056df233}.btn.green{background:#0a795c;border-color:#28ad8c}.btn.red{background:#912b42;border-color:#ac4560}.admin-button{border:1px solid #38516c;background:#172941;border-radius:12px;font-size:12px}.admin-button.active{background:#0c473c;border-color:#1b9577;color:#7bf1be}.version-status{background:#14243a;border-color:#2d4563}
+input,select,textarea{background:#17283d!important;border:1px solid #33475f!important;color:#f4f8ff!important;border-radius:12px!important;min-height:44px}input:focus,select:focus,textarea:focus{outline:2px solid #278eff88!important;outline-offset:1px}.search-box input{border-radius:13px!important;min-height:48px}.search-box{margin:15px 0}
+.stat-card{background:#1a2a40;border:1px solid #324660;padding:16px 12px}.stat-number{font-size:25px}.stat-label{font-size:12px}
+.material-card{cursor:pointer;border-radius:17px;padding:17px 18px;transition:background .16s,transform .15s,border-color .15s}.material-card:hover{border-color:#5485bd;background:#172c46;transform:translateY(-1px)}.material-card .material-name{display:flex;align-items:center;gap:13px;font-size:15px;letter-spacing:-.2px}.material-mini-icon{display:grid;place-items:center;width:47px;height:47px;border:1px solid #426180;border-radius:13px;background:linear-gradient(135deg,#244462,#1a304b);font-size:23px;flex:0 0 47px}.material-card .material-unit{padding-left:60px}.material-stock-number{color:#72ecac;font-size:19px}.stock-measure{color:#8eb5db;font-size:12px}.material-card-hint{border-top:1px solid #263d57;margin-top:11px;padding-top:11px}.material-card-hint strong{color:#75b9ff!important}
+.site-list-item{background:linear-gradient(120deg,#152941,#102036);border:1px solid #314864;border-radius:18px;padding:16px 17px;margin-bottom:11px;box-shadow:0 8px 19px #0002}.site-list-item:hover{border-color:#5185bc}.site-list-header{gap:10px}.site-list-name{display:flex;align-items:center;gap:12px;font-size:15px}.site-list-name strong{font-size:15px;display:block}.site-list-name small{display:block;color:#a7b9ce;font-size:12px;font-weight:400;padding-top:3px}.site-mini-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;background:#183e62;border:1px solid #2a638f;border-radius:13px;font-size:23px}.badge{border-radius:100px;padding:5px 9px;background:#203d5c;color:#b9d8f7}.view-toggle{background:#11233a;border:1px solid #29435f;border-radius:13px;padding:5px}.view-toggle-btn{border-radius:9px}.view-toggle-btn.active{background:#126de2;color:white}
+.vehicle-grid{gap:12px}.vehicle-card{border:1px solid #2b4767;background:linear-gradient(115deg,#172e48,#102338);border-radius:18px;padding:17px}.vehicle-card.selected{border-color:#2798ff;background:#153a62}.vehicle-card-icon{font-size:35px}.vehicle-card-name{font-size:16px!important;font-weight:800}.vehicle-item{background:#11243a;border:1px solid #2b435b;border-radius:14px;margin-bottom:10px}
+.bottom-nav{background:rgba(9,24,44,.96);border:1px solid #32567e;border-bottom:0;box-shadow:0 -15px 45px #030913ae,0 -1px 0 #4489d044;max-width:870px;padding:9px 10px calc(10px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;backdrop-filter:blur(24px)}.bottom-link{min-height:59px;color:#9ab4d2;gap:4px;transition:background .16s}.bottom-link span{font-size:26px}.bottom-link.active{background:linear-gradient(135deg,#114e8c,#13385c);color:#62baff;box-shadow:inset 0 1px 0 #3c7eb1}.fab{background:linear-gradient(135deg,#087bf7,#36a3ff);box-shadow:0 8px 25px #0877ed60;border:1px solid #5db4ff;width:57px;height:57px;right:max(22px,calc((100vw - 1020px)/2))}.more-sheet:not([hidden]){background:#132740;border-color:#3a5c81;box-shadow:0 25px 65px #000a}.more-sheet button{background:#1a3452;border-color:#3b5677}.modal{background:#122239;border:1px solid #3b5470;border-radius:23px}.modal-bg{backdrop-filter:blur(7px)}
+@media(max-width:720px){header{padding:12px 14px}.content{padding:15px 13px}.home-hello{padding:23px 19px;margin-bottom:15px}.home-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.home-tile{min-height:175px;padding:15px 14px}.home-tile strong{font-size:31px}.home-tile strong.home-tile-word{font-size:23px}.home-tile small{font-size:11px}.home-tile-title{font-size:13px}.home-actions{margin:16px 0 23px}.home-section-heading h3{font-size:18px}.card{padding:15px}.material-card{padding:13px}.material-mini-icon{width:42px;height:42px;flex-basis:42px}.material-card .material-unit{padding-left:55px}.site-list-item{padding:12px}.site-mini-icon{width:40px;height:40px;flex-basis:40px}.site-list-header .badge{font-size:10px}.bottom-link{font-size:10px}.bottom-link span{font-size:23px}.header-actions .version-box{display:none}.v24-label{display:none}h1{font-size:18px}.brand-mark{width:32px;height:32px;font-size:22px}}
+@media(max-width:390px){.site-list-header{flex-wrap:wrap}.home-hello h2{font-size:25px}.home-tile{min-height:165px}.home-tile strong{font-size:29px}}
+@media(prefers-reduced-motion:reduce){.home-tile,.material-card,.btn{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -943,13 +963,13 @@ button,input,select,textarea{accent-color:#2487ff}input,select,textarea{max-widt
 <header>
 <div class="header-row">
 <div class="header-title">
-<h1>Materialverwaltung</h1>
-<div class="subtitle">Lager &amp; Baustellen</div>
+<h1><span class="brand-mark" aria-hidden="true">⬡</span> Materialverwaltung <span class="v24-label">V24</span></h1>
+<div class="subtitle">Dein digitaler Baustellenbegleiter</div>
 </div>
 <div class="header-actions">
 <div class="version-box">
 <button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button>
-<div class="app-version-label" id="appVersionLabel">App-Version: 2026-10-19-design-23</div>
+<div class="app-version-label" id="appVersionLabel">App-Version: 2026-10-19-design-24</div>
 <button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">↻ Neue Version laden</button>
 </div>
 <button class="admin-button" id="adminButton" onclick="openAdminModal()">
@@ -1374,7 +1394,7 @@ let historyMaterialFilter = "";
 let historySiteFilter = "";
 let historyEmployeeFilter = "";
 
-let siteViewMode = 'paper_table';
+let siteViewMode = 'list';
 let selectedSiteId = null;
 
 let customColumns = [];
@@ -2022,15 +2042,15 @@ function renderStartseite(){
   return `<div class="home-activity"><div class="activity-icon">📦</div><div><strong>${escapeHtml(mat?.name||'Material')}</strong><small>${formatNumber(m.amount)} ${escapeHtml(mat?.unit||'')} · ${escapeHtml(site?.name||'Lager')}</small></div><span class="activity-date">${formatDate(m.created_at).split(',')[0]}</span></div>`;
  }).join('');
  document.getElementById('startseite').innerHTML=`
- <div class="home-hello"><span class="eyebrow">DEINE ÜBERSICHT</span><h2>Hallo, ${name}! 👋</h2><p>Alles Wichtige für deinen Arbeitstag.</p></div>
+ <div class="home-hello"><span class="eyebrow">DEIN ARBEITSPLATZ</span><h2>Guten Tag, ${name}! <span aria-hidden="true">👋</span></h2><p>Hier ist deine Übersicht für heute.</p></div>
  <div class="home-tiles">
-  <button class="home-tile" onclick="navigateApp('lager')"><span class="tile-icon">📦</span><strong>${materials.length}</strong><small>Materialien im Lager</small><span class="tile-label">Lagerbestand ↗</span></button>
-  <button class="home-tile" onclick="navigateApp('baustellen')"><span class="tile-icon">🏗️</span><strong>${activeSites}</strong><small>Aktive Baustellen</small><span class="tile-label">Baustellen ↗</span></button>
-  <button class="home-tile" onclick="navigateApp('fahrzeuge')"><span class="tile-icon">🚐</span><strong>${vehicles.length}</strong><small>Fahrzeuge · ${openItems} Entnahmen</small><span class="tile-label">Fahrzeuge ↗</span></button>
-  <button class="home-tile" onclick="openMontagebericht()"><span class="tile-icon">📄</span><strong class="home-tile-word">Neuer</strong><small>Blauer Montagebericht</small><span class="tile-label">Bericht erstellen ↗</span></button>
+  <button class="home-tile" onclick="navigateApp('lager')"><span class="tile-icon">📦</span><span class="home-tile-title">Lager <b>↗</b></span><strong>${materials.length}</strong><small>Materialarten im Bestand</small></button>
+  <button class="home-tile" onclick="navigateApp('baustellen')"><span class="tile-icon">🏗️</span><span class="home-tile-title">Baustellen <b>↗</b></span><strong>${activeSites}</strong><small>Aktive Baustellen</small></button>
+  <button class="home-tile" onclick="navigateApp('fahrzeuge')"><span class="tile-icon">🚐</span><span class="home-tile-title">Fahrzeuge <b>↗</b></span><strong>${vehicles.length}</strong><small>${openItems} offene Nachladungen</small></button>
+  <button class="home-tile" onclick="openMontagebericht()"><span class="tile-icon">📄</span><span class="home-tile-title">Berichte <b>↗</b></span><strong class="home-tile-word">Neu +</strong><small>Montagebericht erstellen</small></button>
  </div>
  <div class="home-actions"><button class="btn primary" onclick="openBooking()">＋ Material buchen</button><button class="btn" onclick="navigateApp('notizen')">📝 Notizen</button></div>
- <div class="home-section-heading"><h3>Letzte Buchungen</h3><button onclick="navigateApp('historie')">Alle anzeigen ›</button></div>
+ <div class="home-section-heading"><h3>Aktuelle Aktivitäten</h3><button onclick="navigateApp('historie')">Alle anzeigen ›</button></div>
  <div class="home-activities">${recent||'<p class="muted" style="padding:18px">Noch keine Buchungen vorhanden.</p>'}</div>`;
 }
 function renderAll() {
@@ -2112,11 +2132,11 @@ function renderWarehouseMaterials() {
            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openWarehousePieceModal(${m.id});}">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%;">
           <div class="material-info">
-            <div class="material-name">${escapeHtml(m.name)}</div>
+            <div class="material-name"><span class="material-mini-icon" aria-hidden="true">${/cee|stecker/i.test(m.name)?'🔌':/verteiler/i.test(m.name)?'⚡':'🧵'}</span>${escapeHtml(m.name)}</div>
             <div class="material-unit">Einheit: ${escapeHtml(m.unit || "m")}</div>
           </div>
           <div class="material-stock">
-            <div class="material-stock-number">${formatNumber(m.stock)}</div>
+            <div class="material-stock-number">${formatNumber(m.stock)} <span class="stock-measure">${escapeHtml(m.unit||"m")}</span></div>
             <div class="material-stock-unit">Gesamt in ${escapeHtml(m.unit || "m")}</div>
           </div>
         </div>
@@ -2162,10 +2182,10 @@ function renderSites() {
 
       <div class="view-toggle">
         <button class="view-toggle-btn ${siteViewMode === 'paper_table' ? 'active' : ''}" onclick="setSiteViewMode('paper_table')">
-          📊 Tabelle
+          ▤ Tabelle
         </button>
         <button class="view-toggle-btn ${siteViewMode === 'list' ? 'active' : ''}" onclick="setSiteViewMode('list')">
-          📋 Einzelansicht
+          ▦ Kartenansicht
         </button>
       </div>
 
@@ -2324,7 +2344,7 @@ function renderSiteListView(filteredSites) {
     html += activeSites.map(site => `
       <div class="site-list-item" onclick="toggleSiteListExpand(${site.id})">
         <div class="site-list-header">
-          <div class="site-list-name">🏗️ ${escapeHtml(site.name)}</div>
+          <div class="site-list-name"><span class="site-mini-icon" aria-hidden="true">🏗️</span><span><strong>${escapeHtml(site.name)}</strong><small>${escapeHtml(site.address||"Baustelle")}</small></span></div>
           <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             ${siteNotesFor(site.id).filter(n=>n.status!=='done').length ? `<span class="badge" style="color:#facc15">📝 ${siteNotesFor(site.id).filter(n=>n.status!=='done').length} offen</span>` : ''}
             <span class="badge">${Number(selectedSiteId) === Number(site.id) ? '▲ Einklappen' : '▼ Details'}</span>
@@ -2340,7 +2360,7 @@ function renderSiteListView(filteredSites) {
     html += closedSites.map(site => `
       <div class="site-list-item" style="opacity:0.75;" onclick="toggleSiteListExpand(${site.id})">
         <div class="site-list-header">
-          <div class="site-list-name">⚪ ${escapeHtml(site.name)}</div>
+          <div class="site-list-name"><span class="site-mini-icon" aria-hidden="true">✓</span><span><strong>${escapeHtml(site.name)}</strong><small>${escapeHtml(site.address||"Abgeschlossen")}</small></span></div>
           <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             ${siteNotesFor(site.id).filter(n=>n.status!=='done').length ? `<span class="badge" style="color:#facc15">📝 ${siteNotesFor(site.id).filter(n=>n.status!=='done').length} offen</span>` : ''}
             <span class="badge">${Number(selectedSiteId) === Number(site.id) ? '▲ Einklappen' : '▼ Details'}</span>
