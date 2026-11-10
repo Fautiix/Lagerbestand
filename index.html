@@ -2122,14 +2122,8 @@ async function tsPDF(mode){
    if(align==='center')px+=(width*sx-textWidth)/2;
    page.drawText(str,{x:px,y:page.getHeight()-top*sy,size:fontSize,font:f,color:rgb});
   };
-  const cover=(page,x,top,width,height)=>{
-   const sx=page.getWidth()/REF_W,sy=page.getHeight()/REF_H;
-   page.drawRectangle({x:x*sx,y:page.getHeight()-(top+height)*sy,width:width*sx,height:height*sy,color:lib.rgb(1,1,1)});
-  };
-  // Die vorgedruckten Musterdaten im Kopf sauber überdecken. Überschriften bleiben.
-  cover(pages[0],114,163,142,17); // Name
-  cover(pages[0],324,163,70,17);  // Personalnummer
-  cover(pages[0],493,163,34,17);  // Jahr
+  // Die PDF-Vorlage enthält keine vorgedruckten Beispielwerte mehr.
+  // Keine weißen Rechtecke über das gescannte Papier zeichnen.
   draw(pages[0],142,129,tsData.checkedBy,220,9);
   draw(pages[0],118,176,tsData.employee,138,9,true);
   draw(pages[0],326,176,tsData.persNr,67,9,true);
