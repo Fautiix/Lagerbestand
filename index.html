@@ -7,7 +7,7 @@
 <title>Materialverwaltung V24</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta content="2026-10-19-design-24" name="app-version"/>
+<meta content="2026-11-10-timesheet-25" name="app-version"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -947,6 +947,21 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 @media(max-width:390px){.site-list-header{flex-wrap:wrap}.home-hello h2{font-size:25px}.home-tile{min-height:165px}.home-tile strong{font-size:29px}}
 @media(prefers-reduced-motion:reduce){.home-tile,.material-card,.btn{transition:none!important}}
 
+
+/* V25 Stundenzettel */
+.ts-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:4px 0 18px}
+.ts-heading h2{margin:0;font-size:23px}.ts-heading p{margin:4px 0 0;color:var(--muted,#a5b6c7);font-size:13px}
+.ts-card{background:linear-gradient(150deg,#13243c,#0d1729);border:1px solid #2a405e;border-radius:16px;padding:16px;margin:0 0 14px}
+.ts-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ts-field{min-width:0}.ts-field label{display:block;color:#aebed3;font-size:12px;margin:0 0 5px}
+.ts-field input,.ts-field select,.ts-field textarea{width:100%;padding:11px 10px;border:1px solid #364a65;border-radius:10px;background:#0b1628;color:#f1f6ff;font:inherit;min-width:0}
+.ts-field textarea{resize:vertical;min-height:58px}.ts-day{border:1px solid #2d4260;border-radius:13px;margin:10px 0;overflow:hidden}
+.ts-day summary{display:flex;align-items:center;justify-content:space-between;gap:7px;cursor:pointer;list-style:none;padding:13px 14px;background:#172841;font-weight:700}
+.ts-day summary::-webkit-details-marker{display:none}.ts-day-body{padding:13px}.ts-entry{border:1px solid #253e59;border-radius:12px;padding:10px;margin:10px 0;background:#101d30}
+.ts-entry-header{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;font-size:13px;color:#bfd3e9}
+.ts-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.ts-actions button{min-height:42px}
+.ts-total{font-size:22px;font-weight:800;color:#85b8ff}.ts-hint{font-size:12px;color:#aebed3;line-height:1.55}
+@media(max-width:540px){.ts-row{grid-template-columns:1fr}.ts-heading h2{font-size:20px}}
 </style>
 </head>
 <body>
@@ -963,13 +978,13 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 <header>
 <div class="header-row">
 <div class="header-title">
-<h1><span class="brand-mark" aria-hidden="true">⬡</span> Materialverwaltung <span class="v24-label">V24</span></h1>
+<h1><span class="brand-mark" aria-hidden="true">⬡</span> Materialverwaltung <span class="v24-label">V25</span></h1>
 <div class="subtitle">Dein digitaler Baustellenbegleiter</div>
 </div>
 <div class="header-actions">
 <div class="version-box">
 <button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button>
-<div class="app-version-label" id="appVersionLabel">App-Version: 2026-10-19-design-24</div>
+<div class="app-version-label" id="appVersionLabel">App-Version: 2026-11-10-timesheet-25</div>
 <button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">↻ Neue Version laden</button>
 </div>
 <button class="admin-button" id="adminButton" onclick="openAdminModal()">
@@ -996,6 +1011,7 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 <button class="tab" onclick="showTab('notizen', this); loadAndRenderNotes()">
       📝 Notizen
     </button>
+<button class="tab" onclick="navigateApp('stundenzettel')">🕒 Stundenzettel</button>
 <button aria-label="Blauen Montagebericht öffnen" class="tab report-tab-link" onclick="openMontagebericht()" type="button">
       📄 Bericht
     </button>
@@ -1005,6 +1021,7 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 <section id="historie" style="display:none"></section>
 <section id="fahrzeuge" style="display:none"></section>
 <section id="notizen" style="display:none"></section>
+<section id="stundenzettel" style="display:none"></section>
 </div>
 </div>
 <nav class="bottom-nav" aria-label="Hauptnavigation">
@@ -1018,6 +1035,7 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 <h3>Weitere Bereiche</h3>
 <button onclick="navigateApp('historie')">📜 Buchungshistorie <span>›</span></button>
 <button onclick="navigateApp('notizen')">📝 Notizen & Aufgaben <span>›</span></button>
+<button onclick="navigateApp('stundenzettel')">🕒 Wochen-Stundenzettel <span>›</span></button>
 <button onclick="closeAppMore();openMontagebericht()">📄 Montagebericht <span>›</span></button>
 <button onclick="closeAppMore();openAdminModal()">👤 Profil & Verwaltung <span>›</span></button>
 </div>
@@ -2017,6 +2035,83 @@ async function loadAndRenderVehicles() {
   }
 }
 
+
+/* V25 – Wochenbericht/Stempelkarte. Entries always belong to the signed-in user. */
+const TS_DAYS=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+let tsWeek=null,tsData=null,tsRemoteAvailable=true,tsBusy=false;
+function tsMonday(date){const d=new Date(date+'T12:00:00'); if(isNaN(d))return tsMonday(new Date().toISOString().slice(0,10));d.setDate(d.getDate()-((d.getDay()+6)%7));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function tsDate(offset){const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset);return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
+function tsISO(offset){const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function tsKw(s){const date=new Date(s+'T12:00:00');date.setDate(date.getDate()+4-(date.getDay()||7));const yearStart=new Date(date.getFullYear(),0,1);return 1+Math.ceil(((date-yearStart)/86400000+1)/7);}
+function tsBlank(){return {employee:currentUserProfile?.name||'',persNr:'',checkedBy:'',days:Array.from({length:7},()=>({from:'',to:'',entries:[{work:'',order:'',process:'',hours:'',we:'',hr:'',labor:''}]}))};}
+function tsKey(){return `mv_timesheet_v25_${currentUserProfile?.user_id||'unknown'}_${tsWeek}`;}
+function tsSafe(s){return escapeHtml(String(s??''));}
+function tsNum(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:0;}
+function tsTotal(i){return (tsData.days[i]?.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);}
+function tsAllTotal(){return tsData?.days?.reduce((s,_,i)=>s+tsTotal(i),0)||0;}
+function tsNumFormat(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+async function openTimesheet(week){
+ if(!currentUserProfile)return;
+ const next=tsMonday(week||tsWeek||new Date().toISOString().slice(0,10));
+ if(next===tsWeek&&tsData){renderTimesheet();return;}
+ tsWeek=next;tsData=tsBlank();tsRemoteAvailable=true;
+ try{const rows=await supabase('weekly_timesheets?select=data&user_id=eq.'+encodeURIComponent(currentUserProfile.user_id)+'&week_start=eq.'+tsWeek+'&limit=1');
+ if(rows?.[0]?.data)tsData=rows[0].data;
+ }catch(e){tsRemoteAvailable=false;try{const raw=localStorage.getItem(tsKey());if(raw)tsData=JSON.parse(raw)}catch(_){} }
+ if(!Array.isArray(tsData.days)||tsData.days.length!==7)tsData=tsBlank();
+ tsData.employee=currentUserProfile.name||tsData.employee;
+ renderTimesheet();
+}
+function tsMoveWeek(offset){tsCapture();const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset*7);openTimesheet(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);}
+function tsField(v,day,idx,key,wide=false){const id=`ts-${day}-${idx}-${key}`;return `<div class="ts-field" ${wide?'style="grid-column:1/-1"':''}><label for="${id}">${({work:'Ausgeführte Arbeiten',order:'Auftrag',process:'Vorgang',hours:'Std.',we:'WE',hr:'HR',labor:'L-Art'})[key]}</label>${key==='work'?`<textarea id="${id}" rows="2" data-ts-day="${day}" data-ts-row="${idx}" data-ts-field="${key}">${tsSafe(v)}</textarea>`:`<input id="${id}" ${key==='hours'?'inputmode="decimal"':''} data-ts-day="${day}" data-ts-row="${idx}" data-ts-field="${key}" value="${tsSafe(v)}"/>`}</div>`;}
+function renderTimesheet(){
+ const el=document.getElementById('stundenzettel');if(!el||!tsData)return;
+ const dayRows=tsData.days.map((d,i)=>`<details class="ts-day" ${i===0?'open':''}><summary><span>${TS_DAYS[i]} · ${tsDate(i)}</span><span>${tsNumFormat(tsTotal(i))} Std. ▾</span></summary><div class="ts-day-body">
+ <div class="ts-row"><div class="ts-field"><label>Von (Uhrzeit)</label><input type="time" data-ts-day="${i}" data-ts-time="from" value="${tsSafe(d.from)}"></div><div class="ts-field"><label>Bis (Uhrzeit)</label><input type="time" data-ts-day="${i}" data-ts-time="to" value="${tsSafe(d.to)}"></div></div>
+ ${(d.entries||[]).map((e,j)=>`<div class="ts-entry"><div class="ts-entry-header"><strong>Tätigkeit ${j+1}</strong><button class="btn small" type="button" onclick="tsDeleteEntry(${i},${j})" ${d.entries.length===1?'disabled':''}>Entfernen</button></div><div class="ts-row">${tsField(e.work,i,j,'work',true)}${['order','process','hours','we','hr','labor'].map(k=>tsField(e[k],i,j,k)).join('')}</div></div>`).join('')}
+ <button type="button" class="btn" onclick="tsAddEntry(${i})">＋ Weitere Tätigkeit</button></div></details>`).join('');
+ el.innerHTML=`<div class="ts-heading"><div><h2>🕒 Wochenbericht und Stempelkarte</h2><p>Originalformular · 2 Seiten · 7 Tage</p></div><span class="ts-total" id="tsTotal">${tsNumFormat(tsAllTotal())} Std.</span></div>
+ <div class="ts-card"><div class="ts-row"><div class="ts-field"><label>Woche auswählen (beliebiger Tag)</label><input id="tsWeekSelect" type="date" value="${tsWeek}" onchange="tsChangeWeek(this.value)"></div><div class="ts-field"><label>Kalenderwoche</label><input readonly value="KW ${tsKw(tsWeek)} · ${new Date(tsWeek+'T12:00:00').getFullYear()}"></div><div class="ts-field"><label>Name (vom Account)</label><input readonly value="${tsSafe(tsData.employee)}"></div><div class="ts-field"><label>Personalnummer</label><input id="tsPersNr" value="${tsSafe(tsData.persNr)}" placeholder="Personalnummer"></div><div class="ts-field" style="grid-column:1/-1"><label>Geprüft durch</label><input id="tsCheckedBy" value="${tsSafe(tsData.checkedBy)}" placeholder="Name der prüfenden Person"></div></div><div class="ts-actions"><button class="btn" onclick="tsMoveWeek(-1)">← Vorwoche</button><button class="btn" onclick="tsMoveWeek(1)">Folgewoche →</button></div></div>
+ ${dayRows}
+ <div class="ts-card"><div class="ts-actions"><button class="btn primary" onclick="tsSave()" id="tsSaveBtn">💾 Woche speichern</button><button class="btn" onclick="tsPDF('preview')">👁 PDF-Vorschau</button><button class="btn" onclick="tsPDF('download')">⬇ PDF herunterladen</button></div><p id="tsStatus" class="ts-hint">${tsRemoteAvailable?'Speicherung in Supabase verfügbar.':'Supabase-Tabelle noch nicht eingerichtet: Entwurf wird nur auf diesem Gerät gespeichert.'}</p><p class="ts-hint">Die PDF-Ausgabe verwendet die unveränderte originale Implenia-Vorlage. Für die Originalvorlage sind höchstens 3 Tätigkeiten pro Tag (Samstag/Sonntag: 2) im PDF vorgesehen. Bei mehr Einträgen weist die App vor dem Export darauf hin.</p></div>`;
+ el.querySelectorAll('[data-ts-field],[data-ts-time],#tsPersNr,#tsCheckedBy').forEach(x=>x.addEventListener('change',()=>{tsCapture();tsRefreshTotals()}));
+}
+function tsCapture(){if(!tsData)return;const root=document.getElementById('stundenzettel');if(!root)return;
+ const pn=root.querySelector('#tsPersNr'),chk=root.querySelector('#tsCheckedBy');if(pn)tsData.persNr=pn.value;if(chk)tsData.checkedBy=chk.value;
+ root.querySelectorAll('[data-ts-field]').forEach(x=>{const e=tsData.days[+x.dataset.tsDay]?.entries[+x.dataset.tsRow];if(e)e[x.dataset.tsField]=x.value});
+ root.querySelectorAll('[data-ts-time]').forEach(x=>{const d=tsData.days[+x.dataset.tsDay];if(d)d[x.dataset.tsTime]=x.value});
+}
+function tsRefreshTotals(){const e=document.getElementById('tsTotal');if(e)e.textContent=tsNumFormat(tsAllTotal())+' Std.';}
+function tsAddEntry(i){tsCapture();if(tsData.days[i].entries.length>=8)return alert('Maximal 8 Tätigkeiten pro Tag.');tsData.days[i].entries.push({work:'',order:'',process:'',hours:'',we:'',hr:'',labor:''});renderTimesheet();const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
+function tsDeleteEntry(i,j){tsCapture();if(tsData.days[i].entries.length<2)return;tsData.days[i].entries.splice(j,1);renderTimesheet();const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
+function tsChangeWeek(v){tsCapture();openTimesheet(v);}
+async function tsSave(){tsCapture();if(tsBusy)return;tsBusy=true;const msg=document.getElementById('tsStatus');if(msg)msg.textContent='Speichere …';
+ try{localStorage.setItem(tsKey(),JSON.stringify(tsData));const row={user_id:currentUserProfile.user_id,week_start:tsWeek,data:tsData};
+ await supabase('weekly_timesheets?on_conflict=user_id,week_start',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
+ tsRemoteAvailable=true;if(msg)msg.textContent='✓ In Supabase gespeichert.';
+ }catch(e){tsRemoteAvailable=false;if(msg)msg.textContent='⚠ Nur auf diesem Gerät gesichert. Supabase: '+e.message;}
+ finally{tsBusy=false;}}
+function tsLoadPdfLib(){return new Promise((resolve,reject)=>{if(window.PDFLib)return resolve(window.PDFLib);const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';script.onload=()=>window.PDFLib?resolve(window.PDFLib):reject(new Error('PDF-Bibliothek nicht verfügbar'));script.onerror=()=>reject(new Error('PDF-Bibliothek konnte nicht geladen werden'));document.head.appendChild(script);});}
+async function tsPDF(mode){tsCapture();try{
+ const overflow=tsData.days.findIndex((d,i)=>(d.entries||[]).filter(e=>Object.values(e).some(v=>String(v||'').trim())).length>(i>=5?2:3));if(overflow>=0)throw new Error('Zu viele Tätigkeiten am '+TS_DAYS[overflow]+'. Im Originalformular sind dort nur '+(overflow>=5?2:3)+' Tätigkeitszeilen vorgesehen.');
+ const lib=await tsLoadPdfLib();const response=await fetch('./stundenbericht_vorlage.pdf');if(!response.ok)throw new Error('Die Datei stundenbericht_vorlage.pdf fehlt im GitHub-Ordner.');
+ const doc=await lib.PDFDocument.load(await response.arrayBuffer());const font=await doc.embedFont(lib.StandardFonts.Helvetica);const pages=doc.getPages();if(pages.length!==2)throw new Error('Die Vorlage muss genau zwei Seiten haben.');
+ // Positions measured against original 768x1024 scan, converted to PDF coordinates.
+ const boxes=[{page:0,top:219,end:461,large:true},{page:0,top:464,end:684,large:true},{page:0,top:686,end:908,large:true},{page:1,top:46,end:289,large:true},{page:1,top:291,end:514,large:true},{page:1,top:517,end:645,large:false},{page:1,top:649,end:781,large:false}];
+ const write=(page,x,y,value,max=30,size=8,widthPx=100)=>{let safe=String(value??'').trim().slice(0,max).replace(/[^\x20-\x7eÀ-ÿ€]/g,' ');if(!safe)return;const w=page.getWidth(),h=page.getHeight();const limit=widthPx*w/768;while(safe.length>1&&font.widthOfTextAtSize(safe,size)>limit)safe=safe.slice(0,-1);page.drawText(safe,{x:x*w/768,y:h-y*h/1024,size:Math.min(size,8.3),font,color:lib.rgb(.05,.09,.15)});};
+ const whiteOut=(page,x,y,wPx,hPx)=>{const W=page.getWidth(),H=page.getHeight();page.drawRectangle({x:x*W/768,y:H-(y+hPx)*H/1024,width:wPx*W/768,height:hPx*H/1024,color:lib.rgb(1,1,1)});};
+ whiteOut(pages[0],148,197,139,21);whiteOut(pages[0],417,198,85,21);whiteOut(pages[0],640,198,51,21);
+ write(pages[0],180,73,tsData.checkedBy,45,9);write(pages[0],155,212,tsData.employee,26,9);write(pages[0],422,212,tsData.persNr,12,9);write(pages[0],541,212,String(tsKw(tsWeek)),3,9);write(pages[0],643,212,tsWeek.slice(0,4),4,9);
+ boxes.forEach((b,i)=>{const p=pages[b.page],d=tsData.days[i];write(p,67,b.top+29,tsDate(i).slice(0,5),10,8);
+ const lines=d.entries||[];const slots=b.large?3:2;lines.slice(0,slots).forEach((e,j)=>{const y=b.top+30+j*21.8;
+ write(p,153,y,e.work,33,7.0,178);write(p,337,y,e.order,16,7.4,76);write(p,419,y,e.process,10,7.4,50);write(p,475,y,e.hours,7,7.4,45);write(p,526,y,e.we,6,7.4,44);write(p,576,y,e.hr,6,7.4,43);write(p,623,y,e.labor,8,7.4,50);
+ });const timeY=b.large?b.top+119:b.top+64;write(p,67,timeY,d.from,8,8);write(p,67,timeY+66,d.to,8,8);write(p,474,b.end-7,tsNumFormat(tsTotal(i)),10,8);
+ });
+ const bytes=await doc.save();const blob=new Blob([bytes],{type:'application/pdf'});const url=URL.createObjectURL(blob);
+ if(mode==='download'){const a=document.createElement('a');a.href=url;a.download='Stundenzettel_KW'+tsKw(tsWeek)+'_'+tsWeek+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+ else{const opened=window.open(url,'_blank');if(!opened){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.click();}setTimeout(()=>URL.revokeObjectURL(url),180000);}
+ }catch(e){alert('PDF konnte nicht erstellt werden: '+e.message);}}
+
 let currentAppPage='startseite';
 function closeAppMore(){document.getElementById('moreBackdrop').hidden=true;document.getElementById('moreSheet').hidden=true;}
 function toggleAppMore(){const e=document.getElementById('moreSheet');const next=e.hidden;closeAppMore();if(next){e.hidden=false;document.getElementById('moreBackdrop').hidden=false;}}
@@ -2025,9 +2120,10 @@ function navigateApp(tab){
  document.querySelectorAll('.content section').forEach(section=>section.style.display='none');
  const target=document.getElementById(tab);if(target)target.style.display='block';
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',(b.getAttribute('onclick')||'').includes("'"+tab+"'")));
- document.querySelectorAll('.bottom-link').forEach(b=>b.classList.toggle('active',b.dataset.dest===tab || (b.dataset.dest==='mehr'&&['historie','notizen'].includes(tab))));
+ document.querySelectorAll('.bottom-link').forEach(b=>b.classList.toggle('active',b.dataset.dest===tab || (b.dataset.dest==='mehr'&&['historie','notizen','stundenzettel'].includes(tab))));
  if(tab==='fahrzeuge')loadAndRenderVehicles();
  if(tab==='notizen')loadAndRenderNotes();
+ if(tab==='stundenzettel')openTimesheet();
  if(tab==='startseite')renderStartseite();
  window.scrollTo({top:0,behavior:'instant'});
 }
@@ -2049,7 +2145,7 @@ function renderStartseite(){
   <button class="home-tile" onclick="navigateApp('fahrzeuge')"><span class="tile-icon">🚐</span><span class="home-tile-title">Fahrzeuge <b>↗</b></span><strong>${vehicles.length}</strong><small>${openItems} offene Nachladungen</small></button>
   <button class="home-tile" onclick="openMontagebericht()"><span class="tile-icon">📄</span><span class="home-tile-title">Berichte <b>↗</b></span><strong class="home-tile-word">Neu +</strong><small>Montagebericht erstellen</small></button>
  </div>
- <div class="home-actions"><button class="btn primary" onclick="openBooking()">＋ Material buchen</button><button class="btn" onclick="navigateApp('notizen')">📝 Notizen</button></div>
+ <div class="home-actions"><button class="btn primary" onclick="openBooking()">＋ Material buchen</button><button class="btn" onclick="navigateApp('notizen')">📝 Notizen</button><button class="btn" onclick="navigateApp('stundenzettel')">🕒 Stundenzettel</button></div>
  <div class="home-section-heading"><h3>Aktuelle Aktivitäten</h3><button onclick="navigateApp('historie')">Alle anzeigen ›</button></div>
  <div class="home-activities">${recent||'<p class="muted" style="padding:18px">Noch keine Buchungen vorhanden.</p>'}</div>`;
 }
