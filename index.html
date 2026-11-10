@@ -2073,7 +2073,7 @@ function renderTimesheet(){
  el.innerHTML=`<div class="ts-heading"><div><h2>🕒 Wochenbericht und Stempelkarte</h2><p>Originalformular · 2 Seiten · 7 Tage</p></div><span class="ts-total" id="tsTotal">${tsNumFormat(tsAllTotal())} Std.</span></div>
  <div class="ts-card"><div class="ts-row"><div class="ts-field"><label>Woche auswählen (beliebiger Tag)</label><input id="tsWeekSelect" type="date" value="${tsWeek}" onchange="tsChangeWeek(this.value)"></div><div class="ts-field"><label>Kalenderwoche</label><input readonly value="KW ${tsKw(tsWeek)} · ${new Date(tsWeek+'T12:00:00').getFullYear()}"></div><div class="ts-field"><label>Name (vom Account)</label><input readonly value="${tsSafe(tsData.employee)}"></div><div class="ts-field"><label>Personalnummer</label><input id="tsPersNr" value="${tsSafe(tsData.persNr)}" placeholder="Personalnummer"></div><div class="ts-field" style="grid-column:1/-1"><label>Geprüft durch</label><input id="tsCheckedBy" value="${tsSafe(tsData.checkedBy)}" placeholder="Name der prüfenden Person"></div></div><div class="ts-actions"><button class="btn" onclick="tsMoveWeek(-1)">← Vorwoche</button><button class="btn" onclick="tsMoveWeek(1)">Folgewoche →</button></div></div>
  ${dayRows}
- <div class="ts-card"><div class="ts-actions"><button class="btn primary" onclick="tsSave()" id="tsSaveBtn">💾 Woche speichern</button><button class="btn" onclick="tsPDF('preview')">👁 PDF-Vorschau</button><button class="btn" onclick="tsPDF('download')">⬇ PDF herunterladen</button></div><p id="tsStatus" class="ts-hint">${tsRemoteAvailable?'Speicherung in Supabase verfügbar.':'Supabase-Tabelle noch nicht eingerichtet: Entwurf wird nur auf diesem Gerät gespeichert.'}</p><p class="ts-hint">Die PDF-Ausgabe verwendet die unveränderte originale Implenia-Vorlage. Für die Originalvorlage sind höchstens 3 Tätigkeiten pro Tag (Samstag/Sonntag: 2) im PDF vorgesehen. Bei mehr Einträgen weist die App vor dem Export darauf hin.</p></div>`;
+ <div class="ts-card"><div class="ts-actions"><button class="btn primary" onclick="tsSave()" id="tsSaveBtn">💾 Woche speichern</button><button class="btn" onclick="tsPDF('preview')">👁 PDF-Vorschau</button><button class="btn" onclick="tsPDF('download')">⬇ PDF herunterladen</button></div><p id="tsStatus" class="ts-hint">${tsRemoteAvailable?'Speicherung in Supabase verfügbar.':'Supabase-Tabelle noch nicht eingerichtet: Entwurf wird nur auf diesem Gerät gespeichert.'}</p><p class="ts-hint">Die PDF-Ausgabe verwendet die unveränderte originale Implenia-Vorlage. Der PDF-Export trägt Tätigkeiten zeilenweise in das unveränderte Originalformular ein. Nicht belegte Felder und Tagessummen bleiben leer.</p></div>`;
  el.querySelectorAll('[data-ts-field],[data-ts-time],#tsPersNr,#tsCheckedBy').forEach(x=>x.addEventListener('change',()=>{tsCapture();tsRefreshTotals()}));
 }
 function tsCapture(){if(!tsData)return;const root=document.getElementById('stundenzettel');if(!root)return;
@@ -2092,25 +2092,96 @@ async function tsSave(){tsCapture();if(tsBusy)return;tsBusy=true;const msg=docum
  }catch(e){tsRemoteAvailable=false;if(msg)msg.textContent='⚠ Nur auf diesem Gerät gesichert. Supabase: '+e.message;}
  finally{tsBusy=false;}}
 function tsLoadPdfLib(){return new Promise((resolve,reject)=>{if(window.PDFLib)return resolve(window.PDFLib);const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';script.onload=()=>window.PDFLib?resolve(window.PDFLib):reject(new Error('PDF-Bibliothek nicht verfügbar'));script.onerror=()=>reject(new Error('PDF-Bibliothek konnte nicht geladen werden'));document.head.appendChild(script);});}
-async function tsPDF(mode){tsCapture();try{
- const overflow=tsData.days.findIndex((d,i)=>(d.entries||[]).filter(e=>Object.values(e).some(v=>String(v||'').trim())).length>(i>=5?2:3));if(overflow>=0)throw new Error('Zu viele Tätigkeiten am '+TS_DAYS[overflow]+'. Im Originalformular sind dort nur '+(overflow>=5?2:3)+' Tätigkeitszeilen vorgesehen.');
- const lib=await tsLoadPdfLib();const response=await fetch('./stundenbericht_vorlage.pdf');if(!response.ok)throw new Error('Die Datei stundenbericht_vorlage.pdf fehlt im GitHub-Ordner.');
- const doc=await lib.PDFDocument.load(await response.arrayBuffer());const font=await doc.embedFont(lib.StandardFonts.Helvetica);const pages=doc.getPages();if(pages.length!==2)throw new Error('Die Vorlage muss genau zwei Seiten haben.');
- // Positions measured against original 768x1024 scan, converted to PDF coordinates.
- const boxes=[{page:0,top:219,end:461,large:true},{page:0,top:464,end:684,large:true},{page:0,top:686,end:908,large:true},{page:1,top:46,end:289,large:true},{page:1,top:291,end:514,large:true},{page:1,top:517,end:645,large:false},{page:1,top:649,end:781,large:false}];
- const write=(page,x,y,value,max=30,size=8,widthPx=100)=>{let safe=String(value??'').trim().slice(0,max).replace(/[^\x20-\x7eÀ-ÿ€]/g,' ');if(!safe)return;const w=page.getWidth(),h=page.getHeight();const limit=widthPx*w/768;while(safe.length>1&&font.widthOfTextAtSize(safe,size)>limit)safe=safe.slice(0,-1);page.drawText(safe,{x:x*w/768,y:h-y*h/1024,size:Math.min(size,8.3),font,color:lib.rgb(.05,.09,.15)});};
- const whiteOut=(page,x,y,wPx,hPx)=>{const W=page.getWidth(),H=page.getHeight();page.drawRectangle({x:x*W/768,y:H-(y+hPx)*H/1024,width:wPx*W/768,height:hPx*H/1024,color:lib.rgb(1,1,1)});};
- whiteOut(pages[0],148,197,139,21);whiteOut(pages[0],417,198,85,21);whiteOut(pages[0],640,198,51,21);
- write(pages[0],180,73,tsData.checkedBy,45,9);write(pages[0],155,212,tsData.employee,26,9);write(pages[0],422,212,tsData.persNr,12,9);write(pages[0],541,212,String(tsKw(tsWeek)),3,9);write(pages[0],643,212,tsWeek.slice(0,4),4,9);
- boxes.forEach((b,i)=>{const p=pages[b.page],d=tsData.days[i];write(p,67,b.top+29,tsDate(i).slice(0,5),10,8);
- const lines=d.entries||[];const slots=b.large?3:2;lines.slice(0,slots).forEach((e,j)=>{const y=b.top+30+j*21.8;
- write(p,153,y,e.work,33,7.0,178);write(p,337,y,e.order,16,7.4,76);write(p,419,y,e.process,10,7.4,50);write(p,475,y,e.hours,7,7.4,45);write(p,526,y,e.we,6,7.4,44);write(p,576,y,e.hr,6,7.4,43);write(p,623,y,e.labor,8,7.4,50);
- });const timeY=b.large?b.top+119:b.top+64;write(p,67,timeY,d.from,8,8);write(p,67,timeY+66,d.to,8,8);write(p,474,b.end-7,tsNumFormat(tsTotal(i)),10,8);
- });
- const bytes=await doc.save();const blob=new Blob([bytes],{type:'application/pdf'});const url=URL.createObjectURL(blob);
- if(mode==='download'){const a=document.createElement('a');a.href=url;a.download='Stundenzettel_KW'+tsKw(tsWeek)+'_'+tsWeek+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
- else{const opened=window.open(url,'_blank');if(!opened){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.click();}setTimeout(()=>URL.revokeObjectURL(url),180000);}
- }catch(e){alert('PDF konnte nicht erstellt werden: '+e.message);}}
+async function tsPDF(mode){
+ tsCapture();
+ try{
+  const lib=await tsLoadPdfLib();
+  const response=await fetch('./stundenbericht_vorlage.pdf');
+  if(!response.ok)throw new Error('Die Datei stundenbericht_vorlage.pdf fehlt im GitHub-Ordner.');
+  const doc=await lib.PDFDocument.load(await response.arrayBuffer());
+  const regular=await doc.embedFont(lib.StandardFonts.Helvetica);
+  const bold=await doc.embedFont(lib.StandardFonts.HelveticaBold);
+  const pages=doc.getPages();
+  if(pages.length!==2)throw new Error('Die Vorlage muss genau zwei Seiten haben.');
+
+  // Alle Koordinaten sind direkt an der unveränderten A4-Original-PDF vermessen
+  // (Referenz: 595,2 x 841,68 pt). PDF-Text verwendet den Ursprung unten links.
+  const REF_W=595.2,REF_H=841.68;
+  const rgb=lib.rgb(.045,.08,.12);
+  const draw=(page,x,top,value,width=70,size=8,isBold=false,align='left')=>{
+   let str=String(value??'').trim();if(!str)return;
+   // WinAnsi (Helvetica): nicht unterstützte Zeichen ersetzen, statt PDF-Abbruch.
+   str=str.replace(/[\u0000-\u001f]/g,' ').replace(/[\u0100-\uffff]/g,c=>({'–':'-','—':'-','€':'EUR','’':"'",'“':'"','”':'"','•':'-'}[c]||'?'));
+   const f=isBold?bold:regular;
+   const sx=page.getWidth()/REF_W,sy=page.getHeight()/REF_H;
+   let fontSize=size;
+   while(fontSize>6&&f.widthOfTextAtSize(str,fontSize)>width*sx)fontSize-=.25;
+   if(f.widthOfTextAtSize(str,fontSize)>width*sx){while(str.length>1&&f.widthOfTextAtSize(str+'…',fontSize)>width*sx)str=str.slice(0,-1);str+='.';}
+   const textWidth=f.widthOfTextAtSize(str,fontSize);
+   let px=x*sx;
+   if(align==='center')px+=(width*sx-textWidth)/2;
+   page.drawText(str,{x:px,y:page.getHeight()-top*sy,size:fontSize,font:f,color:rgb});
+  };
+  const cover=(page,x,top,width,height)=>{
+   const sx=page.getWidth()/REF_W,sy=page.getHeight()/REF_H;
+   page.drawRectangle({x:x*sx,y:page.getHeight()-(top+height)*sy,width:width*sx,height:height*sy,color:lib.rgb(1,1,1)});
+  };
+  // Die vorgedruckten Musterdaten im Kopf sauber überdecken. Überschriften bleiben.
+  cover(pages[0],114,163,142,17); // Name
+  cover(pages[0],324,163,70,17);  // Personalnummer
+  cover(pages[0],493,163,34,17);  // Jahr
+  draw(pages[0],142,129,tsData.checkedBy,220,9);
+  draw(pages[0],118,176,tsData.employee,138,9,true);
+  draw(pages[0],326,176,tsData.persNr,67,9,true);
+  draw(pages[0],418,176,String(tsKw(tsWeek)),26,9,true,'center');
+  draw(pages[0],494,176,tsWeek.slice(0,4),32,9,true,'center');
+
+  // Exakte Schreibzeilen pro Tag, einschliesslich der kuerzeren Wochenend-Felder.
+  // Datum und Uhrzeiten liegen ausschliesslich in der linken Datumsspalte.
+  const boxes=[
+   {page:0,dateY:219,firstRow:208,lastRow:350,fromY:299,toY:354,totalY:374},
+   {page:0,dateY:400,firstRow:390,lastRow:532,fromY:481,toY:537,totalY:555},
+   {page:0,dateY:583,firstRow:573,lastRow:715,fromY:664,toY:720,totalY:738},
+   {page:1,dateY:81,firstRow:70,lastRow:212,fromY:161,toY:216,totalY:233},
+   {page:1,dateY:265,firstRow:252,lastRow:394,fromY:344,toY:399,totalY:416},
+   {page:1,dateY:438,firstRow:434,lastRow:507,fromY:472,toY:509,totalY:528,short:true},
+   {page:1,dateY:548,firstRow:545,lastRow:617,fromY:582,toY:619,totalY:640,short:true}
+  ];
+  const cols=[
+   ['work',118,140,7.6],['order',262,61,8],['process',326,39,8],
+   ['hours',369,48,8],['we',421,22,8],['hr',447,34,8],['labor',485,39,8]
+  ];
+  for(let i=0;i<7;i++){
+   const b=boxes[i],page=pages[b.page],day=tsData.days[i];
+   const filled=(day.entries||[]).filter(e=>Object.values(e).some(v=>String(v??'').trim()));
+   const maxRows=1+Math.floor((b.lastRow-b.firstRow)/18.2);
+   if(filled.length>maxRows)throw new Error('Am '+TS_DAYS[i]+' passen nur '+maxRows+' Tätigkeiten auf das Originalformular. Bitte Einträge zusammenfassen.');
+   draw(page,54,b.dateY,tsDate(i).slice(0,5),58,10,true);
+   filled.forEach((entry,j)=>{
+    const y=b.firstRow+j*18.2;
+    cols.forEach(([key,x,width,size])=>draw(page,x,y,entry[key],width,size));
+   });
+   // Die Werte stehen UNTER den gedruckten Feldern "Von" und "bis", nicht darauf.
+   if(day.from)draw(page,b.short?79:53,b.fromY,day.from,b.short?34:60,8.7,true);
+   if(day.to)draw(page,b.short?79:53,b.toY,day.to,b.short?34:60,8.7,true);
+   // Keine 0,00 auf unbenutzten Tagen.
+  }
+  // Tages-Summen getrennt von den einzelnen Positions-Stunden ausgeben.
+  boxes.forEach((b,i)=>{
+   const day=tsData.days[i];
+   if(day.entries?.some(e=>String(e.hours??'').trim()))draw(pages[b.page],369,b.totalY,tsNumFormat(tsTotal(i)),48,8.5,true);
+  });
+  const bytes=await doc.save();
+  const blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob);
+  if(mode==='download'){
+   const a=document.createElement('a');a.href=url;a.download='Stundenzettel_KW'+tsKw(tsWeek)+'_'+tsWeek+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }else{
+   const opened=window.open(url,'_blank');
+   if(!opened){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.click();}
+   setTimeout(()=>URL.revokeObjectURL(url),180000);
+  }
+ }catch(e){alert('PDF konnte nicht erstellt werden: '+e.message);}
+}
 
 let currentAppPage='startseite';
 function closeAppMore(){document.getElementById('moreBackdrop').hidden=true;document.getElementById('moreSheet').hidden=true;}
