@@ -7,7 +7,7 @@
 <title>Materialverwaltung V24</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta content="2026-11-10-timesheet-25" name="app-version"/>
+<meta content="2026-11-10-timesheet-27" name="app-version"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -962,6 +962,25 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 .ts-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.ts-actions button{min-height:42px}
 .ts-total{font-size:22px;font-weight:800;color:#85b8ff}.ts-hint{font-size:12px;color:#aebed3;line-height:1.55}
 @media(max-width:540px){.ts-row{grid-template-columns:1fr}.ts-heading h2{font-size:20px}}
+
+/* V27: Lager-Finder und geordnete Kategorien */
+.warehouse-filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.warehouse-filterbar button{padding:9px 13px;border:1px solid #304767;background:#10233e;color:#dce9fd;border-radius:22px;cursor:pointer;font:inherit;font-size:13px}
+.warehouse-filterbar button.active{background:#146be8;border-color:#529cff;color:white}
+.warehouse-category{margin:12px 0;border:1px solid #263c58;border-radius:15px;overflow:hidden;background:#0e1c30}
+.warehouse-category summary{padding:13px 15px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700;background:#172941}
+.warehouse-category .material-card{margin:9px 11px}
+.warehouse-category summary::-webkit-details-marker{display:none}
+.warehouse-count{font-size:12px;color:#a9bed7}
+/* V27: Stundenzettel */
+.ts-entry-kind{grid-column:1/-1}.ts-entry-kind select{font-weight:650}
+.ts-entry-hint{font-size:12px;color:#a9bed7;margin:0 0 8px}
+.ts-inline-check{display:flex;align-items:center;gap:10px;padding:12px 10px;border-radius:10px;background:#0b1628;border:1px solid #364a65}
+.ts-inline-check input{width:19px;height:19px;accent-color:#2386f8}
+.ts-templates{border:1px solid #395579;border-radius:14px;padding:14px;margin-bottom:16px;background:#12253d}
+.ts-templates-list{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ts-templates-list span{display:inline-flex;gap:8px;align-items:center;border:1px solid #405772;border-radius:16px;padding:5px 9px}
+.ts-templates-list button{background:none;border:0;color:#ffb3b3;cursor:pointer;font-weight:800}
 </style>
 </head>
 <body>
@@ -978,13 +997,13 @@ input,select,textarea{background:#17283d!important;border:1px solid #33475f!impo
 <header>
 <div class="header-row">
 <div class="header-title">
-<h1><span class="brand-mark" aria-hidden="true">⬡</span> Materialverwaltung <span class="v24-label">V25</span></h1>
+<h1><span class="brand-mark" aria-hidden="true">⬡</span> Materialverwaltung <span class="v24-label">V27</span></h1>
 <div class="subtitle">Dein digitaler Baustellenbegleiter</div>
 </div>
 <div class="header-actions">
 <div class="version-box">
 <button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button>
-<div class="app-version-label" id="appVersionLabel">App-Version: 2026-11-10-timesheet-25</div>
+<div class="app-version-label" id="appVersionLabel">App-Version: 2026-11-10-timesheet-27</div>
 <button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">↻ Neue Version laden</button>
 </div>
 <button class="admin-button" id="adminButton" onclick="openAdminModal()">
@@ -1396,6 +1415,7 @@ const adminModeVisible=()=>isAdmin && adminViewEnabled;
 let currentUserProfile=null;
 
 let materials = [];
+let warehouseCategory = "Alle";
 let sites = [];
 let siteStocks = [];
 let movements = [];
@@ -2039,19 +2059,26 @@ async function loadAndRenderVehicles() {
 /* V25 – Wochenbericht/Stempelkarte. Entries always belong to the signed-in user. */
 const TS_DAYS=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 let tsWeek=null,tsData=null,tsRemoteAvailable=true,tsBusy=false;
+let tsTemplates=[];
 function tsMonday(date){const d=new Date(date+'T12:00:00'); if(isNaN(d))return tsMonday(new Date().toISOString().slice(0,10));d.setDate(d.getDate()-((d.getDay()+6)%7));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function tsDate(offset){const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset);return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function tsISO(offset){const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function tsKw(s){const date=new Date(s+'T12:00:00');date.setDate(date.getDate()+4-(date.getDay()||7));const yearStart=new Date(date.getFullYear(),0,1);return 1+Math.ceil(((date-yearStart)/86400000+1)/7);}
-function tsBlank(){return {employee:currentUserProfile?.name||'',persNr:'',checkedBy:'',days:Array.from({length:7},()=>({from:'',to:'',entries:[{work:'',order:'',process:'',hours:'',we:'',hr:'',labor:''}]}))};}
+function tsNewEntry(){return {kind:'custom',siteId:'',orderType:'auftrag',templateId:'',work:'',order:'',process:'',hours:'',we:'',hr:'',labor:''};}
+function tsBlank(){return {employee:currentUserProfile?.name||'',persNr:'',checkedBy:'',days:Array.from({length:7},()=>({from:'',to:'',entries:[tsNewEntry()]}))};}
 function tsKey(){return `mv_timesheet_v25_${currentUserProfile?.user_id||'unknown'}_${tsWeek}`;}
 function tsSafe(s){return escapeHtml(String(s??''));}
 function tsNum(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:0;}
 function tsTotal(i){return (tsData.days[i]?.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);}
 function tsAllTotal(){return tsData?.days?.reduce((s,_,i)=>s+tsTotal(i),0)||0;}
 function tsNumFormat(n){return Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+async function tsLoadTemplates(){
+ try{tsTemplates=await supabase('timesheet_work_templates?select=id,name,order_number,active&active=eq.true&order=name.asc');}
+ catch(e){console.warn('Tätigkeitsvorlagen noch nicht eingerichtet:',e.message);tsTemplates=[];}
+}
 async function openTimesheet(week){
  if(!currentUserProfile)return;
+ await tsLoadTemplates();
  const next=tsMonday(week||tsWeek||new Date().toISOString().slice(0,10));
  if(next===tsWeek&&tsData){renderTimesheet();return;}
  tsWeek=next;tsData=tsBlank();tsRemoteAvailable=true;
@@ -2059,31 +2086,71 @@ async function openTimesheet(week){
  if(rows?.[0]?.data)tsData=rows[0].data;
  }catch(e){tsRemoteAvailable=false;try{const raw=localStorage.getItem(tsKey());if(raw)tsData=JSON.parse(raw)}catch(_){} }
  if(!Array.isArray(tsData.days)||tsData.days.length!==7)tsData=tsBlank();
+ tsData.days.forEach(d=>{if(!Array.isArray(d.entries)||!d.entries.length)d.entries=[tsNewEntry()];d.entries=d.entries.map(e=>({...tsNewEntry(),...e}));});
  tsData.employee=currentUserProfile.name||tsData.employee;
  renderTimesheet();
 }
 function tsMoveWeek(offset){tsCapture();const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset*7);openTimesheet(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);}
-function tsField(v,day,idx,key,wide=false){const id=`ts-${day}-${idx}-${key}`;return `<div class="ts-field" ${wide?'style="grid-column:1/-1"':''}><label for="${id}">${({work:'Ausgeführte Arbeiten',order:'Auftrag',process:'Vorgang',hours:'Std.',we:'WE',hr:'HR',labor:'L-Art'})[key]}</label>${key==='work'?`<textarea id="${id}" rows="2" data-ts-day="${day}" data-ts-row="${idx}" data-ts-field="${key}">${tsSafe(v)}</textarea>`:`<input id="${id}" ${key==='hours'?'inputmode="decimal"':''} data-ts-day="${day}" data-ts-row="${idx}" data-ts-field="${key}" value="${tsSafe(v)}"/>`}</div>`;}
-function renderTimesheet(){
+function tsSiteOptions(selected){return `<option value="">Baustelle wählen …</option>`+sites.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).map(site=>`<option value="${tsSafe(site.id)}" ${String(selected)===String(site.id)?'selected':''}>${tsSafe(site.name)}</option>`).join('');}
+function tsTemplateOptions(selected){return `<option value="">Tätigkeit wählen …</option>`+tsTemplates.map(t=>`<option value="${tsSafe(t.id)}" ${String(selected)===String(t.id)?'selected':''}>${tsSafe(t.name)}</option>`).join('');}
+function tsHoursOptions(v){const n=String(v??'').replace(',','.');return `<option value="">Stunden wählen …</option>`+Array.from({length:49},(_,i)=>i*.5).map(h=>`<option value="${h}" ${n!==''&&Number(n)===h?'selected':''}>${h.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})} Std.</option>`).join('');}
+function tsSiteData(e){return sites.find(s=>String(s.id)===String(e.siteId));}
+function tsDistanceWE(site){if(!site||site.distance_km===null||site.distance_km===undefined||site.distance_km==='')return '';const km=Number(String(site.distance_km).replace(',','.'));if(!Number.isFinite(km)||km<0)return '';return km<=50?'a':km<=75?'b':'c';}
+function tsSyncEntry(e){
+ if(e.kind==='site'){
+  const site=tsSiteData(e);
+  if(site){e.work=site.name||'';e.order=String((e.orderType==='zusatz'?site.extra_order_number:site.order_number)||'');e.we=tsDistanceWE(site);}
+  e.hr=e.hr==='B'?'B':'';
+ }else if(e.kind==='template'){
+  const t=tsTemplates.find(x=>String(x.id)===String(e.templateId));
+  if(t){e.work=t.name||'';e.order=t.order_number||'';}e.we='';e.hr='';
+ }else{e.we='';e.hr='';}
+ e.process='';e.labor='';
+}
+function tsEntryFields(e,i,j){
+ const p=`ts-${i}-${j}`;
+ const isSite=e.kind==='site',isTpl=e.kind==='template';
+ return `<div class="ts-row">
+ <div class="ts-field ts-entry-kind"><label for="${p}-kind">Art der Tätigkeit</label><select id="${p}-kind" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="kind" onchange="tsEntryChanged(${i},${j})"><option value="site" ${isSite?'selected':''}>🏗️ Baustelle</option><option value="template" ${isTpl?'selected':''}>📋 Gespeicherte Tätigkeit</option><option value="custom" ${!isSite&&!isTpl?'selected':''}>✏️ Eigene Tätigkeit</option></select></div>
+ ${isSite?`<div class="ts-field"><label>Baustelle</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="siteId" onchange="tsEntryChanged(${i},${j})">${tsSiteOptions(e.siteId)}</select></div><div class="ts-field"><label>Auftrag oder Zusatz</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="orderType" onchange="tsEntryChanged(${i},${j})"><option value="auftrag" ${e.orderType!=='zusatz'?'selected':''}>Auftrag</option><option value="zusatz" ${e.orderType==='zusatz'?'selected':''}>Zusatz</option></select></div>`:''}
+ ${isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Gespeicherte Arbeit</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="templateId" onchange="tsEntryChanged(${i},${j})">${tsTemplateOptions(e.templateId)}</select></div>`:''}
+ ${!isSite&&!isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Ausgeführte Arbeiten</label><textarea rows="2" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="work">${tsSafe(e.work)}</textarea></div>`:''}
+ <div class="ts-field"><label>Auftragsnummer ${isSite?'(automatisch)':'(optional)'}</label><input data-ts-day="${i}" data-ts-row="${j}" data-ts-field="order" ${isSite||isTpl?'readonly':''} value="${tsSafe(e.order)}"></div>
+ <div class="ts-field"><label>Stunden (0,5er-Schritte)</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hours" onchange="tsCapture();tsRefreshTotals()">${tsHoursOptions(e.hours)}</select></div>
+ ${isSite?`<div class="ts-field"><label>WE · Wegezeit (einfache Strecke)</label><input readonly value="${tsSafe(e.we||'')}" placeholder="Keine Entfernung hinterlegt"></div><div class="ts-field"><label>Bauzuschlag HR</label><label class="ts-inline-check"><input type="checkbox" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hr" ${e.hr==='B'?'checked':''}> B eintragen</label></div>`:''}
+ </div>`;
+}
+function tsEntryChanged(i,j){
+ tsCapture();const e=tsData.days[i]?.entries[j];if(!e)return;
+ if(e.kind!=='site'){e.siteId='';e.orderType='auftrag';}
+ if(e.kind!=='template')e.templateId='';
+ tsSyncEntry(e);renderTimesheet(i);
+}
+function tsAdminTemplates(){if(!adminModeVisible())return '';
+ return `<div class="ts-templates"><h3>⚙️ Tätigkeitsvorlagen (nur Admin)</h3><p class="ts-hint">Diese Einträge können alle Kollegen auswählen, z. B. „Magazin“.</p><div class="ts-templates-list">${tsTemplates.map(t=>`<span>${tsSafe(t.name)} ${t.order_number?' · '+tsSafe(t.order_number):''}<button type="button" title="Vorlage deaktivieren" onclick="tsDisableTemplate('${tsSafe(t.id)}')">×</button></span>`).join('')||'<span>Noch keine Vorlagen</span>'}</div><div class="ts-row"><div class="ts-field"><label>Bezeichnung</label><input id="tsNewTemplateName" maxlength="100" placeholder="z. B. Magazin"></div><div class="ts-field"><label>Auftrag (optional)</label><input id="tsNewTemplateOrder" maxlength="40" placeholder="Optional"></div></div><button class="btn primary" style="margin-top:9px" type="button" onclick="tsCreateTemplate()">＋ Vorlage für alle speichern</button></div>`;
+}
+async function tsCreateTemplate(){if(!isAdmin||!adminModeVisible())return;const name=document.getElementById('tsNewTemplateName')?.value.trim(),order=document.getElementById('tsNewTemplateOrder')?.value.trim();if(!name)return alert('Bitte eine Bezeichnung eingeben.');try{await supabase('timesheet_work_templates',{method:'POST',body:JSON.stringify({name,order_number:order||null,active:true})});await tsLoadTemplates();tsCapture();renderTimesheet();}catch(e){alert('Vorlage konnte nicht gespeichert werden: '+e.message+'\nIst das V27-SQL ausgeführt?');}}
+async function tsDisableTemplate(id){if(!isAdmin||!adminModeVisible())return;if(!confirm('Tätigkeitsvorlage für alle ausblenden? Alte Stundenzettel bleiben erhalten.'))return;try{await supabase('timesheet_work_templates?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({active:false})});await tsLoadTemplates();tsCapture();renderTimesheet();}catch(e){alert(e.message);}}
+function renderTimesheet(openDay){
  const el=document.getElementById('stundenzettel');if(!el||!tsData)return;
- const dayRows=tsData.days.map((d,i)=>`<details class="ts-day" ${i===0?'open':''}><summary><span>${TS_DAYS[i]} · ${tsDate(i)}</span><span>${tsNumFormat(tsTotal(i))} Std. ▾</span></summary><div class="ts-day-body">
+ const dayRows=tsData.days.map((d,i)=>`<details class="ts-day" ${openDay===i||(openDay===undefined&&i===0)?'open':''}><summary><span>${TS_DAYS[i]} · ${tsDate(i)}</span><span>${tsNumFormat(tsTotal(i))} Std. ▾</span></summary><div class="ts-day-body">
  <div class="ts-row"><div class="ts-field"><label>Von (Uhrzeit)</label><input type="time" data-ts-day="${i}" data-ts-time="from" value="${tsSafe(d.from)}"></div><div class="ts-field"><label>Bis (Uhrzeit)</label><input type="time" data-ts-day="${i}" data-ts-time="to" value="${tsSafe(d.to)}"></div></div>
- ${(d.entries||[]).map((e,j)=>`<div class="ts-entry"><div class="ts-entry-header"><strong>Tätigkeit ${j+1}</strong><button class="btn small" type="button" onclick="tsDeleteEntry(${i},${j})" ${d.entries.length===1?'disabled':''}>Entfernen</button></div><div class="ts-row">${tsField(e.work,i,j,'work',true)}${['order','process','hours','we','hr','labor'].map(k=>tsField(e[k],i,j,k)).join('')}</div></div>`).join('')}
+ ${(d.entries||[]).map((e,j)=>`<div class="ts-entry"><div class="ts-entry-header"><strong>Tätigkeit ${j+1}</strong><button class="btn small" type="button" onclick="tsDeleteEntry(${i},${j})" ${d.entries.length===1?'disabled':''}>Entfernen</button></div>${tsEntryFields(e,i,j)}</div>`).join('')}
  <button type="button" class="btn" onclick="tsAddEntry(${i})">＋ Weitere Tätigkeit</button></div></details>`).join('');
  el.innerHTML=`<div class="ts-heading"><div><h2>🕒 Wochenbericht und Stempelkarte</h2><p>Originalformular · 2 Seiten · 7 Tage</p></div><span class="ts-total" id="tsTotal">${tsNumFormat(tsAllTotal())} Std.</span></div>
- <div class="ts-card"><div class="ts-row"><div class="ts-field"><label>Woche auswählen (beliebiger Tag)</label><input id="tsWeekSelect" type="date" value="${tsWeek}" onchange="tsChangeWeek(this.value)"></div><div class="ts-field"><label>Kalenderwoche</label><input readonly value="KW ${tsKw(tsWeek)} · ${new Date(tsWeek+'T12:00:00').getFullYear()}"></div><div class="ts-field"><label>Name (vom Account)</label><input readonly value="${tsSafe(tsData.employee)}"></div><div class="ts-field"><label>Personalnummer</label><input id="tsPersNr" value="${tsSafe(tsData.persNr)}" placeholder="Personalnummer"></div><div class="ts-field" style="grid-column:1/-1"><label>Geprüft durch</label><input id="tsCheckedBy" value="${tsSafe(tsData.checkedBy)}" placeholder="Name der prüfenden Person"></div></div><div class="ts-actions"><button class="btn" onclick="tsMoveWeek(-1)">← Vorwoche</button><button class="btn" onclick="tsMoveWeek(1)">Folgewoche →</button></div></div>
- ${dayRows}
- <div class="ts-card"><div class="ts-actions"><button class="btn primary" onclick="tsSave()" id="tsSaveBtn">💾 Woche speichern</button><button class="btn" onclick="tsPDF('preview')">👁 PDF-Vorschau</button><button class="btn" onclick="tsPDF('download')">⬇ PDF herunterladen</button></div><p id="tsStatus" class="ts-hint">${tsRemoteAvailable?'Speicherung in Supabase verfügbar.':'Supabase-Tabelle noch nicht eingerichtet: Entwurf wird nur auf diesem Gerät gespeichert.'}</p><p class="ts-hint">Die PDF-Ausgabe verwendet die unveränderte originale Implenia-Vorlage. Der PDF-Export trägt Tätigkeiten zeilenweise in das unveränderte Originalformular ein. Nicht belegte Felder und Tagessummen bleiben leer.</p></div>`;
- el.querySelectorAll('[data-ts-field],[data-ts-time],#tsPersNr,#tsCheckedBy').forEach(x=>x.addEventListener('change',()=>{tsCapture();tsRefreshTotals()}));
+ <div class="ts-card"><div class="ts-row"><div class="ts-field"><label>Woche auswählen</label><input id="tsWeekSelect" type="date" value="${tsWeek}" onchange="tsChangeWeek(this.value)"></div><div class="ts-field"><label>Kalenderwoche</label><input readonly value="KW ${tsKw(tsWeek)} · ${new Date(tsWeek+'T12:00:00').getFullYear()}"></div><div class="ts-field"><label>Name (vom Account)</label><input readonly value="${tsSafe(tsData.employee)}"></div><div class="ts-field"><label>Personalnummer</label><input id="tsPersNr" value="${tsSafe(tsData.persNr)}" placeholder="Personalnummer"></div></div><p class="ts-hint">„Geprüft durch“ bleibt für den E-Meister frei. Vorgang und L-Art bleiben im PDF leer.</p><div class="ts-actions"><button class="btn" onclick="tsMoveWeek(-1)">← Vorwoche</button><button class="btn" onclick="tsMoveWeek(1)">Folgewoche →</button></div></div>
+ ${tsAdminTemplates()}${dayRows}
+ <div class="ts-card"><div class="ts-actions"><button class="btn primary" onclick="tsSave()" id="tsSaveBtn">💾 Woche speichern</button><button class="btn" onclick="tsPDF('preview')">👁 PDF-Vorschau</button><button class="btn" onclick="tsPDF('download')">⬇ PDF herunterladen</button></div><p id="tsStatus" class="ts-hint">${tsRemoteAvailable?'Speicherung in Supabase verfügbar.':'Supabase nicht verfügbar: Entwurf nur auf diesem Gerät.'}</p><p class="ts-hint">Baustellen erhalten WE a / b / c anhand der einfachen Entfernung; HR B nur auf ausdrückliche Auswahl. Alle Stunden in 0,5er-Schritten.</p></div>`;
+ el.querySelectorAll('[data-ts-field],[data-ts-time],#tsPersNr').forEach(x=>x.addEventListener('change',()=>{tsCapture();tsRefreshTotals()}));
 }
 function tsCapture(){if(!tsData)return;const root=document.getElementById('stundenzettel');if(!root)return;
- const pn=root.querySelector('#tsPersNr'),chk=root.querySelector('#tsCheckedBy');if(pn)tsData.persNr=pn.value;if(chk)tsData.checkedBy=chk.value;
- root.querySelectorAll('[data-ts-field]').forEach(x=>{const e=tsData.days[+x.dataset.tsDay]?.entries[+x.dataset.tsRow];if(e)e[x.dataset.tsField]=x.value});
+ const pn=root.querySelector('#tsPersNr');if(pn)tsData.persNr=pn.value;tsData.checkedBy='';
+ root.querySelectorAll('[data-ts-field]').forEach(x=>{const e=tsData.days[+x.dataset.tsDay]?.entries[+x.dataset.tsRow];if(e)e[x.dataset.tsField]=x.type==='checkbox'?(x.checked?'B':''):x.value});
  root.querySelectorAll('[data-ts-time]').forEach(x=>{const d=tsData.days[+x.dataset.tsDay];if(d)d[x.dataset.tsTime]=x.value});
 }
 function tsRefreshTotals(){const e=document.getElementById('tsTotal');if(e)e.textContent=tsNumFormat(tsAllTotal())+' Std.';}
-function tsAddEntry(i){tsCapture();if(tsData.days[i].entries.length>=8)return alert('Maximal 8 Tätigkeiten pro Tag.');tsData.days[i].entries.push({work:'',order:'',process:'',hours:'',we:'',hr:'',labor:''});renderTimesheet();const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
-function tsDeleteEntry(i,j){tsCapture();if(tsData.days[i].entries.length<2)return;tsData.days[i].entries.splice(j,1);renderTimesheet();const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
+function tsAddEntry(i){tsCapture();if(tsData.days[i].entries.length>=8)return alert('Maximal 8 Tätigkeiten pro Tag.');tsData.days[i].entries.push(tsNewEntry());renderTimesheet(i);const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
+function tsDeleteEntry(i,j){tsCapture();if(tsData.days[i].entries.length<2)return;tsData.days[i].entries.splice(j,1);renderTimesheet(i);const d=document.querySelectorAll('.ts-day')[i];if(d)d.open=true;}
 function tsChangeWeek(v){tsCapture();openTimesheet(v);}
 async function tsSave(){tsCapture();if(tsBusy)return;tsBusy=true;const msg=document.getElementById('tsStatus');if(msg)msg.textContent='Speichere …';
  try{localStorage.setItem(tsKey(),JSON.stringify(tsData));const row={user_id:currentUserProfile.user_id,week_start:tsWeek,data:tsData};
@@ -2095,6 +2162,10 @@ function tsLoadPdfLib(){return new Promise((resolve,reject)=>{if(window.PDFLib)r
 async function tsPDF(mode){
  tsCapture();
  try{
+  for(const d of tsData.days)for(const e of d.entries){
+   if(e.kind==='site'||e.kind==='template')tsSyncEntry(e);
+   const hrs=String(e.hours??'').trim();if(hrs&&(!Number.isFinite(tsNum(hrs))||Math.abs(tsNum(hrs)*2-Math.round(tsNum(hrs)*2))>1e-8))throw new Error('Stunden sind nur in 0,5er-Schritten zulässig.');
+  }
   const lib=await tsLoadPdfLib();
   const response=await fetch('./stundenbericht_vorlage.pdf');
   if(!response.ok)throw new Error('Die Datei stundenbericht_vorlage.pdf fehlt im GitHub-Ordner.');
@@ -2260,7 +2331,7 @@ function renderWarehouse() {
       </div>
       <div class="search-box">
         <span class="search-icon">🔎</span>
-        <input id="materialSearch" type="search" placeholder="Material suchen..." oninput="renderWarehouseMaterials()">
+        <input id="materialSearch" type="search" placeholder="Materialname oder M-Nummer suchen, z. B. M13840" oninput="renderWarehouseMaterials()">
       </div>
     </div>
 
@@ -2270,19 +2341,27 @@ function renderWarehouse() {
   renderWarehouseMaterials();
 }
 
+const WAREHOUSE_CATS=['Alle','Leitungen & Kabel','Verlängerungen','Stecker & Kupplungen','FI / RCD & Sicherungen','Beleuchtung','Heizgeräte','Sonstiges'];
+function warehouseClass(name){
+ const n=String(name||'').toLowerCase();
+ if(/verlänger|^5x(?:16|32|63|125)a\s*\d|^schuko\s*\d+\s*m/.test(n))return 'Verlängerungen';
+ if(/(^[135]g\d|^1x\d|leitung|kabel|konturenzuleitung)/.test(n))return 'Leitungen & Kabel';
+ if(/stecker|kupplung|schuko|cee|steckdose/.test(n))return 'Stecker & Kupplungen';
+ if(/\bfi\b|rcd|sicher|schutzschalter|nh-|ls\b/.test(n))return 'FI / RCD & Sicherungen';
+ if(/led|licht|leucht|strahler|lampe|dämmerung/.test(n))return 'Beleuchtung';
+ if(/konvektor|heiz/.test(n))return 'Heizgeräte';
+ return 'Sonstiges';
+}
+function warehouseSelectCategory(category){warehouseCategory=category;renderWarehouseMaterials();}
 function renderWarehouseMaterials() {
-  const container = document.getElementById("warehouseMaterials");
-  if (!container) return;
-
-  const search = (document.getElementById("materialSearch")?.value || "").trim().toLowerCase();
-  const filtered = materials.filter(m => (m.name+' '+(m.material_number ? 'M'+m.material_number : '')).toLowerCase().includes(search));
-
-  if (!filtered.length) {
-    container.innerHTML = `<div class="empty">Kein Material gefunden.</div>`;
-    return;
-  }
-
-  container.innerHTML = filtered.map(m => {
+  const container=document.getElementById('warehouseMaterials');if(!container)return;
+  const search=(document.getElementById('materialSearch')?.value||'').trim().toLocaleLowerCase('de');
+  const matches=materials.filter(m => (m.name+' '+(m.material_number ? 'M'+m.material_number : '')).toLocaleLowerCase('de').includes(search))
+    .sort((a,b)=>a.name.localeCompare(b.name,'de',{numeric:true,sensitivity:'base'}));
+  const categories=WAREHOUSE_CATS.slice(1);
+  const filterbar=`<div class="warehouse-filterbar" aria-label="Materialkategorien">${WAREHOUSE_CATS.map(c=>`<button type="button" class="${warehouseCategory===c?'active':''}" onclick="warehouseSelectCategory('${c}')">${c}</button>`).join('')}</div>`;
+  if(!matches.length){container.innerHTML=filterbar+'<div class="empty">Kein Material gefunden. Auch die M-Nummer kann eingegeben werden.</div>';return;}
+  const renderCards = list => list.map(m => {
     const pieces = getWarehousePieces(m.id);
     const pieceCount = pieces.reduce((sum, p) => sum + (Number(p.count) || 0), 0);
     const pieceLength = pieces.reduce((sum, p) => sum + ((Number(p.count) || 0) * (Number(p.length) || 0)), 0);
@@ -2309,6 +2388,14 @@ function renderWarehouseMaterials() {
       </div>
     `;
   }).join("");
+
+  const visible=categories.filter(c=>warehouseCategory==='Alle'||warehouseCategory===c);
+  const sections=visible.map(c=>{
+   const list=matches.filter(m=>warehouseClass(m.name)===c);
+   if(!list.length)return '';
+   return `<details class="warehouse-category" ${search||warehouseCategory!=='Alle'?'open':''}><summary><span>${c}</span><span class="warehouse-count">${list.length} Materialien ▾</span></summary>${renderCards(list)}</details>`;
+  }).join('');
+  container.innerHTML=filterbar+`<p class="muted" style="margin:6px 2px">${matches.filter(m=>warehouseCategory==='Alle'||warehouseClass(m.name)===warehouseCategory).length} Treffer · Name oder M-Nummer suchen</p>`+sections;
 }
 
 function renderSites() {
