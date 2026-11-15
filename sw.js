@@ -1,8 +1,10 @@
-const CACHE_NAME = 'lagerbestand-v20261115-44';
+const CACHE_NAME = 'lagerbestand-v20261115-45';
 
 const APP_FILES = [
   './',
-  './index.html'
+  './index.html',
+  './wochenplan.css?v=2026-11-15-workspace-45',
+  './wochenplan.js?v=2026-11-15-workspace-45'
 ];
 
 self.addEventListener('install', event => {
