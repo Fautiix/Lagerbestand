@@ -7,7 +7,7 @@
 <title>Materialverwaltung V34 · Personal Workspace</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta name="app-version" content="2026-11-15-workspace-38"/>
+<meta name="app-version" content="2026-11-15-workspace-40"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -1354,6 +1354,115 @@ table:not(.desk31-table table){border-color:var(--line)}
 #moreSheet .v38-innav{display:none!important}
 @media(min-width:1100px){#v34NavEdit{display:none!important}}
 .v38-side .desk31-link span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* V39 Stundenzettel */
+.v39-split{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:24px;align-items:start}
+.v39-left{min-width:0}
+.v39-left .desk31-weekgrid{display:none!important}
+.v39-left .ts29-week-list.desk31-daylist{display:grid!important;gap:8px}
+.v39-paperpanel{position:sticky;top:84px;background:var(--sunken);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 104px)}
+.v39-paperhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.v39-paperhead div{display:flex;flex-direction:column;line-height:1.35}
+.v39-paperhead strong{font-size:14.5px}
+.v39-paperhead span{font-size:12.5px;color:var(--muted)}
+.v39-papers{overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.v39-papers .v34paper{min-width:0;max-width:820px;margin:0 auto;width:100%;border-radius:4px;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+.v39-papers .v34paperfield:enabled{cursor:pointer}
+.v39-papers .v34paperfield:enabled:hover,.v39-papers .v34paperfield:enabled:focus-visible{background:rgba(53,103,224,.16);border-color:#3567E0;outline:none}
+.v39-mobilepaper{position:static;max-height:none;margin-top:14px}
+.v39-mobilepaper .v39-papers{overflow-x:auto;padding:10px}
+.v39-mobilepaper .v34paper{min-width:560px}
+.v39-papertoggle{margin-left:auto}
+.ts29-editor-top{display:flex;align-items:center;gap:12px}
+.v39-weekrow{display:flex;gap:8px;align-items:stretch}
+.v39-weekrow .ts29-week{flex:1;min-width:0}
+.v39-weekdel{flex:none;width:44px;border-radius:12px;border:1px solid rgba(242,122,122,.35);background:transparent;color:#F59090;display:grid;place-items:center;cursor:pointer}
+.v39-weekdel:hover{background:var(--bad-soft)}
+.ts29-summary .v39-weekdel{width:42px;height:42px}
+.v39-danger{color:#F59090!important;border-color:rgba(242,122,122,.45)!important}
+.btn:disabled,.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* V40 Stundenzettel-Optik */
+#stundenzettel{--tz-r:14px}
+.tz-pagehead{margin:0 0 18px}.tz-pagehead h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}.tz-pagehead p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.tz-eyebrow{display:block;font-size:12px;font-weight:600;color:#8FB2FF;letter-spacing:.02em}
+.tz-sub{color:var(--muted);font-size:13px}
+.tz-current{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:16px;margin-bottom:26px}
+.tz-current-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.tz-current h2{margin:2px 0 2px;font-size:22px;font-weight:700;letter-spacing:-.015em}
+.tz-current-hours{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.tz-current-hours strong{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.tz-current-hours>span{font-size:12.5px;color:var(--muted)}
+.tz-mini{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.tz-miniday{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;border-radius:10px;background:var(--sunken);border:1px solid var(--line);color:var(--muted);font:inherit}
+.tz-miniday span{font-size:11.5px}.tz-miniday b{font-size:14px;font-weight:600;color:var(--faint);font-variant-numeric:tabular-nums}
+.tz-miniday.has{background:#16223A;border-color:#253555}.tz-miniday.has b{color:var(--text)}
+.tz-miniday.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.tz-miniday.we:not(.has){opacity:.6}
+button.tz-miniday{cursor:pointer}
+.tz-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.tz-actions.end{justify-content:flex-end;margin-top:14px}
+.tz-list h3{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px}
+.tz-row{display:flex;gap:8px;margin-bottom:8px}
+.tz-rowmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--tz-r);background:var(--surface);border:1px solid var(--line);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.tz-rowmain:hover{border-color:var(--line2)}
+.tz-rowtxt{flex:1;min-width:0;display:flex;flex-direction:column}.tz-rowtxt strong{font-weight:600}.tz-rowtxt small{color:var(--muted);font-size:12.5px}
+.tz-rowhours{font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tz-rowmain>svg{color:var(--faint);flex:none}
+.tz-badge{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:11px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.tz-badge.ok{background:var(--ok-soft);color:#6BD6A8}.tz-badge.warn{background:var(--warn-soft);color:var(--warn)}.tz-badge.info{background:var(--accent-soft);color:#8FB2FF}
+.tz-iconbtn{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);color:var(--text2);display:grid;place-items:center;cursor:pointer}
+.tz-iconbtn:hover{background:var(--surface2)}
+.tz-iconbtn.danger{color:#F59090;border-color:rgba(242,122,122,.3);background:transparent}.tz-iconbtn.danger:hover{background:var(--bad-soft)}
+.tz-row .tz-iconbtn{height:auto;width:46px}
+.tz-empty{color:var(--muted);padding:18px;border:1px dashed var(--line2);border-radius:var(--tz-r);text-align:center}
+.tz-foot{color:var(--muted);font-size:12.5px;margin:14px 2px 0}
+.tz-top{display:flex;align-items:center;gap:12px;margin:0 0 16px}
+.tz-toptxt{display:flex;flex-direction:column;line-height:1.3;min-width:0}.tz-toptxt strong{font-size:18px;font-weight:700;letter-spacing:-.01em}.tz-toptxt span{color:var(--muted);font-size:12.5px}
+.tz-weekcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;display:flex;flex-direction:column;gap:14px}
+.tz-weektotal{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.tz-weektotal div{display:flex;flex-direction:column}.tz-weektotal strong{font-size:32px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}.tz-weektotal span{color:var(--muted);font-size:12.5px}
+.tz-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tz-tool{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:12px;border:1px solid var(--line2);background:var(--sunken);color:var(--text2);font:inherit;font-size:12.5px;font-weight:550;cursor:pointer}
+.tz-tool:hover{background:var(--surface2);color:var(--text)}.tz-tool svg{color:#8FB2FF}
+.tz-days{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:14px}
+.tz-day{display:grid;grid-template-columns:96px minmax(0,1fr) auto 16px;align-items:center;gap:10px;padding:13px 14px;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.tz-day:first-child{border-top:0}.tz-day:hover{background:#141E30}
+.tz-dayname{display:flex;flex-direction:column;line-height:1.3}.tz-dayname strong{font-weight:600;font-size:14px}.tz-dayname small{color:var(--muted);font-size:12px}
+.tz-daysub{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tz-day.has .tz-daysub{color:var(--text2)}
+.tz-dayhours{font-weight:650;font-variant-numeric:tabular-nums;color:var(--faint)}.tz-day.has .tz-dayhours{color:var(--text)}
+.tz-day>svg{color:var(--faint)}
+.tz-day.we:not(.has) .tz-dayname strong{color:var(--muted)}
+.tz-details{background:var(--surface);border:1px solid var(--line);border-radius:var(--tz-r);margin-bottom:14px}
+.tz-details>summary{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;list-style:none;font-weight:550;color:var(--text2)}
+.tz-details>summary::-webkit-details-marker{display:none}.tz-details>summary span{flex:1}.tz-details>summary svg{color:var(--faint)}
+.tz-details[open]>summary svg:last-child{transform:rotate(90deg)}
+.tz-details>:not(summary){padding:0 14px}.tz-details>:last-child{padding-bottom:14px}
+.tz-weeknav{display:flex;flex-wrap:wrap;gap:8px}
+.tz-weeknav .btn svg{flex:none}
+.tz-daytabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:4px;border-radius:12px;background:var(--sunken);border:1px solid var(--line);margin-bottom:14px}
+.tz-daytabs button{position:relative;height:36px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:550;cursor:pointer}
+.tz-daytabs button.has::after{content:"";position:absolute;bottom:5px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.tz-daytabs button.on{background:var(--line2);color:var(--text)}
+.tz-daycard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.tz-daytop{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.tz-times{flex:1;min-width:220px;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tz-times label{margin-top:0}
+.tz-daysum{display:flex;flex-direction:column;align-items:flex-end}.tz-daysum strong{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}.tz-daysum span{color:var(--muted);font-size:12.5px}
+.tz-entry{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:18px!important;padding:14px 16px 16px!important;margin-bottom:10px!important;box-shadow:none!important}
+.tz-entryhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.tz-entryhead strong{flex:1;font-weight:600}
+.tz-entryhead .tz-iconbtn{width:34px;height:34px;border-radius:10px}
+.tz-num{width:24px;height:24px;border-radius:8px;background:var(--accent-soft);color:#8FB2FF;display:grid;place-items:center;font-size:12px;font-weight:700}
+.tz-entry .ts-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.tz-entry .ts-entry-kind{grid-column:1/-1}
+.tz-entry .ts-field label{margin:6px 0 6px}
+.tz-entry input[readonly]{color:var(--muted)!important;background:transparent!important;border-style:dashed!important}
+.tz-entry .ts-inline-check{display:flex;align-items:center;gap:8px;min-height:44px;margin:0;color:var(--text2);font-weight:500}
+.tz-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:14px;border:1px dashed var(--line2);background:transparent;color:#8FB2FF;font:inherit;font-weight:600;cursor:pointer}
+.tz-add:hover{background:var(--accent-soft)}
+.v39-left .tz-top{margin-bottom:14px}
+@media(max-width:600px){.tz-day{grid-template-columns:82px minmax(0,1fr) auto 14px;padding:12px}.tz-entry .ts-row{grid-template-columns:1fr}.tz-current{padding:16px}.tz-mini{gap:4px}}
 .v38-rowlink{background:none!important;border:0!important;padding:0!important;color:var(--text)!important;font:inherit;font-weight:550;cursor:pointer;text-align:left}
 .v38-lagersearch{margin:0 0 14px}
 </style>
@@ -1370,7 +1479,7 @@ table:not(.desk31-table table){border-color:var(--line)}
 </div>
 <aside class="desk31-sidebar v38-side" aria-label="Hauptnavigation"><div class="v38-brand"><span class="v38-logo"><svg class="v38-ic" aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><div><strong>Materialverwaltung</strong><small>Bau &amp; Elektrotechnik</small></div></div><div class="v38-nav"><button type="button" class="desk31-link active" data-desk="startseite"  onclick="desk31Navigate('startseite')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Übersicht</span></button><div class="v38-cap">Material</div><button type="button" class="desk31-link" data-desk="lager"  onclick="desk31Navigate('lager')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg><span>Lager</span></button><button type="button" class="desk31-link" data-desk="baustellen"  onclick="desk31Navigate('baustellen')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg><span>Baustellen</span></button><button type="button" class="desk31-link" data-desk="fahrzeuge"  onclick="desk31Navigate('fahrzeuge')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M6 18a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0M16 18a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0"/></svg><span>Fahrzeuge</span><b class="v38-badge" data-v38-badge="fahrzeuge" hidden></b></button><button type="button" class="desk31-link" data-desk="historie"  onclick="desk31Navigate('historie')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4M12 7v5l3 2"/></svg><span>Buchungshistorie</span></button><div class="v38-cap">Dokumente</div><button type="button" class="desk31-link" data-desk="stundenzettel"  onclick="desk31Navigate('stundenzettel')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 2"/></svg><span>Stundenzettel</span></button><button type="button" class="desk31-link" data-desk="bericht"  onclick="desk31Navigate('bericht')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h6"/></svg><span>Montagebericht</span></button><button type="button" class="desk31-link" data-desk="meineAenderungen"  onclick="desk31Navigate('meineAenderungen')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Meine Berichte</span></button><button type="button" class="desk31-link" data-desk="pruefbereich" hidden id="desk31Review" onclick="desk31Navigate('pruefbereich')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5"/></svg><span>Prüfplatz</span><b class="v38-badge" data-v38-badge="pruef" hidden></b></button><div class="v38-cap">Team</div><button type="button" class="desk31-link" data-desk="notizen"  onclick="desk31Navigate('notizen')"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg><span>Notizen &amp; Aufgaben</span></button></div><div class="v38-side-foot"><button type="button" class="v38-user" onclick="openAdminModal()"><span class="v38-avatar" data-v38-avatar>–</span><span class="v38-user-txt"><strong data-v38-name>Anmelden</strong><small data-v38-role>Profil &amp; Verwaltung</small></span><svg class="v38-ic" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></aside>
 <div class="app">
-<header class="v38-top"><div class="v38-mobilebrand"><span class="v38-logo"><svg class="v38-ic" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><strong>Materialverwaltung</strong></div><div class="v38-search" role="search"><label for="v38Search" class="v38-sr">Material oder Baustelle suchen</label><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4"/></svg><input id="v38Search" type="search" autocomplete="off" placeholder="Material, M-Nummer oder Baustelle suchen" aria-controls="v38SearchResults" aria-expanded="false"><kbd>/</kbd><div class="v38-results" id="v38SearchResults" role="listbox" hidden></div></div><div class="header-actions v38-actions"><div class="version-box"><button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button><div class="app-version-label" id="appVersionLabel">App-Version: 2026-11-15-workspace-38</div><button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">Neue Version laden</button></div><button class="admin-button" id="adminButton" onclick="openAdminModal()">Anmelden</button><button type="button" class="v38-book" onclick="openBooking()"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span>Material buchen</span></button></div></header>
+<header class="v38-top"><div class="v38-mobilebrand"><span class="v38-logo"><svg class="v38-ic" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><strong>Materialverwaltung</strong></div><div class="v38-search" role="search"><label for="v38Search" class="v38-sr">Material oder Baustelle suchen</label><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M20 20l-4-4"/></svg><input id="v38Search" type="search" autocomplete="off" placeholder="Material, M-Nummer oder Baustelle suchen" aria-controls="v38SearchResults" aria-expanded="false"><kbd>/</kbd><div class="v38-results" id="v38SearchResults" role="listbox" hidden></div></div><div class="header-actions v38-actions"><div class="version-box"><button class="version-status" id="versionStatus" onclick="checkAppVersion()" title="Klicken, um die Online-Version erneut zu prüfen" type="button">⏳ Prüfe Version …</button><div class="app-version-label" id="appVersionLabel">App-Version: 2026-11-15-workspace-40</div><button class="reload-app-button" hidden="" id="reloadAppButton" onclick="location.reload()" type="button">Neue Version laden</button></div><button class="admin-button" id="adminButton" onclick="openAdminModal()">Anmelden</button><button type="button" class="v38-book" onclick="openBooking()"><svg class="v38-ic" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span>Material buchen</span></button></div></header>
 <div class="content">
 <section id="startseite" class="home-view"></section>
 
@@ -2521,28 +2630,29 @@ async function openTimesheet(week){
  await tsLoadArchive();
  renderTimesheet();
 }
-async function tsMoveWeek(offset){tsCapture();await tsSave(true);const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset*7);await openTimesheet(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);tsView='editor';tsActiveDay=0;renderTimesheet();}
+async function tsMoveWeek(offset){if(!tsCanOpen(v34Shift(tsWeek,offset))){v38Toast('Neue Stundenzettel gibt es nur für die aktuelle und die letzte Kalenderwoche.',{kind:'err'});return;}tsCapture();await tsSave(true);const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset*7);await openTimesheet(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);tsView='editor';tsActiveDay=0;renderTimesheet();}
+let tsRemoteWeeks=new Set();
 async function tsLoadArchive(){
- const found=new Map();
+ const found=new Map();tsRemoteWeeks=new Set();
  try{
   const data=await supabase('weekly_timesheets?select=week_start,data&user_id=eq.'+encodeURIComponent((tsOwnerId||currentUserProfile.user_id))+'&order=week_start.desc&limit=156');
-  if(Array.isArray(data))data.forEach(x=>{if(x.week_start)found.set(x.week_start,x.data);});
+  if(Array.isArray(data))data.forEach(x=>{if(x.week_start){found.set(x.week_start,x.data);tsRemoteWeeks.add(x.week_start);}});
  }catch(err){console.warn('Archiv derzeit nur lokal verfügbar:',err.message);}
  const prefix=`mv_timesheet_v25_${tsOwnerId||currentUserProfile.user_id}_`;
- try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)){const week=k.slice(prefix.length);if(/^\d{4}-\d{2}-\d{2}$/.test(week)&&!found.has(week))found.set(week,JSON.parse(localStorage.getItem(k)));}}}catch(_){}
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)){const week=k.slice(prefix.length);if(/^\d{4}-\d{2}-\d{2}$/.test(week)&&!found.has(week)&&tsCanOpen(week))found.set(week,JSON.parse(localStorage.getItem(k)));}}}catch(_){}
  tsArchive=[...found.entries()].map(([week,data])=>({week,data})).sort((a,b)=>b.week.localeCompare(a.week));
 }
 function tsWeekLabel(week){const d=new Date(week+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));return `KW ${tsKw(week)} · ${d.getUTCFullYear()}`;}
 function tsWeekRange(week){const d=new Date(week+'T12:00:00');const a=`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.`;d.setDate(d.getDate()+6);return `${a} – ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;}
 function tsArchiveHours(data){return (data?.days||[]).reduce((sum,d)=>sum+(d.entries||[]).reduce((v,e)=>v+tsNum(e.hours),0),0);}
-async function tsOpenWeek(week){if(tsWeek&&tsData){tsCapture();await tsSave(true);}tsView='editor';tsActiveDay=0;await openTimesheet(week);renderTimesheet();}
+async function tsOpenWeek(week){if(!tsCanOpen(tsMonday(week))){v38Toast('Neue Stundenzettel gibt es nur für die aktuelle und die letzte Kalenderwoche.',{kind:'err'});return;}if(tsWeek&&tsData){tsCapture();await tsSave(true);}tsView='editor';tsActiveDay=0;await openTimesheet(week);renderTimesheet();}
 function tsOpenDay(day){tsCapture();tsActiveDay=day;tsView='day';renderTimesheet();}
 function tsCloseDay(){tsCapture();tsView='editor';tsSave(true);renderTimesheet();}
 function tsBackToOverview(){tsCapture();tsView='overview';tsSave(true);renderTimesheet();}
 function tsQueueSave(){tsCapture();tsRefreshTotals();clearTimeout(tsAutosaveTimer);tsAutosaveTimer=setTimeout(()=>tsSave(true),900);}
 function tsSiteOptions(selected){return `<option value="">Baustelle wählen …</option>`+sites.slice().sort((a,b)=>a.name.localeCompare(b.name,'de')).map(site=>`<option value="${tsSafe(site.id)}" ${String(selected)===String(site.id)?'selected':''}>${tsSafe(site.name)}</option>`).join('');}
 function tsTemplateOptions(selected){return `<option value="">Tätigkeit wählen …</option>`+tsTemplates.map(t=>`<option value="${tsSafe(t.id)}" ${String(selected)===String(t.id)?'selected':''}>${tsSafe(t.name)}</option>`).join('');}
-function tsHoursOptions(v){const n=String(v??'').replace(',','.');return `<option value="">Stunden wählen …</option>`+Array.from({length:49},(_,i)=>i*.5).map(h=>`<option value="${h}" ${n!==''&&Number(n)===h?'selected':''}>${h.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})} Std.</option>`).join('');}
+function tsHoursOptions(v){const n=String(v??'').replace(',','.');return `<option value="">– Std.</option>`+Array.from({length:49},(_,i)=>i*.5).map(h=>`<option value="${h}" ${n!==''&&Number(n)===h?'selected':''}>${h.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})} Std.</option>`).join('');}
 function tsSiteData(e){return sites.find(s=>String(s.id)===String(e.siteId));}
 function tsDistanceWE(site){if(!site||site.distance_km===null||site.distance_km===undefined||site.distance_km==='')return '';const km=Number(String(site.distance_km).replace(',','.'));if(!Number.isFinite(km)||km<0)return '';return km<=50?'a':km<=75?'b':'c';}
 function tsSyncEntry(e){
@@ -2560,13 +2670,13 @@ function tsEntryFields(e,i,j){
  const p=`ts-${i}-${j}`;
  const isSite=e.kind==='site',isTpl=e.kind==='template';
  return `<div class="ts-row">
- <div class="ts-field ts-entry-kind"><label for="${p}-kind">Art der Tätigkeit</label><select id="${p}-kind" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="kind" onchange="tsEntryChanged(${i},${j})"><option value="site" ${isSite?'selected':''}>🏗️ Baustelle</option><option value="template" ${isTpl?'selected':''}>📋 Gespeicherte Tätigkeit</option><option value="custom" ${!isSite&&!isTpl?'selected':''}>✏️ Eigene Tätigkeit</option></select></div>
+ <div class="ts-field ts-entry-kind"><label for="${p}-kind">Art</label><select id="${p}-kind" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="kind" onchange="tsEntryChanged(${i},${j})"><option value="site" ${isSite?'selected':''}>Baustelle</option><option value="template" ${isTpl?'selected':''}>Gespeicherte Tätigkeit</option><option value="custom" ${!isSite&&!isTpl?'selected':''}>Eigene Tätigkeit</option></select></div>
  ${isSite?`<div class="ts-field"><label>Baustelle</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="siteId" onchange="tsEntryChanged(${i},${j})">${tsSiteOptions(e.siteId)}</select></div><div class="ts-field"><label>Auftrag oder Zusatz</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="orderType" onchange="tsEntryChanged(${i},${j})"><option value="auftrag" ${e.orderType!=='zusatz'?'selected':''}>Auftrag</option><option value="zusatz" ${e.orderType==='zusatz'?'selected':''}>Zusatz</option></select></div>`:''}
  ${isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Gespeicherte Arbeit</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="templateId" onchange="tsEntryChanged(${i},${j})">${tsTemplateOptions(e.templateId)}</select></div>`:''}
  ${!isSite&&!isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Ausgeführte Arbeiten</label><textarea rows="2" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="work">${tsSafe(e.work)}</textarea></div>`:''}
  <div class="ts-field"><label>Auftragsnummer ${isSite?'(automatisch)':'(optional)'}</label><input data-ts-day="${i}" data-ts-row="${j}" data-ts-field="order" ${isSite||isTpl?'readonly':''} value="${tsSafe(e.order)}"></div>
- <div class="ts-field"><label>Stunden (0,5er-Schritte)</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hours" onchange="tsCapture();tsRefreshTotals()">${tsHoursOptions(e.hours)}</select></div>
- ${isSite?`<div class="ts-field"><label>WE · Wegezeit (einfache Strecke)</label><input readonly value="${tsSafe(e.we||'')}" placeholder="Keine Entfernung hinterlegt"></div><div class="ts-field"><label>Bauzuschlag HR</label><label class="ts-inline-check"><input type="checkbox" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hr" ${e.hr==='B'?'checked':''}> B eintragen</label></div>`:''}
+ <div class="ts-field"><label>Stunden</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hours" onchange="tsCapture();tsRefreshTotals()">${tsHoursOptions(e.hours)}</select></div>
+ ${isSite?`<div class="ts-field"><label>WE · Wegezeit</label><input readonly value="${tsSafe(e.we||'')}" placeholder="Keine Entfernung hinterlegt"></div><div class="ts-field"><label>Bauzuschlag HR</label><label class="ts-inline-check"><input type="checkbox" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hr" ${e.hr==='B'?'checked':''}> B eintragen</label></div>`:''}
  </div>`;
 }
 function tsEntryChanged(i,j){
@@ -2580,34 +2690,48 @@ function tsAdminTemplates(){if(!adminModeVisible())return '';
 }
 async function tsCreateTemplate(){if(!isAdmin||!adminModeVisible())return;const name=document.getElementById('tsNewTemplateName')?.value.trim(),order=document.getElementById('tsNewTemplateOrder')?.value.trim();if(!name)return alert('Bitte eine Bezeichnung eingeben.');try{await supabase('timesheet_work_templates',{method:'POST',body:JSON.stringify({name,order_number:order||null,active:true})});await tsLoadTemplates();tsCapture();renderTimesheet();}catch(e){alert('Vorlage konnte nicht gespeichert werden: '+e.message+'\nIst das V27-SQL ausgeführt?');}}
 async function tsDisableTemplate(id){if(!isAdmin||!adminModeVisible())return;if(!await v38Confirm('Tätigkeitsvorlage für alle ausblenden? Alte Stundenzettel bleiben erhalten.'))return;try{await supabase('timesheet_work_templates?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({active:false})});await tsLoadTemplates();tsCapture();renderTimesheet();}catch(e){alert(e.message);}}
+function tzIcon(k,size=16){const P={back:'M15 6l-6 6 6 6',chev:'M9 6l6 6-6 6',file:'M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h6',down:'M12 4v11M7 10l5 5 5-5M5 20h14',send:'M4 12l16-8-6 16-3-7z',trash:'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',plus:'M12 5v14M5 12h14',check:'M5 12l5 5 9-10',cog:'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6M19 12l2-1-1-3-2 .2-1.3-1.3.2-2-3-1-1 2h-1.8l-1-2-3 1 .2 2L6 8.2 4 8 3 11l2 1v0l-2 1 1 3 2-.2 1.3 1.3-.2 2 3 1 1-2h1.8l1 2 3-1-.2-2 1.3-1.3 2 .2 1-3z',link:'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'};return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${P[k]}"/></svg>`;}
+function tzStatus(data){const s=data?.reviewStatus;if(s==='geprueft')return '<span class="tz-badge ok">Geprüft</span>';if(s==='spaeter')return '<span class="tz-badge warn">Zurückgestellt</span>';return '';}
+function tzDayHours(data,i){return (data?.days?.[i]?.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);}
+function tzMiniWeek(data,week,clickable){const short=['Mo','Di','Mi','Do','Fr','Sa','So'];const today=tsToday();return `<div class="tz-mini">${short.map((n,i)=>{const h=tzDayHours(data,i);const d=new Date(week+'T12:00:00');d.setDate(d.getDate()+i);const iso=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const cls=['tz-miniday',h?'has':'',iso===today?'today':'',i>4?'we':''].join(' ');const inner=`<span>${n}</span><b>${h?String(h).replace('.',','):'–'}</b>`;return clickable?`<button type="button" class="${cls}" onclick="tsOpenDay(${i})" aria-label="${TS_DAYS[i]}: ${h?tsNumFormat(h)+' Stunden':'nichts eingetragen'}">${inner}</button>`:`<div class="${cls}">${inner}</div>`;}).join('')}</div>`;}
 function renderTimesheet(openDay){
  const el=document.getElementById('stundenzettel');if(!el||!tsData)return;
  const current=tsMonday(tsToday());
- const activeYear=new Date(tsWeek+'T12:00:00').getFullYear();
- const status=`<p id="tsStatus" class="ts29-status">${tsRemoteAvailable?'Die Wochen werden mit deinem Account gespeichert.':'Supabase vorübergehend nicht erreichbar. Der Entwurf bleibt lokal.'}</p>`;
+ const status=`<p id="tsStatus" class="tz-foot">${tsRemoteAvailable?'Wird automatisch mit deinem Account gespeichert.':'Supabase gerade nicht erreichbar. Der Entwurf bleibt auf diesem Gerät.'}</p>`;
+ const other=tsOwnerId&&tsOwnerId!==currentUserProfile.user_id;
+ const delBtn=(w,cls='tz-iconbtn danger')=>adminModeVisible()&&tsRemoteWeeks.has(w)?`<button type="button" class="${cls}" onclick="tsDeleteWeek('${w}')" aria-label="${tsWeekLabel(w)} löschen" title="Kalenderwoche löschen">${tzIcon('trash')}</button>`:'';
  if(tsView==='overview'){
+  const cur=tsArchive.find(x=>x.week===current);const curData=cur?.data||(tsWeek===current?tsData:null);
   const old=tsArchive.filter(x=>x.week!==current).slice(0,104);
-  el.innerHTML=`<div class="ts29-head"><div><h2>${tsOwnerId&&tsOwnerId!==currentUserProfile.user_id?tsSafe(tsOwnerName)+' · ':'Meine '}Stundenzettel</h2><p>Eine Kalenderwoche, ein Bericht.</p></div></div>
-   <div class="ts29-summary"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="ts29-week-title">${tsWeekLabel(current)}</span><span class="ts29-tag">Aktuelle Woche</span></div><div class="ts29-week-meta">${tsWeekRange(current)}</div><div class="ts29-actions"><button class="btn primary" onclick="tsOpenWeek('${current}')">Woche öffnen →</button></div></div>
-   <div class="ts29-archive"><h3>Vergangene Wochen</h3><div class="ts29-week-list">${old.map(x=>`<button class="ts29-week" onclick="tsOpenWeek('${x.week}')"><span><span class="ts29-week-name">${tsWeekLabel(x.week)}</span><small>${tsWeekRange(x.week)}</small></span><span class="ts29-week-hours">${tsNumFormat(tsArchiveHours(x.data))} Std. <span class="ts29-week-icon">›</span></span></button>`).join('')||'<p class="ts29-archive-note">Hier erscheinen deine gespeicherten älteren Kalenderwochen.</p>'}</div></div>
-   <div class="ts29-actions" style="margin-top:18px"><button class="btn" onclick="tsOpenCustomWeek()">Andere Kalenderwoche öffnen</button></div>${status}`;
+  const prev=tsPrevWeek(),prevMissing=!tsArchive.some(x=>x.week===prev);
+  el.innerHTML=`<div class="tz-pagehead"><div><h1>${other?tsSafe(tsOwnerName)+' · ':'Meine '}Stundenzettel</h1><p>Eine Kalenderwoche, ein Zettel.</p></div></div>
+   <section class="tz-current" aria-label="Aktuelle Woche">
+    <div class="tz-current-top"><div><span class="tz-eyebrow">Aktuelle Woche</span><h2>${tsWeekLabel(current)}</h2><span class="tz-sub">${tsWeekRange(current)}</span></div><div class="tz-current-hours"><strong>${tsNumFormat(tsArchiveHours(curData))}</strong><span>Stunden</span>${tzStatus(curData)}</div></div>
+    ${tzMiniWeek(curData,current,false)}
+    <div class="tz-actions"><button class="btn primary" onclick="tsOpenWeek('${current}')">${cur?'Woche öffnen':'Woche beginnen'}</button>${prevMissing?`<button class="btn" onclick="tsOpenWeek('${prev}')">KW ${tsKw(prev)} nachtragen</button>`:''}${delBtn(current)}</div>
+   </section>
+   <section class="tz-list" aria-label="Vergangene Wochen"><h3>Vergangene Wochen</h3>
+    ${old.length?old.map(x=>`<div class="tz-row"><button class="tz-rowmain" onclick="tsOpenWeek('${x.week}')"><span class="tz-rowtxt"><strong>${tsWeekLabel(x.week)}</strong><small>${tsWeekRange(x.week)}</small></span>${tzStatus(x.data)}<span class="tz-rowhours">${tsNumFormat(tsArchiveHours(x.data))} Std.</span>${tzIcon('chev')}</button>${delBtn(x.week)}</div>`).join(''):'<p class="tz-empty">Hier erscheinen deine gespeicherten Wochen.</p>'}
+   </section>
+   <p class="tz-foot">Neue Stundenzettel gibt es nur für die aktuelle und die letzte Kalenderwoche.</p>`;
   return;
  }
- const top=`<div class="ts29-editor-top"><button class="btn" onclick="${tsView==='day'?'tsCloseDay()':'tsBackToOverview()'}">← Zurück</button><div><strong>${tsWeekLabel(tsWeek)}</strong><div class="ts29-status">${tsWeekRange(tsWeek)}</div></div></div>`;
- const daysList=tsData.days.map((d,i)=>`<button type="button" class="ts29-week" onclick="tsOpenDay(${i})"><span><span class="ts29-week-name">${TS_DAYS[i]}</span><small>${tsDate(i)}</small></span><span class="ts29-week-hours">${tsNumFormat(tsTotal(i))} Std. <span class="ts29-week-icon">›</span></span></button>`).join('');
+ const top=`<div class="ts29-editor-top tz-top"><button class="tz-iconbtn" onclick="${tsView==='day'?'tsCloseDay()':'tsBackToOverview()'}" aria-label="Zurück">${tzIcon('back',18)}</button><div class="tz-toptxt"><strong>${tsView==='day'?TS_DAYS[tsActiveDay]+', '+tsDate(tsActiveDay):tsWeekLabel(tsWeek)}</strong><span>${tsView==='day'?tsWeekLabel(tsWeek):tsWeekRange(tsWeek)}</span></div></div>`;
  if(tsView==='editor'){
-  el.innerHTML=top+`<div class="ts29-summary"><div class="ts29-week-title">${tsNumFormat(tsAllTotal())} Std.</div><div class="ts29-week-meta">Diese Kalenderwoche</div><div class="ts29-actions"><button class="btn primary" onclick="tsPDF('share')">✉ Per E-Mail senden</button><button class="btn" onclick="tsPDF('preview')">PDF ansehen</button><button class="btn" onclick="tsPDF('download')">PDF speichern</button></div></div>
-   <div class="ts29-week-list desk31-daylist">${daysList}</div><div class="desk31-weekgrid">${tsData.days.map((d,i)=>`<button class="desk31-day" onclick="tsOpenDay(${i})"><b>${TS_DAYS[i]}</b><small>${tsDate(i)}</small><strong>${tsNumFormat(tsTotal(i))} h</strong><span>${(d.entries||[]).length} Positionen</span><span>Bearbeiten ›</span></button>`).join('')}</div>
-   <details class="ts29-pane"><summary>⚙ Angaben & Einstellungen</summary><div class="ts-row"><div class="ts-field"><label>Personalnummer</label><input readonly value="${tsSafe(tsData.persNr)}" placeholder="vergibt der Admin"></div><div class="ts-field"><label>Name</label><input readonly value="${tsSafe(tsData.employee)}"></div></div><p class="ts29-status">Name und Personalnummer pflegt der Admin. Geprüft durch ist für den E-Meister. Vorgang und L-Art bleiben leer.</p>${tsAdminTemplates()}</details>
-   <div class="ts29-actions"><button class="btn" onclick="tsSave()">Woche speichern</button><button class="btn" onclick="tsMoveWeek(-1)">← Vorwoche</button><button class="btn" onclick="tsMoveWeek(1)">Folgewoche →</button></div>${status}`;
-  const pn=el.querySelector('#tsPersNr');if(pn)pn.addEventListener('change',tsQueueSave);
+  const rows=tsData.days.map((d,i)=>{const h=tsTotal(i);const n=(d.entries||[]).filter(e=>e.work||e.hours||e.siteId).length;const time=d.from||d.to?`${d.from||'–'} – ${d.to||'–'}`:'';const sub=n?[time,`${n} ${n===1?'Tätigkeit':'Tätigkeiten'}`].filter(Boolean).join(' · '):(time||'Noch nichts eingetragen');return `<button type="button" class="tz-day ${h?'has':''} ${i>4?'we':''}" onclick="tsOpenDay(${i})"><span class="tz-dayname"><strong>${TS_DAYS[i]}</strong><small>${tsDate(i).slice(0,6)}</small></span><span class="tz-daysub">${tsSafe(sub)}</span><span class="tz-dayhours">${h?tsNumFormat(h):'–'}</span>${tzIcon('chev')}</button>`;}).join('');
+  el.innerHTML=top+`<section class="tz-weekcard"><div class="tz-weektotal"><div><strong>${tsNumFormat(tsAllTotal())}</strong><span>Stunden diese Woche</span></div>${tzStatus(tsData)}</div>
+    <div class="tz-tools"><button class="tz-tool" onclick="tsPDF('preview')">${tzIcon('file')}<span>PDF ansehen</span></button><button class="tz-tool" onclick="tsPDF('download')">${tzIcon('down')}<span>Speichern</span></button><button class="tz-tool" onclick="tsPDF('share')">${tzIcon('send')}<span>Senden</span></button></div></section>
+   <div class="tz-days">${rows}</div>
+   <details class="tz-details"><summary>${tzIcon('cog')}<span>Angaben &amp; Einstellungen</span>${tzIcon('chev')}</summary><div class="ts-row"><div class="ts-field"><label>Personalnummer</label><input readonly value="${tsSafe(tsData.persNr)}" placeholder="vergibt der Admin"></div><div class="ts-field"><label>Name</label><input readonly value="${tsSafe(tsData.employee)}"></div></div><p class="tz-foot">Name und Personalnummer pflegt der Admin. „Geprüft durch“ füllt der E-Meister. Vorgang und L-Art bleiben leer.</p>${tsAdminTemplates()}</details>
+   <div class="tz-weeknav"><button class="btn small" onclick="tsMoveWeek(-1)" ${tsCanOpen(v34Shift(tsWeek,-1))?'':'disabled'}>${tzIcon('back')} KW ${tsKw(v34Shift(tsWeek,-1))}</button><button class="btn small" onclick="tsSave()">Jetzt speichern</button><button class="btn small" onclick="tsMoveWeek(1)" ${tsCanOpen(v34Shift(tsWeek,1))?'':'disabled'}>KW ${tsKw(v34Shift(tsWeek,1))} ${tzIcon('chev')}</button>${adminModeVisible()&&tsRemoteWeeks.has(tsWeek)?`<button class="btn small red" onclick="tsDeleteWeek('${tsWeek}')">${tzIcon('trash')} Woche löschen</button>`:''}</div>${status}`;
   return;
  }
  const i=tsActiveDay,d=tsData.days[i];
- el.innerHTML=top+`<div class="ts29-head"><div><h2>${TS_DAYS[i]}</h2><p>${tsDate(i)}</p></div><span class="ts-total" id="tsTotal">${tsNumFormat(tsTotal(i))} Std.</span></div>
-  <div class="ts29-pane"><div class="ts-row"><div class="ts-field"><label>Von</label><input type="time" data-ts-day="${i}" data-ts-time="from" value="${tsSafe(d.from)}"></div><div class="ts-field"><label>Bis</label><input type="time" data-ts-day="${i}" data-ts-time="to" value="${tsSafe(d.to)}"></div></div></div>
-  ${(d.entries||[]).map((e,j)=>`<div class="ts29-entry"><div class="ts29-entry-title"><span>Tätigkeit ${j+1}${e.importSource?' · 🔗 Monteurbericht':''}</span><button class="btn small" onclick="tsDeleteEntry(${i},${j})">Entfernen</button></div>${tsEntryFields(e,i,j)}</div>`).join('')}
-  <div class="ts29-actions"><button class="btn" onclick="tsAddEntry(${i})">Tätigkeit hinzufügen</button><button class="btn primary" onclick="tsCloseDay()">✓ Tag fertig</button></div>${status}`;
+ const dayTabs=`<div class="tz-daytabs" role="tablist" aria-label="Wochentag">${['Mo','Di','Mi','Do','Fr','Sa','So'].map((n,k)=>`<button type="button" role="tab" aria-selected="${k===i}" class="${k===i?'on':''} ${tsTotal(k)?'has':''}" onclick="tsCapture();tsActiveDay=${k};tsSave(true);renderTimesheet()">${n}</button>`).join('')}</div>`;
+ el.innerHTML=top+dayTabs+`<section class="tz-daycard"><div class="tz-daytop"><div class="ts-row tz-times"><div class="ts-field"><label for="tzFrom">Von</label><input id="tzFrom" type="time" data-ts-day="${i}" data-ts-time="from" value="${tsSafe(d.from)}"></div><div class="ts-field"><label for="tzTo">Bis</label><input id="tzTo" type="time" data-ts-day="${i}" data-ts-time="to" value="${tsSafe(d.to)}"></div></div><div class="tz-daysum"><strong id="tsTotal">${tsNumFormat(tsTotal(i))}</strong><span>Std. heute</span></div></div></section>
+  ${(d.entries||[]).map((e,j)=>`<section class="ts29-entry tz-entry"><div class="tz-entryhead"><span class="tz-num">${j+1}</span><strong>Tätigkeit ${j+1}</strong>${e.importSource?`<span class="tz-badge info">${tzIcon('link',12)} aus Monteurbericht</span>`:''}<button class="tz-iconbtn danger" onclick="tsDeleteEntry(${i},${j})" aria-label="Tätigkeit ${j+1} entfernen">${tzIcon('trash')}</button></div>${tsEntryFields(e,i,j)}</section>`).join('')}
+  <button class="tz-add" onclick="tsAddEntry(${i})">${tzIcon('plus')} Tätigkeit hinzufügen</button>
+  <div class="tz-actions end"><button class="btn primary" onclick="tsCloseDay()">${tzIcon('check')} Tag fertig</button></div>${status}`;
  el.querySelectorAll('[data-ts-field],[data-ts-time]').forEach(x=>x.addEventListener('change',tsQueueSave));
 }
 async function tsOpenCustomWeek(){const raw=await v38Prompt('Ein Datum der gewünschten Woche eingeben (JJJJ-MM-TT):',tsWeek||tsToday());if(raw&&/^\d{4}-\d{2}-\d{2}$/.test(raw))tsOpenWeek(raw);}
@@ -2616,7 +2740,7 @@ function tsCapture(){if(!tsData)return;const root=document.getElementById('stund
  root.querySelectorAll('[data-ts-field]').forEach(x=>{const e=tsData.days[+x.dataset.tsDay]?.entries[+x.dataset.tsRow];if(e)e[x.dataset.tsField]=x.type==='checkbox'?(x.checked?'B':''):x.value});
  root.querySelectorAll('[data-ts-time]').forEach(x=>{const d=tsData.days[+x.dataset.tsDay];if(d)d[x.dataset.tsTime]=x.value});
 }
-function tsRefreshTotals(){const e=document.getElementById('tsTotal');if(e)e.textContent=tsNumFormat(tsAllTotal())+' Std.';}
+function tsRefreshTotals(){const e=document.getElementById('tsTotal');if(e)e.textContent=tsView==='day'?tsNumFormat(tsTotal(tsActiveDay)):tsNumFormat(tsAllTotal())+' Std.';}
 function tsAddEntry(i){tsCapture();if(tsData.days[i].entries.length>=8)return alert('Maximal 8 Tätigkeiten pro Tag.');tsData.days[i].entries.push(tsNewEntry());tsView='day';tsActiveDay=i;renderTimesheet();tsQueueSave();}
 function tsDeleteEntry(i,j){tsCapture();tsData.days[i].entries.splice(j,1);if(!tsData.days[i].entries.length)tsData.days[i].entries=[tsNewEntry()];tsView='day';tsActiveDay=i;renderTimesheet();tsQueueSave();}
 async function tsSave(silent=false,skipCapture=false){if(!skipCapture)tsCapture();if(tsBusy)return;tsBusy=true;const msg=document.getElementById('tsStatus');if(msg)msg.textContent='Speichere …';
@@ -4269,7 +4393,7 @@ let v34ReviewUser='';
 const v34Boxes=[{page:0,dateY:219,firstRow:208,lastRow:350,fromY:299,toY:354,totalY:374},{page:0,dateY:400,firstRow:390,lastRow:532,fromY:481,toY:537,totalY:555},{page:0,dateY:583,firstRow:573,lastRow:715,fromY:664,toY:720,totalY:738},{page:1,dateY:81,firstRow:70,lastRow:212,fromY:161,toY:216,totalY:233},{page:1,dateY:265,firstRow:252,lastRow:394,fromY:344,toY:399,totalY:416},{page:1,dateY:438,firstRow:434,lastRow:507,fromY:472,toY:509,totalY:528,short:true},{page:1,dateY:548,firstRow:545,lastRow:617,fromY:582,toY:619,totalY:640,short:true}];
 const v34Cols=[['work',118,140],['order',262,61],['process',326,39],['hours',369,48],['we',421,22],['hr',447,34],['labor',485,39]];
 function v34Field(x,y,w,h,value,action,label,cls=''){return `<button type="button" class="v34paperfield ${cls}" style="left:${x/595.2*100}%;top:${y/841.68*100}%;width:${w/595.2*100}%;height:${h/841.68*100}%" ${action?`data-v34-field="${action}"`:'disabled'} title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">${escapeHtml(String(value??''))}</button>`;}
-function v34RenderPaper(){const root=document.getElementById('v32Empty'),r=v33Current();if(!root||r?.type!=='week'||!v34WeekDraft)return;const d=v34WeekDraft;const pages=[[],[]];const f=(p,...a)=>pages[p].push(v34Field(...a));f(0,116,113,250,18,v34Signature?d.checkedBy||'':'', 'signature','Geprüft durch · unterschreiben');if(v34Signature)pages[0].push(`<img class="v34ink" src="${/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(v34Signature)?v34Signature:''}" alt="Meister-Unterschrift" style="left:37%;top:12.3%;width:23%;height:3.5%">`);f(0,118,163,138,13,d.employee||v33Name(r.owner),'','Mitarbeiter');f(0,326,163,67,13,d.persNr,'','Personalnummer');f(0,418,163,26,13,tsKw(r.id),'','Kalenderwoche','center');f(0,494,163,32,13,tsWeekLabel(r.id).split(' · ')[1],'','Jahr','center');v34Boxes.forEach((b,i)=>{const day=d.days[i];const dt=new Date(r.id+'T12:00:00');dt.setDate(dt.getDate()+i);f(b.page,53,b.dateY-11,58,13,dt.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}),'',TS_DAYS[i]);f(b.page,b.short?79:53,b.fromY-11,b.short?34:60,15,day.from,`${i}:from`,'Arbeitsbeginn '+TS_DAYS[i]);f(b.page,b.short?79:53,b.toY-11,b.short?34:60,15,day.to,`${i}:to`,'Arbeitsende '+TS_DAYS[i]);const max=1+Math.floor((b.lastRow-b.firstRow)/18.2);for(let j=0;j<max;j++){const e=day.entries?.[j];for(const [key,x,w] of v34Cols){f(b.page,x,b.firstRow+j*18.2-10,w,15,key==='hours'&&e?.hours!==undefined?String(e.hours).replace('.',','):e?.[key]||'',['process','labor'].includes(key)?'':`${i}:${j}:${key}`,`${TS_DAYS[i]} · Zeile ${j+1} · ${key}`);}}const sum=(day.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);f(b.page,369,b.totalY-10,48,14,sum?tsNumFormat(sum):'','','Tagessumme');});root.hidden=false;root.className='v34paperwrap';root.innerHTML=`<div class="v34paperbar"><button class="v33btn" id="v34BackWeek">← Zurück zur KW</button><span class="v34paperhours">${escapeHtml(tsNumFormat(tsArchiveHours(d)))} Std.</span><button class="v33btn" id="v34SaveWeek">Speichern</button><button class="v33btn" id="v34LaterWeek">◷ Später</button><button class="v33btn" id="v34SignWeek">✎ Unterschreiben</button><button class="v33btn v33primary" id="v34ApproveWeek">✓ Prüfung erledigt</button><button class="v33btn" id="v34PdfWeek">PDF</button></div><div class="v34paperhint">Originalformular · Klicke in eine Zeile oder auf eine Uhrzeit. Leere Zeilen können ergänzt werden.${v34WeekDirty?' · Nicht gespeichert':''}</div>${pages.map((p,i)=>`<div class="v34paper" style="background-image:url('${V34_PAPER[i]}')">${p.join('')}</div>`).join('')}`;root.querySelectorAll('[data-v34-field]').forEach(el=>el.onclick=()=>v34EditField(el.dataset.v34Field));document.getElementById('v34BackWeek').onclick=()=>{if(v32CanLeaveReview()){v33ResetPaper();v32DrawPeople();}};document.getElementById('v34SaveWeek').onclick=()=>v34SaveWeek('offen');document.getElementById('v34LaterWeek').onclick=()=>v34SaveWeek('spaeter');document.getElementById('v34SignWeek').onclick=v34Sign;document.getElementById('v34ApproveWeek').onclick=()=>v34SaveWeek('geprueft');document.getElementById('v34PdfWeek').onclick=()=>v34PreviewPdf();}
+function v34RenderPaper(){const root=document.getElementById('v32Empty'),r=v33Current();if(!root||r?.type!=='week'||!v34WeekDraft)return;const d=v34WeekDraft;const pages=[[],[]];const f=(p,...a)=>pages[p].push(v34Field(...a));f(0,116,113,250,18,v34Signature?d.checkedBy||'':'', 'signature','Geprüft durch · unterschreiben');if(v34Signature)pages[0].push(`<img class="v34ink" src="${/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(v34Signature)?v34Signature:''}" alt="Meister-Unterschrift" style="left:37%;top:12.3%;width:23%;height:3.5%">`);f(0,118,163,138,13,d.employee||v33Name(r.owner),'','Mitarbeiter');f(0,326,163,67,13,d.persNr,'','Personalnummer');f(0,418,163,26,13,tsKw(r.id),'','Kalenderwoche','center');f(0,494,163,32,13,tsWeekLabel(r.id).split(' · ')[1],'','Jahr','center');v34Boxes.forEach((b,i)=>{const day=d.days[i];const dt=new Date(r.id+'T12:00:00');dt.setDate(dt.getDate()+i);f(b.page,53,b.dateY-11,58,13,dt.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}),'',TS_DAYS[i]);f(b.page,b.short?79:53,b.fromY-11,b.short?34:60,15,day.from,`${i}:from`,'Arbeitsbeginn '+TS_DAYS[i]);f(b.page,b.short?79:53,b.toY-11,b.short?34:60,15,day.to,`${i}:to`,'Arbeitsende '+TS_DAYS[i]);const max=1+Math.floor((b.lastRow-b.firstRow)/18.2);for(let j=0;j<max;j++){const e=day.entries?.[j];for(const [key,x,w] of v34Cols){f(b.page,x,b.firstRow+j*18.2-10,w,15,key==='hours'&&e?.hours!==undefined?String(e.hours).replace('.',','):e?.[key]||'',['process','labor'].includes(key)?'':`${i}:${j}:${key}`,`${TS_DAYS[i]} · Zeile ${j+1} · ${key}`);}}const sum=(day.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);f(b.page,369,b.totalY-10,48,14,sum?tsNumFormat(sum):'','','Tagessumme');});root.hidden=false;root.className='v34paperwrap';root.innerHTML=`<div class="v34paperbar"><button class="v33btn" id="v34BackWeek">← Zurück zur KW</button><span class="v34paperhours">${escapeHtml(tsNumFormat(tsArchiveHours(d)))} Std.</span><button class="v33btn" id="v34SaveWeek">Speichern</button><button class="v33btn" id="v34LaterWeek">◷ Später</button><button class="v33btn" id="v34SignWeek">✎ Unterschreiben</button><button class="v33btn v33primary" id="v34ApproveWeek">✓ Prüfung erledigt</button><button class="v33btn" id="v34PdfWeek">PDF</button>${isAdmin&&adminModeVisible()?'<button class="v33btn v39-danger" id="v39DeleteWeek">KW löschen</button>':''}</div><div class="v34paperhint">Originalformular · Klicke in eine Zeile oder auf eine Uhrzeit. Leere Zeilen können ergänzt werden.${v34WeekDirty?' · Nicht gespeichert':''}</div>${pages.map((p,i)=>`<div class="v34paper" style="background-image:url('${V34_PAPER[i]}')">${p.join('')}</div>`).join('')}`;root.querySelectorAll('[data-v34-field]').forEach(el=>el.onclick=()=>v34EditField(el.dataset.v34Field));document.getElementById('v34BackWeek').onclick=()=>{if(v32CanLeaveReview()){v33ResetPaper();v32DrawPeople();}};document.getElementById('v34SaveWeek').onclick=()=>v34SaveWeek('offen');document.getElementById('v34LaterWeek').onclick=()=>v34SaveWeek('spaeter');document.getElementById('v34SignWeek').onclick=v34Sign;document.getElementById('v34ApproveWeek').onclick=()=>v34SaveWeek('geprueft');document.getElementById('v34PdfWeek').onclick=()=>v34PreviewPdf();const dw=document.getElementById('v39DeleteWeek');if(dw)dw.onclick=()=>v39DeleteReviewWeek();}
 function v34Modal(title,body){document.getElementById('v34Modal')?.remove();const el=document.createElement('div');el.id='v34Modal';el.className='mv30-modal v34modal';el.style.display='flex';el.innerHTML=`<div class="mv30-modalbox"><div class="v34modalhead"><h2>${escapeHtml(title)}</h2><button class="btn" data-close>✕</button></div>${body}</div>`;document.body.append(el);el.querySelector('[data-close]').onclick=()=>el.remove();return el;}
 function v34EditField(action){if(v34WeekBusy)return;if(action==='signature')return v34Sign();const [a,b,k]=action.split(':');const day=v34WeekDraft.days[+a];if(!k){const el=v34Modal(`${TS_DAYS[+a]} · ${b==='from'?'Von':'Bis'}`,`<input id="v34Time" type="time" value="${escapeHtml(day[b]||'')}"><button class="btn primary" data-save>Übernehmen</button>`);el.querySelector('[data-save]').onclick=()=>{day[b]=el.querySelector('input').value;v34MarkDirty();el.remove();};return;}const j=+b;const e={...tsNewEntry(),...(day.entries?.[j]||{})};const el=v34Modal(`${TS_DAYS[+a]} · Tätigkeit ${j+1}`,`<div class="v34editrow">${tsEntryFields(e,+a,j)}</div><div class="v34modalactions"><button class="btn" data-remove>Zeile leeren</button><button class="btn primary" data-save>Übernehmen</button></div>`); // Reuse the actual site's options, but never call personal timesheet handlers.
 function capture(){el.querySelectorAll('[data-ts-field]').forEach(x=>e[x.dataset.tsField]=x.type==='checkbox'?(x.checked?'B':''):x.value);}
@@ -4497,6 +4621,149 @@ checkAppVersion();
     el.querySelector('[data-save]').onclick=()=>{const sel=[...el.querySelectorAll('[data-slot]')].map(x=>x.value);if(new Set(sel).size!==3)return alert('Bitte drei unterschiedliche Reiter wählen.');v34Layout().nav=sel;v34ApplyMobile();v34Persist();el.remove();};
   };
   if(document.readyState!=='loading')v38SyncChrome();else document.addEventListener('DOMContentLoaded',v38SyncChrome);
+})();
+</script>
+<script id="v39-js">
+/* V39: Stundenzettel – Wochenfenster, Löschen durch Admin, Originalzettel rechts zum direkten Eintragen. */
+function tsPrevWeek(){return v34Shift(tsMonday(tsToday()),-1);}
+function tsCanOpen(week){
+  if(!week)return false;
+  if(typeof adminModeVisible==='function'&&adminModeVisible())return true;
+  if(tsOwnerId&&currentUserProfile&&tsOwnerId!==currentUserProfile.user_id)return true;
+  const cur=tsMonday(tsToday());
+  return week===cur||week===v34Shift(cur,-1)||(typeof tsRemoteWeeks!=='undefined'&&tsRemoteWeeks.has(week));
+}
+async function tsDeleteWeek(week){
+  if(!isAdmin||!adminModeVisible())return;
+  const owner=tsOwnerId||currentUserProfile.user_id;
+  if(!await v38Confirm(`${tsWeekLabel(week)} (${tsWeekRange(week)}) endgültig löschen?\nDer alte Stand bleibt im Änderungsverlauf erhalten.`,{ok:'Woche löschen',danger:true}))return;
+  try{
+    await rpc('app_v39_delete_week',{target_user:owner,target_week:week});
+    try{localStorage.removeItem(`mv_timesheet_v25_${owner}_${week}`);}catch(_){}
+    tsRemoteWeeks.delete(week);tsArchive=tsArchive.filter(x=>x.week!==week);
+    tsView='overview';
+    if(tsWeek===week){clearTimeout(tsAutosaveTimer);tsWeek=null;tsData=null;await openTimesheet(tsToday());tsView='overview';}
+    renderTimesheet();
+    v38Toast(`${tsWeekLabel(week)} gelöscht.`,{kind:'ok'});
+  }catch(e){v38Toast('Löschen fehlgeschlagen: '+e.message,{kind:'err'});}
+}
+async function v39DeleteReviewWeek(){
+  const r=v33Current();if(r?.type!=='week'||!isAdmin||!adminModeVisible())return;
+  if(!await v38Confirm(`${tsWeekLabel(r.id)} von ${v33Name(r.owner)} endgültig löschen?\nDer alte Stand bleibt im Änderungsverlauf erhalten.`,{ok:'Woche löschen',danger:true}))return;
+  try{
+    await rpc('app_v39_delete_week',{target_user:r.owner,target_week:r.id});
+    reviewRows=reviewRows.filter(x=>!(x.type==='week'&&x.owner===r.owner&&x.id===r.id));
+    v34WeekDirty=false;v34WeekDraft=null;v34Stats={};
+    v33ResetPaper();v32DrawPeople();
+    v38Toast(`${tsWeekLabel(r.id)} gelöscht.`,{kind:'ok'});
+  }catch(e){v38Toast('Löschen fehlgeschlagen: '+e.message,{kind:'err'});}
+}
+
+/* ---------- Originalzettel ---------- */
+function v39Field(x,y,w,h,value,action,label,cls=''){
+  return `<button type="button" class="v34paperfield ${cls}" style="left:${x/595.2*100}%;top:${y/841.68*100}%;width:${w/595.2*100}%;height:${h/841.68*100}%" ${action?`data-v39-field="${action}"`:'disabled'} title="${escapeHtml(label)}" aria-label="${escapeHtml(label+(value?': '+value:''))}">${escapeHtml(String(value??''))}</button>`;
+}
+function v39PaperHTML(){
+  const d=tsData,week=tsWeek;if(!d||!week)return '';
+  const pages=[[],[]];const f=(p,...a)=>pages[p].push(v39Field(...a));
+  f(0,116,113,250,18,d.checkedBy||'','','Geprüft durch');
+  if(d.reviewSignature&&/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(d.reviewSignature))pages[0].push(`<img class="v34ink" src="${d.reviewSignature}" alt="Unterschrift E-Meister" style="left:37%;top:12.3%;width:23%;height:3.5%">`);
+  f(0,118,163,138,13,d.employee||'','','Mitarbeiter');
+  f(0,326,163,67,13,d.persNr||'','','Personalnummer');
+  f(0,418,163,26,13,tsKw(week),'','Kalenderwoche','center');
+  f(0,494,163,32,13,tsWeekLabel(week).split(' · ')[1],'','Jahr','center');
+  v34Boxes.forEach((b,i)=>{
+    const day=d.days[i]||{entries:[]};const dt=new Date(week+'T12:00:00');dt.setDate(dt.getDate()+i);
+    f(b.page,53,b.dateY-11,58,13,dt.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}),'',TS_DAYS[i]);
+    f(b.page,b.short?79:53,b.fromY-11,b.short?34:60,15,day.from,`${i}:from`,'Arbeitsbeginn '+TS_DAYS[i]);
+    f(b.page,b.short?79:53,b.toY-11,b.short?34:60,15,day.to,`${i}:to`,'Arbeitsende '+TS_DAYS[i]);
+    const max=1+Math.floor((b.lastRow-b.firstRow)/18.2);
+    for(let j=0;j<max;j++){
+      const e=day.entries?.[j];
+      for(const [key,x,w] of v34Cols){
+        const val=key==='hours'&&e?.hours!==undefined&&e?.hours!==''?String(e.hours).replace('.',','):e?.[key]||'';
+        f(b.page,x,b.firstRow+j*18.2-10,w,15,val,['process','labor'].includes(key)?'':`${i}:${j}:${key}`,`${TS_DAYS[i]} · Zeile ${j+1}`);
+      }
+    }
+    const sum=(day.entries||[]).reduce((s,e)=>s+tsNum(e.hours),0);
+    f(b.page,369,b.totalY-10,48,14,sum?tsNumFormat(sum):'','','Tagessumme '+TS_DAYS[i]);
+  });
+  return pages.map((p,i)=>`<div class="v34paper" style="background-image:url('${V34_PAPER[i]}')">${p.join('')}</div>`).join('');
+}
+function v39PaperPanel(){
+  return `<div class="v39-paperhead"><div><strong>Originalzettel</strong><span>${tsNumFormat(tsAllTotal())} Std. · in ein Feld tippen zum Eintragen</span></div><button type="button" class="btn small" onclick="tsPDF('preview')">PDF</button></div><div class="v39-papers" id="v39Papers">${v39PaperHTML()}</div>`;
+}
+function v39WirePaper(root){root?.querySelectorAll('[data-v39-field]').forEach(b=>b.onclick=()=>v39EditField(b.dataset.v39Field));}
+function v39RefreshPaper(){
+  const box=document.getElementById('v39PaperPanel');if(!box)return;
+  const sc=box.querySelector('.v39-papers')?.scrollTop||0;
+  box.innerHTML=v39PaperPanel();v39WirePaper(box);
+  const p=box.querySelector('.v39-papers');if(p)p.scrollTop=sc;
+}
+function v39AfterEdit(){
+  tsView=tsView==='paper'?'paper':tsView;
+  renderTimesheet();
+  tsSave(true);
+}
+function v39EditField(action){
+  const [a,b,k]=action.split(':');const di=+a;const day=tsData.days[di];if(!day)return;
+  if(!k){
+    const el=v34Modal(`${TS_DAYS[di]} · ${b==='from'?'Arbeitsbeginn':'Arbeitsende'}`,`<label for="v39Time">${b==='from'?'Von':'Bis'}</label><input id="v39Time" type="time" value="${escapeHtml(day[b]||'')}"><div class="v34modalactions"><button class="btn" data-clear type="button">Leeren</button><button class="btn primary" data-save type="button">Übernehmen</button></div>`);
+    const inp=el.querySelector('input');inp.focus();
+    el.querySelector('[data-clear]').onclick=()=>{day[b]='';el.remove();v39AfterEdit();};
+    el.querySelector('[data-save]').onclick=()=>{day[b]=inp.value;el.remove();v39AfterEdit();};
+    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();el.querySelector('[data-save]').click();}});
+    return;
+  }
+  const j=+b;
+  if(j>0&&!(day.entries?.[j-1]?.work||day.entries?.[j-1]?.hours)&&!(day.entries?.[j]?.work||day.entries?.[j]?.hours)){
+    const first=(day.entries||[]).findIndex(x=>!(x.work||x.hours||x.siteId||x.templateId));
+    if(first>=0&&first<j)return v39EditField(`${di}:${first}:${k}`);
+  }
+  const e={...tsNewEntry(),...(day.entries?.[j]||{}),kind:(day.entries?.[j]?.kind)||'site'};
+  const el=v34Modal(`${TS_DAYS[di]} · Zeile ${j+1}`,`<div class="v34editrow">${tsEntryFields(e,di,j)}</div><div class="v34modalactions"><button class="btn" data-remove type="button">Zeile leeren</button><button class="btn primary" data-save type="button">Übernehmen</button></div>`);
+  const capture=()=>el.querySelectorAll('[data-ts-field]').forEach(x=>e[x.dataset.tsField]=x.type==='checkbox'?(x.checked?'B':''):x.value);
+  const wire=()=>el.querySelectorAll('[data-ts-field]').forEach(x=>{x.removeAttribute('onchange');x.onchange=()=>{capture();if(['kind','siteId','orderType','templateId'].includes(x.dataset.tsField)){if(e.kind!=='site'){e.siteId='';e.orderType='auftrag';}if(e.kind!=='template')e.templateId='';tsSyncEntry(e);el.querySelector('.v34editrow').innerHTML=tsEntryFields(e,di,j);wire();}};});
+  wire();
+  el.querySelector('[data-save]').onclick=()=>{
+    capture();e.hr=e.kind==='site'&&e.hr==='B'?'B':'';
+    if(e.kind==='site'||e.kind==='template'){const p=e.process,l=e.labor;tsSyncEntry(e);e.process=p;e.labor=l;}
+    if(e.hours!==''&&(!/^\d+(?:[.,][05])?$/.test(String(e.hours))||tsNum(e.hours)>24)){alert('Bitte nur 0,5-Stunden-Schritte bis 24 Stunden.');return;}
+    day.entries=day.entries||[];while(day.entries.length<j)day.entries.push(tsNewEntry());day.entries[j]=e;
+    el.remove();v39AfterEdit();
+  };
+  el.querySelector('[data-remove]').onclick=()=>{if(day.entries?.[j]){day.entries.splice(j,1);if(!day.entries.length)day.entries=[tsNewEntry()];}el.remove();v39AfterEdit();};
+  const focus=el.querySelector(`[data-ts-field="${k}"]`);if(focus&&!focus.readOnly)focus.focus();
+}
+
+(function(){
+  const desk=()=>matchMedia('(min-width:1100px)').matches;
+  const orig=window.renderTimesheet;
+  window.renderTimesheet=function(){
+    const el=document.getElementById('stundenzettel');
+    if(tsView==='paper'&&desk())tsView='editor';
+    if(tsView==='paper'&&el&&tsData){
+      el.innerHTML=`<div class="ts29-editor-top"><button class="btn" onclick="tsView='editor';renderTimesheet()">← Zurück</button><div><strong>${tsWeekLabel(tsWeek)}</strong><div class="ts29-status">${tsWeekRange(tsWeek)}</div></div></div><section class="v39-paperpanel v39-mobilepaper" id="v39PaperPanel">${v39PaperPanel()}</section><p id="tsStatus" class="ts29-status"></p>`;
+      v39WirePaper(el);return;
+    }
+    const r=orig.apply(this,arguments);
+    if(!el||!tsData||!['editor','day'].includes(tsView))return r;
+    if(desk()){
+      const left=document.createElement('div');left.className='v39-left';
+      while(el.firstChild)left.appendChild(el.firstChild);
+      const split=document.createElement('div');split.className='v39-split';
+      const right=document.createElement('section');right.className='v39-paperpanel';right.id='v39PaperPanel';right.setAttribute('aria-label','Originalzettel');
+      right.innerHTML=v39PaperPanel();split.append(left,right);el.appendChild(split);v39WirePaper(right);
+    }else if(tsView==='editor'){
+      const top=el.querySelector('.ts29-editor-top');
+      if(top){const b=document.createElement('button');b.type='button';b.className='btn v39-papertoggle';b.textContent='Als Zettel';b.onclick=()=>{tsCapture();tsView='paper';renderTimesheet();};top.appendChild(b);}
+    }
+    return r;
+  };
+  const origTotals=window.tsRefreshTotals;
+  window.tsRefreshTotals=function(){const r=origTotals.apply(this,arguments);try{v39RefreshPaper();}catch(e){}return r;};
+  let wasDesk=desk();
+  addEventListener('resize',()=>{const now=desk();if(now!==wasDesk){wasDesk=now;if(currentAppPage==='stundenzettel'&&tsData&&['editor','day','paper'].includes(tsView)){tsCapture();renderTimesheet();}}});
 })();
 </script>
 </body>
