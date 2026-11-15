@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-12">
+<title>Blauer Montagebericht · Materialverwaltung</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d10;--panel:#121824;--ink:#f4f6fb;--muted:#b0bfd5;--line:#29354a;--accent:#2563eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 17px;border-bottom:1px solid var(--line);background:#090d14}.top a{color:#a7caff;text-decoration:none;font-weight:700}.top h1{font-size:19px;flex:1;margin:0}.version{color:#9fe2ae;font-size:12px;border:1px solid #386346;padding:4px 8px;border-radius:7px}
+main{display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);align-items:start;gap:15px;padding:15px;max-width:1500px;margin:auto}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}button,select{border:1px solid #35425a;background:#1c2739;color:var(--ink);border-radius:9px;padding:10px 12px}button{font-weight:700}.primary{background:var(--accent);border-color:var(--accent)}.delete{color:#ffb4b4}button:disabled{opacity:.5}
+h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin:10px 0;border-radius:10px;overflow:hidden}summary{padding:12px;background:#1b2535;cursor:pointer;font-weight:750}.inside{padding:12px}.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.one{grid-template-columns:1fr}.field{min-width:0}.field label{font-size:12px;color:#c0cce0;display:block;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;min-width:0;background:#070d17;border:1px solid #374760;border-radius:8px;color:var(--ink);padding:10px;min-height:41px}.field textarea{resize:vertical;min-height:92px}.field input:focus,.field textarea:focus{outline:2px solid #487fee}.field input[type=checkbox]{width:auto;min-height:0;accent-color:#60a5fa}.field input[type=range]{padding:0;min-height:22px;accent-color:#60a5fa}.tiny{font-size:12px;color:var(--muted);line-height:1.5}.note{font-size:12px;background:#101d2e;padding:10px;border:1px solid var(--line);border-radius:8px}.danger-note{color:#ffaeae}.ok-note{color:#9fe2ae}.status{min-height:20px;font-size:13px;color:#9fe2ae}
+.emp{padding:10px;border:1px solid #35435a;border-radius:9px;margin:10px 0}.emp strong{display:block;margin-bottom:9px}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.days .field label{text-align:center}.days input{padding:8px 2px!important;text-align:center!important}.days.hour-days{grid-template-columns:repeat(4,minmax(0,1fr))}.days.hour-days select{padding:9px 6px}.totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}.vehicleBlock{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}.vehicleBlock>strong{display:block;margin-bottom:10px}.vehicleBlock .field:has(label) {margin-top:4px}.vehicleBlock .field>label{margin-bottom:4px}.vehicle2Toggle{display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer}.vehicle2Toggle input{width:19px;height:19px;accent-color:#60a5fa}.vehicleBlock [hidden]{display:none!important}.materialrow{display:grid;grid-template-columns:90px minmax(0,1fr);gap:7px;margin-bottom:7px}.sigRow{padding:10px;border:1px solid var(--line);border-radius:9px;margin:8px 0}.sigRow strong{display:block;margin-bottom:8px}.sigControls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sigControls .field input{width:100%}
+.preview{position:sticky;top:12px}.previewTitle{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px}.previewTitle h2{margin:0}.sheetFrame{padding:10px;background:#202a39;border-radius:10px;overflow:auto}.sheetCanvas{display:block;width:100%;height:auto;max-width:1054px;margin:0 auto;box-shadow:0 6px 22px #0009;background:#d3e7ed}.selectReport{max-width:100%;flex:1;min-width:150px}
+.sheetSwitch{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px;margin:7px 0 12px;border:1px solid #35425a;border-radius:11px;background:#0e1622}.sheetSwitch button{padding:9px 11px}.sheetSwitch button[aria-selected="true"]{background:#2563eb;border-color:#6a99ff;color:#fff}.sheetSwitch button[hidden]{display:none}.sheetSwitch .tiny{flex-basis:100%;margin:0 2px}.sheetSwitch .muted-delete{font-size:12px;color:#ffb4b4}.sheetSwitch .muted-delete[hidden]{display:none}
+#signPreview{display:none;position:fixed;inset:0;z-index:29;background:#000e;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto}
+#signPreview.visible{display:flex}.signPreviewDialog{width:100%;max-width:780px;background:#141e2b;border:1px solid #45617a;border-radius:14px;padding:14px;margin:auto}
+#signPreviewCanvas{display:block;width:100%;height:auto;max-height:69vh;object-fit:contain;background:#d4e6e9;margin:10px auto;border-radius:5px}
+#sigModal{display:none;position:fixed;inset:0;z-index:100;background:#090e16;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#sigModal.visible{display:flex}
+.sigDialog{display:flex;flex-direction:column;gap:7px;background:#111a29;border:1px solid #45617a;padding:10px;border-radius:10px;width:100%;height:100%;max-width:none;max-height:none;min-height:0}
+.sigDialog h2{font-size:18px;margin:0}.sigDialog .tiny{margin:0}
+.sigDialog canvas{display:block;touch-action:none;width:100%;height:100%;flex:1 1 auto;min-height:0;background:white;border:2px solid #6b8299;border-radius:8px;margin:0}
+.sigDialog .buttons{flex:0 0 auto;margin:0;justify-content:flex-end}.sigDialog .buttons button{min-height:46px}
+/* Querformat auf kleinen Hochformat-Displays auch dann, wenn die Browser-Drehsperre greift. */
+#sigModal.rotated{width:100dvh;height:100dvw;inset:auto;top:0;left:100vw;transform-origin:top left;transform:rotate(90deg)}
+@supports not (height:100dvh){#sigModal.rotated{width:100vh;height:100vw}}
+@media (orientation:landscape){#sigModal.rotated{width:100vw;height:100dvh;top:0;left:0;transform:none}}
+
+@media(max-width:980px){main{grid-template-columns:1fr}.preview{position:static}.panel{padding:12px}.sheetFrame{padding:5px}}@media(max-width:510px){.cols,.totals{grid-template-columns:1fr}.days{grid-template-columns:repeat(4,minmax(0,1fr))}.days.hour-days{grid-template-columns:repeat(2,minmax(0,1fr))}.sigControls{grid-template-columns:1fr 1fr}.top{padding:10px}.top h1{flex-basis:100%}}
+
+/* Handy-Zoom: die echte Canvas-Auflösung und damit der PDF-Export bleiben unverändert */
+.sheetFrame{max-width:100%;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.sheetCanvas{max-width:none;margin:0 auto;}
+.zoomBar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0;padding:9px;background:#101a2b;border:1px solid #35425a;border-radius:10px}
+.zoomBar button{min-height:43px;min-width:48px;font-size:17px;padding:8px 13px}
+.zoomBar .zoomText{font-size:13px;color:#c9d9ed;min-width:53px;text-align:center}
+.zoomBar button.active{background:#2563eb;border-color:#8bb9ff}
+@media(max-width:600px){.sheetFrame{padding:3px}.zoomBar{position:sticky;top:0;z-index:6}.previewTitle h2{font-size:16px}}
+/* Direkte Eingabe auf dem Originalformular */
+main{grid-template-columns:minmax(0,1fr)}
+.preview{position:static;order:0;max-width:1140px;width:100%;margin:0 auto}
+main>.panel:first-child{order:1;max-width:1140px;width:100%;margin:0 auto}
+#editorWrap:not([open]) #editor{display:none}
+#editorWrap>summary{cursor:pointer;background:#1b2535;border-radius:9px;padding:12px;font-weight:700}
+#page{cursor:crosshair;touch-action:pan-x pan-y;}
+#directModal{display:none;position:fixed;inset:0;z-index:180;background:#000c;padding:16px;align-items:center;justify-content:center}
+#directModal.visible{display:flex}
+#directBox{background:#141e2b;border:1px solid #435571;border-radius:16px;padding:18px;width:min(95vw,480px);max-height:92dvh;overflow:auto}
+#directBox label{display:block;margin:12px 0 6px}
+#directBox input,#directBox select,#directBox textarea{width:100%;background:#08111e;color:white;border:1px solid #435571;border-radius:9px;padding:12px;font-size:18px;min-height:48px}
+#directBox textarea{min-height:120px}
+#templateBar{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:12px 0}
+#templateBar label{display:grid;gap:5px;font-size:13px}
+#templateBar select,#templateBar input{min-width:130px;background:#0c1828;border:1px solid #435571;border-radius:8px;color:#fff;padding:11px}
+#page:focus{outline:3px solid #60a5fa}
+@media(max-width:980px){main>.preview{order:0}main>.panel:first-child{order:1}}
+
+/* V15: Das Handy ist ein Eingabeassistent, nicht ein verkleinertes A4-Blatt. */
+#reportModeSelector{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 6px}
+#reportModeSelector button{font-size:14px;line-height:1.3;min-height:59px;padding:9px;border:1px solid #435878;border-radius:13px;background:#152439;color:#e0ecff}
+#reportModeSelector button[aria-pressed=true]{border:2px solid #7eaaff;background:#254675;color:#fff;font-weight:750}
+.workTask{display:grid;grid-template-columns:1fr auto;gap:9px;margin:9px 0;padding:12px;background:#19263a;border:1px solid #394e6c;border-radius:12px;align-items:end}
+.workTask .field textarea{font-size:16px;min-height:78px}
+.workTask button{min-width:44px;min-height:45px;background:#26384e;border:1px solid #58718d}
+#addWorkTask{width:100%;min-height:49px;background:#1f416a;border:1px solid #679cdd;font-weight:750}
+body.guide-advanced #guideProgress,body.guide-advanced #guideHint,body.guide-advanced #guideEditAdvanced{display:none!important}
+body.guide-advanced #guideActions{display:flex!important}
+body.guide-advanced #guideActions #guidePrev,body.guide-advanced #guideActions #guideNext{display:none!important}
+body.guide-advanced #guideActions #guideSave{width:100%}
+body.guide-preview #guideActions{display:none!important}
+body.guide-advanced #editor>details{display:block!important}
+@media(max-width:480px){#reportModeSelector button{font-size:13px}}
+#guideHeader{display:flex;align-items:center;gap:10px;justify-content:space-between;margin:14px 0 10px}
+#guideHeader h2{font-size:19px;line-height:1.25;margin:0}
+#guidePeek{background:transparent;color:#cce0ff;border:1px solid #58749a;border-radius:9px;padding:8px;font-size:13px;min-height:40px}
+#guideHeaderRight{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#guideHeader .tiny{margin:0}
+#guideStepCount{font-size:12px;color:#bfd3ed;white-space:nowrap;border:1px solid #405475;border-radius:22px;padding:6px 9px}
+#mobileGuide{margin:14px 0 8px;background:#101b2d;border:1px solid #344a67;border-radius:14px;padding:12px}
+#guideProgress{display:flex;gap:7px;overflow-x:auto;scrollbar-width:thin;padding-bottom:7px;scroll-snap-type:x proximity}
+#guideProgress button{background:#18263b;border:1px solid #344965;border-radius:25px;white-space:nowrap;font-size:13px;font-weight:650;color:#d5e0f3;padding:11px 13px;min-height:44px;scroll-snap-align:start}
+#guideProgress button.active{background:#2563eb;color:white;border-color:#78a8ff}
+#guideProgress button.done:not(.active){border-color:#3f8d79}
+#guideProgress button.done:not(.active)::before{content:'✓ ';color:#8be4bd}
+.guideHint{font-size:13px;color:#bdcce0;line-height:1.45;margin:11px 0 0}
+#guideActions{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;margin:13px 0 2px}
+#guideActions button{min-height:50px;flex:0 0 auto;padding:10px 9px;font-size:14px}
+#guidePrev{width:68px}
+#guideSave{width:94px}
+#guideActions .primary{flex:1 1 auto;min-width:0}
+#guideReviewActions{display:none;flex-wrap:wrap;gap:8px;margin:12px 0}
+#guideReviewActions button{min-height:50px;flex:1 1 145px}
+#reportManage{margin:10px 0;border:1px solid #293a51;border-radius:10px}
+#reportManage>summary{display:list-item;background:#172234;padding:13px;font-size:13px;color:#c6d5eb}
+#reportManage>.buttons{margin:8px;}
+#reportManage>.buttons button{min-height:42px}
+#editorWrap{margin:10px 0 80px;border:0;border-radius:0;overflow:visible}
+#editorWrap>summary,#editorWrap>h2{display:none}
+#editor>details{display:none;border:0;border-radius:14px;margin:0;background:#121d2d;overflow:visible}
+#editor>details.guide-active{display:block}
+#editor>details.guide-active>summary{display:none}
+#editor>details.guide-active>.inside{padding:15px}
+#editor>details.guide-active .field label{font-size:14px;font-weight:600;line-height:1.3;color:#e0e9f5}
+#editor>details.guide-active input:not([type=checkbox]):not([type=range]),
+#editor>details.guide-active select,#editor>details.guide-active textarea{font-size:16px;min-height:51px;border-radius:10px;padding:12px;border-color:#496080}
+#editor>details.guide-active button{min-height:45px}
+#editor>details.guide-active .emp{border-radius:12px;padding:13px;margin:13px 0;background:#182438}
+#editor>details.guide-active .vehicleBlock{background:#172338;border-radius:12px}
+#editor>details.guide-active .dayBox{padding:8px}
+#editor>details.guide-active .days .field label{font-size:13px}
+#editor>details.guide-active .totals{grid-template-columns:repeat(2,minmax(0,1fr))}
+#editor>details.guide-active .materialrow{padding:10px;background:#182438;border-radius:11px;margin-bottom:10px}
+#editor>details.guide-active input[type=checkbox]{width:22px;height:22px;accent-color:#60a5fa}
+#editor>details.guide-active .vehicle2Toggle{padding:10px;background:#182438;border-radius:11px}
+body.guide-advanced #editorWrap>summary{display:list-item}
+body.guide-advanced #editor>details{display:block;border:1px solid var(--line);margin:10px 0}
+body.guide-advanced #editor>details>summary{display:list-item}
+body.guide-advanced #editorWrap{margin-bottom:20px}
+body.guide-advanced #editorWrap>h2{display:block}
+body.guide-preview .preview{display:block}
+body.guide-preview #editorWrap{display:none}
+body.guide-preview #guideActions{display:none}
+body.guide-preview #guideReviewActions{display:flex}
+body.guide-preview #guideProgress{display:none}
+body.guide-preview #guideHint{display:none}
+body.guide-preview .preview{margin:0 auto;max-width:1140px}
+body.guide-preview .sheetCanvas{max-width:none}
+body:not(.guide-preview) .preview{display:none}
+body.guide-preview #guideEditAdvanced{display:none}
+body.guide-preview #guidePeek{display:none}
+body.guide-preview #guideHeader{margin-bottom:4px}
+#guideEditAdvanced{font-size:13px;background:transparent;border:1px solid #52667f;min-height:40px;color:#c4d7ed;width:100%;margin-top:8px}
+/* Mobile first: on desktop the same guided flow avoids a completely different behavior. */
+main{grid-template-columns:minmax(0,1fr)!important;max-width:1140px}
+main>.panel:first-child{order:0!important;width:100%;max-width:1140px}
+main>.preview{order:1!important;width:100%}
+#templateBar{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px}
+#templateBar label{grid-column:1/-1}
+#templateBar select{width:100%;min-height:48px;font-size:16px}
+#templateBar button{min-height:45px}
+@media(max-width:600px){
+ main{padding:9px;gap:0}
+ .panel{padding:12px;margin:0}
+ #mobileGuide{margin:11px 0;padding:11px}
+ .sheetSwitch{padding:8px;gap:5px}
+ .sheetSwitch .tiny{display:none}
+ .sheetSwitch button{font-size:13px;padding:9px 10px}
+ #templateBar{grid-template-columns:minmax(0,1fr) auto}
+ #templateBar label{grid-column:auto}
+ #templateBar button{padding:10px;font-size:13px}
+ #templateBar #saveWholeTemplate,#templateBar #deleteWholeTemplate{grid-column:1/-1}
+ #guideHeaderRight{flex-direction:row;align-items:center}
+ #guidePeek{font-size:12px;padding:7px;min-height:36px}
+ #guideHeader h2{font-size:18px}
+ #guideActions{position:sticky;bottom:0;background:#111e30;border:1px solid #344963;border-radius:12px;padding:9px;z-index:9;box-shadow:0 -5px 18px #0008}
+ #guideProgress{margin:0 -2px}
+ #guideHint{display:none}
+ #guideHeader{margin:0 0 8px}
+ #mobileGuide{margin-bottom:5px}
+ .top{padding:8px 11px;gap:6px}
+ .top h1{font-size:17px}
+ .top .version{font-size:10px}
+ #editor>details.guide-active>.inside{padding:12px}
+ #editor>details.guide-active .cols{grid-template-columns:1fr}
+ #editor>details.guide-active .materialrow{grid-template-columns:90px minmax(0,1fr)}
+ #editor>details.guide-active .days{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ #editor>details.guide-active .days.hour-days{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .top{position:static}
+ .sheetFrame{max-height:70dvh}
+}
+
+/* V20: echte seitliche Vorschau, auf dem Handy ohne miniaturisierten Papier-Editor. */
+#previewClose,#previewMobileActions,#swipeGuideHint{display:none}
+@media(max-width:800px){
+ #swipeGuideHint{display:flex;align-items:center;gap:8px;font-size:12px;color:#c6dcf7;margin:8px 1px 0;line-height:1.4}
+ body.guide-preview #swipeGuideHint{display:none}
+ #previewClose{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#253b5a;border:1px solid #57769b}
+ #previewMobileActions{display:flex;gap:7px;padding:10px 2px calc(6px + env(safe-area-inset-bottom));flex-shrink:0;flex-wrap:nowrap}
+ #previewMobileActions button{flex:1 1 0;min-width:0;min-height:46px;padding:8px 5px;font-size:12px;border-radius:10px}
+ #previewMobileActions .primary{flex:1.3 1 0}
+ body.guide-preview #guideReviewActions{display:none}
+ body.guide-preview .preview{
+  position:fixed!important;inset:0!important;z-index:40;
+  display:flex!important;flex-direction:column;
+  width:100vw!important;max-width:100vw!important;height:100vh;height:100dvh;
+  margin:0!important;padding:calc(7px + env(safe-area-inset-top)) 9px 2px!important;
+  border:0;border-radius:0;background:#0b1421;overflow:hidden;
+  animation:swipePreviewIn .22s ease-out both;
+ }
+ body.guide-preview .previewTitle{flex:0 0 auto;margin:0 0 7px;flex-wrap:nowrap;gap:5px}
+ body.guide-preview .previewTitle h2{font-size:16px;line-height:1.2}
+ body.guide-preview .previewTitle .version{display:none}
+ body.guide-preview .preview>p.tiny{display:none}
+ body.guide-preview .zoomBar{flex:0 0 auto;position:relative;top:auto;z-index:auto;gap:6px;margin:0 0 8px;padding:7px;flex-wrap:nowrap;overflow-x:auto}
+ body.guide-preview .zoomBar button{flex-shrink:0;min-width:41px;min-height:43px;padding:8px 9px;font-size:14px}
+ body.guide-preview .zoomBar .zoomText{flex-shrink:0}
+ body.guide-preview .sheetFrame{flex:1 1 auto;min-height:0;max-height:none!important;margin:0;padding:7px;background:#243142;border-radius:10px;overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain}
+ body.guide-preview .sheetCanvas{max-width:none}
+}
+@keyframes swipePreviewIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){body.guide-preview .preview{animation:none}}
+
+/* V28: schnelle Materialsuche direkt im Monteurbericht */
+.report-material-search-wrap{position:relative}
+.report-material-search-wrap>input[type=search]{width:100%;min-height:44px;border:1px solid #4c6e93;background:#0b1a2d;color:#fff;border-radius:10px;padding:10px 12px}
+.report-material-results{background:#0c192c;border:1px solid #416080;border-radius:10px;max-height:265px;overflow-y:auto;overscroll-behavior:contain;margin-top:4px;box-shadow:0 12px 30px #0009;z-index:20}
+.report-material-search-wrap .report-material-results{position:absolute;top:100%;left:0;right:0;max-height:260px}
+.report-material-results[hidden]{display:none!important}
+.report-material-group{padding:7px 11px;font-size:11px;color:#9bcaff;font-weight:800;letter-spacing:.3px;background:#172d46;position:sticky;top:0}
+.report-material-option{display:flex!important;align-items:center;justify-content:space-between;gap:10px;text-align:left;width:100%;background:#0c192c!important;border:0!important;border-bottom:1px solid #243b55!important;border-radius:0!important;padding:10px 12px!important;font-weight:500!important;color:#f1f7ff!important;min-height:42px}
+.report-material-option:hover,.report-material-option:focus{background:#193f67!important;outline:1px solid #73b9ff}
+.report-material-option small{font-size:11px;white-space:nowrap;color:#9bcaff}
+.report-material-empty,.report-material-more{padding:12px;font-size:12px;color:#b8cee6;margin:0}
+.report-material-direct{position:relative;max-height:205px}
+
+@media(min-width:850px) and (pointer:fine){
+body:not(.guide-preview) main{grid-template-columns:minmax(320px,1fr) minmax(330px,1fr)!important;max-width:1800px;padding:18px;gap:18px;align-items:start}
+body:not(.guide-preview) main>.panel:first-child{order:0!important;max-width:none;margin:0}
+body:not(.guide-preview) main>.preview{display:block!important;position:sticky;top:14px;order:1!important;max-width:none;margin:0;min-width:0}
+body:not(.guide-preview) .sheetFrame{max-height:calc(100vh - 160px);overflow:auto}
+body:not(.guide-preview) .preview .sheetCanvas{max-width:none}
+.top{background:#101d2e;padding:15px 20px}.panel{background:#142235;border-radius:12px;border-color:#2b3e55}.field input,.field select,.field textarea{background:#0d1828}.zoomBar{flex-wrap:wrap}
+}
+</style>
+<style>
+body[data-review=yes] .top,body[data-review=yes] main>.panel:not(.preview){display:none!important}
+body[data-review=yes] main{display:block!important;max-width:none!important;padding:10px!important;margin:0!important}
+body[data-review=yes] #reportPreview{display:block!important;position:static!important;inset:auto!important;height:auto!important;max-width:none!important;margin:0!important;animation:none!important}
+body[data-review=yes] #reportPreview .previewTitle,body[data-review=yes] #previewMobileActions,body[data-review=yes] #reportPreview>p.tiny{display:none!important}
+body[data-review=yes] #sheetScroll{max-height:none!important;height:auto!important;min-height:300px!important;overflow:auto!important;flex:none!important}
+body[data-review=yes] #page{cursor:crosshair} #v32Bar{display:none} body[data-review=yes] #v32Bar{display:block;position:sticky;top:0;z-index:12;padding:12px;background:#142438;border:1px solid #32465e;border-radius:12px;margin:0 0 12px;color:#eef5ff} #v32Bar .buttons{display:flex;flex-wrap:wrap;gap:7px} #v32Message{font-size:13px;margin:8px 0} #v32Approve{background:#137441;color:white} #v32Later{color:#ff8888} #v32Bar button:disabled{opacity:.45}
+</style><style>body[data-review=yes]{background:#0b1625;color:#e7eef9}body[data-review=yes] main{padding:8px!important}body[data-review=yes] #v32Bar{position:sticky;top:0;margin:0 0 8px;padding:8px 10px;border-radius:8px;background:#142338}body[data-review=yes] #v32Title{display:none}body[data-review=yes] #v32Bar .buttons{gap:6px}body[data-review=yes] #v32Bar button{font-size:12px;padding:8px 10px;min-height:36px}body[data-review=yes] #v32Later{border-color:#773845;color:#ff9c9c}body[data-review=yes] #v33Sign{border-color:#3978bf;color:#b3d8ff}body[data-review=yes] #v32Message{margin:6px 0 0;font-size:12px}body[data-review=yes] #reportPreview{background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important}body[data-review=yes] .zoomBar{padding:5px;margin:0 0 6px;background:#132238;border:0;position:static}body[data-review=yes] .zoomBar button{font-size:12px;padding:6px 9px}body[data-review=yes] #sheetScroll{background:#101d2e;padding:4px;border-radius:6px}body[data-review=yes] #reportPreview>p.tiny{display:none!important}</style></head>
+<body>
+<header class="top"><a href="#" onclick="event.preventDefault(); parent.closeMontagebericht()">← Materialverwaltung</a><h1>📄 Blauer Montagebericht</h1><span class="version">Version 28 · Materialsuche</span></header>
+<div id="v32Bar"><strong id="v32Title">Originalbericht prüfen</strong><div class="buttons"><button id="v32First">Auftrag / Blatt 1</button><button id="v32Second" hidden>Zusatz / Blatt 2</button><button id="v32Draft">Speichern</button><button id="v33Sign">Unterschreiben</button><button id="v32Later">◷ Später bearbeiten</button><button id="v32Approve">✓ Prüfung erledigt</button></div><div id="v32Message" role="status">Bericht wird geladen …</div></div><main>
+<section class="panel">
+<div class="buttons"><select class="selectReport" id="saved" aria-label="Gespeicherten Bericht öffnen"></select><button id="add" type="button">＋ Neuer Bericht</button></div>
+<div class="sheetSwitch" role="tablist" aria-label="Blauenzettel für Auftrag und Zusatz">
+<button id="sheetFirst" type="button" role="tab" aria-selected="true">📄 1 · Auftrag</button>
+<button id="sheetSecond" type="button" role="tab" aria-selected="false" hidden>📄 2 · Zusatz</button>
+<button id="addSecond" type="button">＋ Zusatz-Blatt</button>
+<button id="removeSecond" type="button" class="muted-delete" hidden>Zusatz-Blatt entfernen</button>
+<p class="tiny" id="sheetHint">Zweiter Blauenzettel für Zusatzarbeiten, nur bei Bedarf.</p>
+</div>
+<div class="note" style="margin:9px 0">Berichtsnummer des aktuellen Blatts: <strong id="currentReportNumber" style="font-size:18px;letter-spacing:1px">wird geladen</strong> <button type="button" id="assignReportNumber" hidden>Nummer vergeben</button></div>
+<div id="status" class="status" role="status"></div>
+<div id="templateBar"><label>Berichtsvorlage<select id="wholeTemplate"><option value="">Ohne Vorlage</option></select></label><button type="button" id="applyWholeTemplate">Vorlage übernehmen</button><button type="button" id="saveWholeTemplate" hidden>🔐 Als Admin-Vorlage speichern</button><button type="button" id="deleteWholeTemplate" hidden>🔐 Vorlage löschen</button></div>
+<div id="mobileGuide" aria-label="Bericht Schritt für Schritt ausfüllen">
+ <div id="reportModeSelector" role="group" aria-label="Bedienmodus wählen"><button type="button" id="modeEasy" aria-pressed="true">🧭 Einfach · Schritt für Schritt</button><button type="button" id="modeFast" aria-pressed="false">⚡ Schnell · alle Bereiche</button></div><p class="tiny" id="modeExplanation">Du kannst jederzeit wechseln. Deine Eingaben bleiben erhalten.</p>
+<div id="guideHeader"><div><h2 id="guideTitle">Baustelle &amp; Einsatz</h2><p class="tiny" id="guideSubheading">Einfach Schritt für Schritt ausfüllen</p></div><div id="guideHeaderRight"><span id="guideStepCount">1 von 6</span><button id="guidePeek" type="button">👁️ Vorschau</button></div></div>
+ <div id="guideProgress" role="navigation" aria-label="Berichtsabschnitte"></div>
+ <div id="swipeGuideHint" aria-label="Hinweis zur Vorschau">👈 Nach links wischen: Vorschau öffnen. Zurück mit Wischen nach rechts.</div><p class="guideHint" id="guideHint">Wähle deine Baustelle oder eine Vorlage. Die übrigen Angaben werden automatisch übernommen.</p>
+ <div id="guideReviewActions"><button id="guideBackToEdit" type="button">← Weiter bearbeiten</button><button id="guideReviewSign" type="button" class="primary">✍️ Polier unterschreiben</button><button id="guideReviewPdf" type="button">📄 PDF</button><button id="guideReviewMail" type="button">✉️ Teilen</button></div>
+</div>
+<details id="editorWrap"><summary>⚙️ Alle Felder und Einstellungen (optional öffnen)</summary><h2>Bericht ausfüllen</h2><div id="editor"></div></details>
+<details id="reportManage"><summary>⋯ Speichern, PDF &amp; Berichte verwalten</summary>
+<div class="buttons"><button class="primary" id="pdf" type="button">📄 Aktuelles Blatt als PDF</button><button id="pdfBoth" type="button" hidden>📚 Beide Blätter als PDF</button><button id="emailPdf" type="button">✉️ PDF per E-Mail teilen</button><button id="emailPdfBoth" type="button" hidden>✉️ Beide Blätter per E-Mail</button><button id="save" type="button">💾 Speichern</button><button id="remove" class="delete" type="button">🗑️ Löschen</button></div>
+</details>
+<div id="guideActions"><button id="guidePrev" type="button">← Zurück</button><button id="guideSave" type="button">💾 Speichern</button><button id="guideNext" class="primary" type="button">Weiter →</button></div>
+<button type="button" id="guideEditAdvanced">⚙️ Weitere Einstellungen &amp; Stunden-Vorlagen</button>
+<p class="tiny">Der blaue Originalzettel bleibt unverändert. Baustellen werden aus Supabase geladen; Berichte selbst werden weiterhin nur auf diesem Gerät gespeichert. Stunden-Vorlagen für alle werden in Supabase gespeichert (SQL-Einrichtung erforderlich). Die Nummer wird beim Anlegen jedes Blattes über Supabase vergeben (SQL-Einrichtung notwendig). Jede Nummer bleibt dauerhaft mit ihrem Blatt verknüpft. Optional sind zwei getrennte Blauenzettel für Auftrag und Zusatz pro Einsatz möglich.</p>
+</section>
+<section class="panel preview" id="reportPreview" aria-label="Blauenzettel-Vorschau"><div class="previewTitle"><h2>Originaler Blauenzettel</h2><span class="version">PDF = Vorschau</span><button type="button" id="previewClose">← Bearbeiten</button></div><p class="tiny">Hier siehst du deinen fertig ausgefüllten Originalzettel. Zum Korrigieren kannst du ein Feld auf dem Zettel antippen oder zu den großen Eingabefeldern zurückkehren.</p><div class="zoomBar" aria-label="Ansicht vergrößern"><button type="button" id="zoomOut" aria-label="Verkleinern">−</button><span id="zoomLabel" class="zoomText">100 %</span><button type="button" id="zoomIn" aria-label="Vergrößern">＋</button><button type="button" id="zoomFit">Ganzes Blatt</button><button type="button" id="zoomReadable">Groß lesen</button></div><div class="sheetFrame" id="sheetScroll"><canvas id="page" tabindex="0" class="sheetCanvas" width="1054" height="1492" aria-label="Vorschau des blauen Montageberichts"></canvas></div><div id="previewMobileActions"><button id="previewSave" type="button">💾 Speichern</button><button id="previewPdf" type="button">📄 PDF</button><button id="previewShare" type="button">✉️ Teilen</button><button id="previewSign" type="button" class="primary">✍️ Polier</button></div><p class="tiny">Die Zoom-Tasten ändern nur die Ansicht. Das ausgedruckte PDF behält Größe, Qualität und Positionen des Originalzettels.</p></section>
+</main>
+<div id="directModal" role="dialog" aria-modal="true" aria-label="Feld direkt bearbeiten"><div id="directBox"><h2 id="directTitle">Feld bearbeiten</h2><div id="directContents"></div><div class="buttons" style="margin-top:14px"><button id="directCancel" type="button">Abbrechen</button><button id="directSave" class="primary" type="button">Übernehmen</button></div></div></div>
+<div id="signPreview" role="dialog" aria-modal="true" aria-label="Bericht vor Unterschrift prüfen"><div class="signPreviewDialog">
+<h2>📄 Bericht zur Unterschrift vorlegen</h2>
+<p class="tiny">Bitte dem Polier den vollständigen Bericht zeigen. Erst nach der Kontrolle auf „Jetzt unterschreiben“ tippen. Das aktuelle Blatt (Auftrag oder Zusatz) wird angezeigt.</p>
+<canvas id="signPreviewCanvas" width="1054" height="1492" aria-label="Vollständiger Bericht zur Kontrolle"></canvas>
+<div class="buttons"><button type="button" id="signPreviewBack">Zurück zum Bearbeiten</button><button type="button" id="signPreviewAccept" class="primary">✍️ Jetzt unterschreiben</button></div>
+</div></div>
+<div id="sigModal" role="dialog" aria-modal="true" aria-label="Unterschrift"><div class="sigDialog"><h2 id="sigTitle">Unterschrift</h2><p class="tiny">Handy quer halten und mit dem Finger unterschreiben.</p><canvas id="sigPad" width="900" height="280"></canvas><div class="buttons"><button id="sigClear">Leeren</button><button id="sigCancel">Abbrechen</button><button id="sigDone" class="primary">Übernehmen</button></div></div></div>
+<img id="template" src="./montagebericht_vorlage.png?v=20261018-neu6" alt="" hidden>
+<script>
+'use strict';
+// Neue Rendering-Engine: alle Positionen sind echte Pixel in derselben 1054x1492-Vorlage.
+// EIN Canvas ist die einzige Quelle für Vorschau und PDF. Keine zweiten CSS-Positionen.
+const VERSION='2026-10-19-MODI-AUFGABEN-22', W=1054,H=1492;
+const STORAGE='mv_montageberichte_v2', ACTIVE='mv_montagebericht_aktiv_v2';
+const $=id=>document.getElementById(id);
+const v32Review=document.body.dataset.review==='yes';let v32Version='',v32Fresh=new Set(),v32Busy=false,v32Signing=false,v32Ready=false,v32Status='offen';
+const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const SUMS=['Gesamtstd.','Fahrstd.','Rüstzeit','Pause','Überstd.','Nacht'];
+// Dies sind dieselben öffentlichen Supabase-Konfigurationswerte wie in der Haupt-App.
+const SITE_SUPABASE_URL='https://zjomsuqowqgpzodawixw.supabase.co';
+const SITE_SUPABASE_KEY='sb_publishable_y57JIFACv2ZOlJcTKNBSVw_9AQPTUmD';
+const HOME_LOCATION_KEY='mv_bericht_standort_v1';
+const DEFAULT_STANDORT='MET Voerde';
+const PENDING_NUMBER_KEY='mv_montagebericht_pending_number_v1_';
+let numberBusy=false;
+let availableSites=[];
+let availableVehicles=[];
+let availableTemplates=[];
+let availableMaterials=[];
+let materialState='loading';
+let sitesState='loading';
+let vehicleState='loading';
+let templateState='loading';
+let reportIsAdmin=false;
+const quarterCache=new Map();
+function quarterValues(max){
+ if(!quarterCache.has(max))quarterCache.set(max,Array.from({length:Math.round(max*4)+1},(_,i)=>(i/4).toFixed(2).replace('.',',')));
+ return quarterCache.get(max);
+}
+function quarterMax(key){return /_sum0$/.test(key)?50:13;}
+function validateHourValue(key,raw){
+ const value=safe(raw).trim();
+ if(!value)return {valid:true,value:''};
+ const normalized=value.replace(',','.');
+ if(!/^\d+(?:\.\d{1,2})?$/.test(normalized))return {valid:false,message:'Bitte einen gültigen Stundenwert eingeben.'};
+ const n=Number(normalized),max=quarterMax(key);
+ if(!Number.isFinite(n)||n<0||n>max)return {valid:false,message:'Maximal '+max.toFixed(2).replace('.',',')+' Stunden erlaubt.'};
+ return {valid:true,value:n.toFixed(2).replace('.',',')};
+}
+function validateStoredHours(hours,r){
+ for(const d of DAYS){const check=validateHourValue('m'+r+'_'+d,hours.days?.[d]);if(!check.valid)return check;}
+ for(let i=0;i<SUMS.length;i++){const check=validateHourValue('m'+r+'_sum'+i,hours.totals?.[i]);if(!check.valid)return check;}
+ return {valid:true};
+}
+const FIELD_FONT='600 16px Arial, sans-serif';
+const DAY_EDGES=[194,256,318,381,443,505,568,631];
+const SUM_EDGES=[631,693,756,819,881,944,1009];
+const ROW_EDGES=[560,600,640,680,723];
+const WORK_EDGES=[773,803,832,861,890,919,947,975];
+const DEFECT_EDGES=[975,1004,1033,1061];
+const MAT_EDGES=[1105,1134,1163,1193,1222,1251,1281,1310];
+const SIGNATURES=[
+ {key:'sign_monteur',name:'Monteur',box:[48,1324,314,1369]},
+ {key:'sign_bauleitung',name:'Bauleitung',box:[324,1324,604,1369]},
+ {key:'sign_meister',name:'Meister / MI',box:[618,1324,998,1369]}
+];
+const GUIDE_STEPS=[
+ {idx:0,title:'Baustelle & Einsatz',short:'Baustelle',hint:'Baustelle oder Vorlage auswählen. Standort, Polier und Auftragsnummer werden automatisch übernommen.'},
+ {idx:1,title:'Fahrzeug & Fahrt',short:'Fahrt',hint:'Kennzeichen aus der Fahrzeugliste wählen, Kilometer und Uhrzeiten eintragen. Fahrzeug 2 bleibt optional.'},
+ {idx:3,title:'Datum & Stunden',short:'Stunden',hint:'Datum und Monteur auswählen. Stunden in 0,25-Schritten eintragen oder eine gespeicherte Stunden-Vorlage nutzen.'},
+ {idx:5,title:'Ausgeführte Arbeiten',short:'Arbeiten',hint:'Beschreibe die Arbeiten. Der Text wird im originalen Bericht passend umgebrochen.'},
+ {idx:6,title:'Verwendetes Material',short:'Material',hint:'Material aus dem Lager auswählen oder frei schreiben. Der Lagerbestand wird dadurch nicht verändert.'},
+ {idx:7,title:'Unterschriften',short:'Abschluss',hint:'Der Monteur darf sofort unterschreiben. Der Polier sieht vor seiner Unterschrift den vollständigen Bericht.'}
+];
+let guideStep=0,guideView='edit',guideAdvanced=localStorage.getItem('mv_report_edit_mode_v22')==='fast';
+let reports={},currentId='',model={},sheetModels={first:null,second:null},activeSheet='first',changed=false,signatureKey='',paintSeq=0,raf=0;
+const imagePromises=new Map();
+const safe=v=>String(v??'');
+const esc=v=>safe(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\"':'&quot;'}[c]));
+const number=(v,fallback=0)=>Number.isFinite(Number(v))?Number(v):fallback;
+function normalizeTasksFromText(text){
+ return safe(text).split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+}
+function defaults(){
+ if(!Array.isArray(model.workTasks))model.workTasks=normalizeTasksFromText(model.arbeiten);
+ if(!model.workTasks.length && !safe(model.arbeiten).trim())model.workTasks=[''];
+ if(!model.employeeCount)model.employeeCount=1;
+ // Frühere Versionen haben KM2 selbst dann ausgefüllt, wenn kein zweites Fahrzeug genutzt wurde.
+ // Deshalb KM2 alleine nicht als Beleg für ein zweites Fahrzeug werten.
+ if(model.vehicle2Enabled==null){
+  model.vehicle2Enabled=Boolean(
+   safe(model.vehicle2Id).trim()||safe(model.kfz2).trim()||
+   safe(model.abfahrt2).trim()||safe(model.rueckkehr2).trim()||
+   model.kfz2_bis15||model.kfz2_ueber15||
+   (model.kmMode2==='custom'&&safe(model.km2).trim())
+  );
+ }
+ if(!model.vehicle2Enabled)clearSecondVehicle();
+ if(!model.angeordnet)model.angeordnet='Schlottau';
+ // Ältere gespeicherte Berichte nur bei eindeutig automatischer Reihenfolge korrigieren.
+ if(model.polier && model.angeordnet===`Schlottau / ${safe(model.polier).trim()}`)model.angeordnet=composeResponsible(model.polier);
+ for(let r=1;r<=4;r++)if(model['quarterCustom_m'+r+'_sum3']==null && model['pauseCustom'+r]===true)model['quarterCustom_m'+r+'_sum3']=true;
+ for(let i=1;i<=2;i++)if(!model['kmMode'+i])model['kmMode'+i]='one';
+ if(!model.jahr)model.jahr=String(new Date().getFullYear());
+ if(!model.arbeiten_font)model.arbeiten_font=16;
+ if(!model.material_font)model.material_font=16;
+ // Standardposition der drei Unterschriften: 25 Pixel tiefer, mittig im Unterschriftsfeld.
+ // Bereits manuell eingestellte vertikale Positionen bleiben erhalten.
+ const migrateSignatures = !model._signatureVerticalStart25V16;
+ for(const s of SIGNATURES){
+  if(model[s.key+'_dx']==null)model[s.key+'_dx']=0;
+  if(model[s.key+'_dy']==null || (migrateSignatures && Number(model[s.key+'_dy'])===0))model[s.key+'_dy']=25;
+  if(model[s.key+'_scale']==null)model[s.key+'_scale']=100;
+ }
+ model._signatureVerticalStart25V16=true;
+}
+function clearSecondVehicle(){
+ for(const key of ['vehicle2Id','kfz2','km2','abfahrt2','rueckkehr2'])model[key]='';
+ model.kfz2_bis15=false;
+ model.kfz2_ueber15=false;
+ model.kmMode2='one';
+}
+function vehicle2Toggle(){
+ return `<label class="vehicle2Toggle"><input type="checkbox" data-field="vehicle2Enabled" id="f_vehicle2Enabled"><span>🚐 Zweites Fahrzeug verwenden</span></label><p class="tiny">Nur aktivieren, wenn ein zweites Einsatzfahrzeug dabei ist. Ansonsten bleiben Kennzeichen, KM und Fahrtzeiten 2 leer.</p>`;
+}
+function field(label,key,type='text',placeholder=''){
+ if(type==='textarea')return `<div class="field"><label for="f_${key}">${esc(label)}</label><textarea data-field="${key}" id="f_${key}" rows="4" placeholder="${esc(placeholder)}"></textarea></div>`;
+ return `<div class="field"><label for="f_${key}">${esc(label)}</label><input data-field="${key}" id="f_${key}" type="${type}" autocomplete="off" placeholder="${esc(placeholder)}"></div>`;
+}
+function siteChoice(){
+ const opts=availableSites.filter(s=>s.active!==false||String(s.id)===String(model.siteId))
+  .map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+ const selected=model.siteId?String(model.siteId):'';
+ const missing=selected&&!availableSites.some(s=>String(s.id)===selected)?`<option value="${esc(selected)}">Bisherige Baustelle (nicht mehr verfügbar)</option>`:'';
+ const desc=sitesState==='loading'?'Baustellen werden geladen …':sitesState==='error'?'Baustellen konnten nicht geladen werden. In der Materialverwaltung anmelden und erneut versuchen.':availableSites.length?'Baustelle auswählen: Einsatzort, Kilometer und Auftragsnummer werden übernommen. Du kannst sie danach noch ändern.':'Keine Baustellen gefunden.';
+ return `<div class="field" style="grid-column:1/-1"><label for="f_siteId">Baustelle aus der Materialverwaltung</label><select id="f_siteId" data-field="siteId"><option value="">Bitte Baustelle auswählen …</option>${missing}${opts}</select><div class="tiny">${esc(desc)} <button type="button" id="reloadSites" style="padding:3px 8px;font-size:12px">↻ Aktualisieren</button></div></div>`;
+}
+function orderChoice(){return `<div class="field"><label for="f_orderType">Auftragsart</label><select id="f_orderType" data-field="orderType"><option value="auftrag">Auftrag</option><option value="zusatz">Zusatz</option></select></div>`}
+function polierChoice(){
+ const names=[...new Set(availableSites.map(s=>safe(s.contact_person).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'de'));
+ return `<div class="field"><label for="f_polier">Polier / Ansprechpartner (änderbar)</label><input id="f_polier" data-field="polier" list="availablePoliers" autocomplete="off" placeholder="Polier auswählen oder selbst schreiben"><datalist id="availablePoliers">${names.map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist><div class="tiny">Wird automatisch vor „Schlottau“ eingetragen.</div></div>`;
+}
+function vehicleChoice(i){
+ const opts=availableVehicles.filter(v=>v.active!==false||String(v.id)===String(model[`vehicle${i}Id`]))
+ .map(v=>`<option value="${esc(v.id)}">${esc(v.name)}${v.plate?' · '+esc(v.plate):''}</option>`).join('');
+ return `<div class="field"><label for="f_vehicle${i}Id">Einsatzfahrzeug ${i} aus der App</label><select id="f_vehicle${i}Id" data-field="vehicle${i}Id"><option value="">${vehicleState==='loading'?'Fahrzeuge werden geladen …':'Manuell / kein Fahrzeug'}</option>${opts}</select></div>`;
+}
+function kmChoice(i){
+ return `<div class="field"><label for="f_kmMode${i}">Fahrstrecke Fahrzeug ${i}</label><select id="f_kmMode${i}" data-field="kmMode${i}"><option value="one">1 Strecke</option><option value="two">2 Strecken (Hin- und Rückfahrt)</option><option value="custom">Individuelle KM</option></select><div class="tiny" id="kmHelp${i}"></div></div>`;
+}
+function hoursTemplateChooser(r){
+ const opts=availableTemplates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+ return `<div class="field" style="margin-bottom:9px"><label for="template${r}">Stunden-Vorlage für Monteur ${r}</label><div style="display:flex;gap:6px;flex-wrap:wrap"><select id="template${r}" data-hour-template="${r}" style="flex:1;min-width:155px"><option value="">${templateState==='loading'?'Vorlagen werden geladen …':'Vorlage auswählen …'}</option>${opts}</select><button type="button" data-apply-template="${r}">Übernehmen</button></div></div>`;
+}
+function templateAdminPanel(){
+ if(!reportIsAdmin)return '<p class="tiny">Nur angemeldete Administratoren können hier Vorlagen erstellen oder löschen. Vorhandene Vorlagen stehen allen Kollegen zur Auswahl.</p>';
+ return `<div class="note"><strong>🔐 Admin: Stunden-Vorlagen verwalten</strong><p class="tiny">Übernimmt die Wochenstunden und alle sechs Summen eines Monteurs. Namen, Datum und Baustelle werden nicht gespeichert.</p>
+ <div class="cols">${field('Name der neuen Vorlage','templateName')}
+ <div class="field"><label>Werte von Monteur</label><select id="adminTemplateEmployee">${[1,2,3,4].map(i=>`<option value="${i}">Monteur ${i}</option>`).join('')}</select></div></div>
+ <div class="buttons" style="margin-top:10px"><button type="button" id="adminTemplateSave">＋ Vorlage speichern</button></div>
+ <div class="field"><label>Bestehende Vorlage löschen</label><select id="adminTemplateDelete"><option value="">Vorlage auswählen …</option>${availableTemplates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('')}</select></div>
+ <button type="button" id="adminTemplateDeleteBtn" class="delete" style="margin-top:9px">Ausgewählte Vorlage löschen</button></div>`;
+}
+
+function quarterChoice(label,key,max=13){
+ const val=safe(model[key]).trim();
+ const options=quarterValues(max).map(v=>`<option value="${v}">${v} Std.</option>`).join('');
+ return `<div class="field"><label for="q_${key}">${esc(label)}</label>
+ <select id="q_${key}" data-quarter="${key}" data-quarter-max="${max}"><option value="">Bitte wählen …</option>${options}<option value="custom">Eigener Wert …</option></select>
+ <div id="qc_${key}" style="display:none;margin-top:6px"><input id="qi_${key}" type="text" inputmode="decimal" data-quarter-custom="${key}" placeholder="Wert selbst eintragen" value="${esc(val)}"></div></div>`;
+}
+function reportMaterialLabel(m){return safe(m.name)+(m.material_number?' · M'+safe(m.material_number):'');}
+function reportMaterialCategory(m){
+ const n=safe(m.name).toLocaleLowerCase('de');
+ if(/^(?:5x|3x|2x|schuko \d)/i.test(n)&&/\bm\b|\d+m\b/i.test(n))return 'Verlängerungen';
+ if(/(?:\b(?:\d+[gx]\d+|\d+g\d+[,.]?\d*|h07|nym|nyy)\b|leitung|kabel|konturenzuleitung)/i.test(n))return 'Leitungen & Kabel';
+ if(/stecker|kupplung|schuko|cee/i.test(n))return 'Stecker & Kupplungen';
+ if(/(?:\bfi\b|rcd|\d+\s*a\s*\/|sicherung|leitungsschutz)/i.test(n))return 'FI/RCD & Sicherungen';
+ if(/led|lampe|leuchte|lichtband|strahler|dämmerung/i.test(n))return 'Beleuchtung';
+ if(/konvektor|heiz/i.test(n))return 'Heizgeräte';
+ if(/schrumpf|srh|manschette/i.test(n))return 'Schrumpfschlauch';
+ return 'Sonstiges';
+}
+const REPORT_MATERIAL_CATEGORY_ORDER=['Leitungen & Kabel','Verlängerungen','Stecker & Kupplungen','FI/RCD & Sicherungen','Beleuchtung','Heizgeräte','Schrumpfschlauch','Sonstiges'];
+function sortReportMaterials(items){
+ return [...items].sort((a,b)=>{
+  const c=REPORT_MATERIAL_CATEGORY_ORDER.indexOf(reportMaterialCategory(a))-REPORT_MATERIAL_CATEGORY_ORDER.indexOf(reportMaterialCategory(b));
+  return c||safe(a.name).localeCompare(safe(b.name),'de',{numeric:true,sensitivity:'base'});
+ });
+}
+function reportMaterialSearchMatches(query,m){
+ const q=safe(query).toLocaleLowerCase('de').trim().replace(/\s+/g,' ');
+ if(!q)return true;
+ const name=safe(m.name).toLocaleLowerCase('de');
+ const num=safe(m.material_number).toLocaleLowerCase('de');
+ const merged=(name+' m'+num+' '+num+' '+reportMaterialCategory(m).toLocaleLowerCase('de'));
+ return q.split(' ').every(word=>merged.includes(word));
+}
+function materialPicker(i){
+ const name=safe(model[`mat${i}_name`]);
+ return `<div class="field report-material-picker" id="materialPickerContainer${i}">
+ <label for="materialSearch${i}">Material ${i} · Lager durchsuchen</label>
+ <div class="report-material-search-wrap"><input type="search" id="materialSearch${i}" data-material-search="${i}" autocomplete="off" placeholder="🔎 Name oder M-Nummer (z. B. M13840)" aria-controls="materialResults${i}" aria-expanded="false" role="combobox" aria-autocomplete="list">
+ <div id="materialResults${i}" class="report-material-results" role="listbox" hidden></div></div>
+ <input style="margin-top:7px" type="text" id="f_mat${i}_name" data-field="mat${i}_name" autocomplete="off" placeholder="Oder Material frei eingeben" value="${esc(name)}"></div>`;
+}
+function showMaterialResults(i){
+ const inp=$('materialSearch'+i),box=$('materialResults'+i);if(!inp||!box)return;
+ const all=sortReportMaterials(availableMaterials.filter(m=>reportMaterialSearchMatches(inp.value,m)));
+ const displayed=all.slice(0,36);let current='';let html='';
+ for(const m of displayed){
+  const group=reportMaterialCategory(m);
+  if(group!==current){current=group;html+=`<div class="report-material-group">${esc(group)}</div>`;}
+  html+=`<button type="button" class="report-material-option" role="option" data-material-pick="${i}" data-material-id="${esc(m.id)}"><span>${esc(m.name)}</span><small>${m.material_number?'M'+esc(m.material_number)+' · ':''}${esc(m.unit||'Stk')}</small></button>`;
+ }
+ if(!displayed.length)html=`<p class="report-material-empty">${materialState==='loading'?'Lager wird geladen …':materialState==='error'?'Lager nicht erreichbar. Bitte Freitext verwenden.':'Keine Treffer. Material kann unten frei eingetragen werden.'}</p>`;
+ if(all.length>displayed.length)html+=`<p class="report-material-more">${all.length-displayed.length} weitere Treffer. Bitte Suche präzisieren.</p>`;
+ box.innerHTML=html;box.hidden=false;inp.setAttribute('aria-expanded','true');
+}
+function closeMaterialResults(i){const el=$('materialResults'+i),input=$('materialSearch'+i);if(el)el.hidden=true;if(input)input.setAttribute('aria-expanded','false');}
+function selectEmployee(){return `<div class="field"><label for="f_employeeCount">Anzahl Monteure</label><select id="f_employeeCount" data-field="employeeCount">${[1,2,3,4].map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>`}
+function checkbox(label,key){return `<label style="display:flex;align-items:center;gap:7px;margin:5px 0;font-size:13px"><input data-field="${key}" type="checkbox">${esc(label)}</label>`}
+function weightRadios(i){return `<div class="field"><label>Fahrzeug ${i} · Gewichtsklasse</label><div style="display:flex;flex-wrap:wrap;gap:14px">${checkbox('bis 1,5 t',`kfz${i}_bis15`)}${checkbox('über 1,5 t',`kfz${i}_ueber15`)}</div></div>`}
+function range(label,key,min,max){return `<div class="field"><label for="f_${key}">${esc(label)} <output id="out_${key}"></output></label><input id="f_${key}" data-field="${key}" type="range" min="${min}" max="${max}" step="1"></div>`}
+function workTasksUI(){
+ const list=Array.isArray(model.workTasks)?model.workTasks:[];
+ return `<p class="tiny">Für jede Tätigkeit einen eigenen Block hinzufügen. Die Aufgaben werden mit Absätzen auf den originalen Blauenzettel gedruckt.</p>
+ <div id="workTaskList">${list.map((value,i)=>`<div class="workTask"><div class="field"><label for="workTask${i}">Tätigkeit ${i+1}</label><textarea id="workTask${i}" rows="2" data-work-task="${i}" placeholder="Was wurde gemacht?">${esc(value)}</textarea></div><button type="button" data-remove-task="${i}" aria-label="Tätigkeit ${i+1} entfernen">✕</button></div>`).join('')}</div>
+ <button type="button" id="addWorkTask">＋ Weitere Tätigkeit hinzufügen</button>
+ <details><summary>Optional: alle Tätigkeiten als Freitext bearbeiten</summary><div class="inside">${field('Gesamter Arbeitstext','arbeiten','textarea')}</div></details>`;
+}
+function updateTasksText(){
+ model.arbeiten=(model.workTasks||[]).map(t=>safe(t).trim()).filter(Boolean).join('\n\n');
+ const all=$('f_arbeiten');if(all)all.value=model.arbeiten;
+ dirty();
+}
+function refreshTaskList(){
+ const wrap=$('workTaskList');if(!wrap)return;
+ const temp=document.createElement('div');temp.innerHTML=workTasksUI();
+ wrap.replaceWith(temp.querySelector('#workTaskList'));
+}
+function buildEditor(){
+ defaults();
+ let h=`<details open><summary>🏗️ Baustelle / Einsatz</summary><div class="inside cols">${siteChoice()}${field('Standort (Standard: MET Voerde)','standort')}${polierChoice()}${field('Einsatz angeordnet von (bearbeitbar)','angeordnet')}${field('Einsatzort / Kunde','kunde')}${field('Einsatzkostenstelle','kostenstelle')}${orderChoice()}${field('Auftragsnummer','auftragsnummer')}</div></details>`;
+ h+=`<details open><summary>🚐 Fahrzeuge und Fahrtzeiten</summary><div class="inside">
+ <div class="vehicleBlock"><strong>Fahrzeug 1</strong><div class="cols">${vehicleChoice(1)}${field('KFZ 1 Kennzeichen (änderbar)','kfz1')}${kmChoice(1)}${field('Gefahrene KM 1 (änderbar)','km1')}${field('Abfahrt 1','abfahrt1','time')}${field('Rückkehr 1','rueckkehr1','time')}</div>${weightRadios(1)}</div>
+ <div class="vehicleBlock">${vehicle2Toggle()}<div id="vehicle2Fields" ${model.vehicle2Enabled?'':'hidden'}><div class="cols">${vehicleChoice(2)}${field('KFZ 2 Kennzeichen (änderbar)','kfz2')}${kmChoice(2)}${field('Gefahrene KM 2 (änderbar)','km2')}${field('Abfahrt 2','abfahrt2','time')}${field('Rückkehr 2','rueckkehr2','time')}</div>${weightRadios(2)}</div></div>
+ </div></details>`;
+ h+=`<details><summary>🔧 Gerät / Technik (optional)</summary><div class="inside"><p class="tiny">Nur öffnen und ausfüllen, wenn ihr diesen Bereich benötigt.</p><div class="cols">${[
+ ['Gerät','geraet'],['Geräteeigentümer','eigentuemer'],['Equipment-Nr.','equipment'],['Fabrikat','fabrikat'],['Typ','typ'],['Betriebsstunden','betriebsstunden']].map(a=>field(...a)).join('')}</div></div></details>`;
+ h+=`<details open><summary>👷 Fahr- und Arbeitsstunden</summary><div class="inside"><div class="cols">${selectEmployee()}${field('Jahreszahl','jahr','number')}</div><p class="tiny">Datum steht direkt unter dem Wochentag. Kollegen 2–4 nur nach Bedarf hinzufügen.</p><div class="days">${DAYS.map(d=>field(d,`date_${d}`)).join('')}</div>`;
+ for(let i=1;i<=Number(model.employeeCount);i++){
+  h+=`<div class="emp"><strong>Monteur ${i}</strong>${hoursTemplateChooser(i)}${field('Name',`monteur${i}`)}<p class="tiny">Stunden je Wochentag</p><div class="days hour-days">${DAYS.map(d=>quarterChoice(d,`m${i}_${d}`)).join('')}</div><div class="totals">${SUMS.map((s,j)=>quarterChoice(s,`m${i}_sum${j}`,quarterMax(`m${i}_sum${j}`))).join('')}</div></div>`;
+ }
+ h+=`</div></details>`;
+ h+=`<details><summary>📋 Stunden-Vorlagen verwalten</summary><div class="inside" id="templateAdminMount">${templateAdminPanel()}</div></details>`;
+ h+=`<details open><summary>🛠️ Ausgeführte Arbeiten</summary><div class="inside"><div class="cols">${checkbox('Gewaltschaden: Ja','gewaltJa')}${checkbox('Gewaltschaden: Nein','gewaltNein')}${checkbox('Inspektion: Ja','inspektionJa')}${checkbox('Inspektion: Nein','inspektionNein')}</div>${workTasksUI()}${range('Schriftgröße Arbeiten','arbeiten_font',12,19)}<p class="tiny" id="workHint"></p>${field('Weitere Mängel am Gerät','maengel','textarea')}<p class="tiny" id="defectHint"></p></div></details>`;
+ h+=`<details><summary>📦 Verwendete Materialien</summary><div class="inside">${range('Schriftgröße Materialien','material_font',12,18)}<p class="tiny">Material aus dem Lager wählen oder frei eingeben. Die M-Nummer wird bei Auswahl automatisch auf dem PDF mitgedruckt. Die Auswahl bucht kein Material aus dem Lager aus. <button type="button" id="reloadMaterials" style="padding:3px 8px;font-size:12px">↻ Lager aktualisieren</button></p>`;
+ for(let i=1;i<=8;i++){h+=`<div class="materialrow">${field(`Menge ${i}`,`mat${i}_menge`)}${materialPicker(i)}</div>`}
+ h+=`<p class="tiny" id="materialHint"></p></div></details>`;
+ h+=`<details><summary>✍️ Unterschriften</summary><div class="inside"><p class="tiny">Der Monteur darf sofort unterschreiben. Für Bauleitung / Polier und Meister wird zuerst der fertige Blauenzettel zur Prüfung angezeigt. Jede Unterschrift kann verschoben und in der Größe angepasst werden.</p>`;
+ for(const s of SIGNATURES){h+=`<div class="sigRow"><strong>${esc(s.name)}</strong><div class="buttons"><button type="button" data-sign="${s.key}">${s.key==='sign_monteur'?'✍️ Unterschreiben':'📄 Vorschau & unterschreiben'}</button><button type="button" data-clear-sign="${s.key}">Entfernen</button></div><div class="sigControls">${range('Links / Rechts',s.key+'_dx',-70,70)}${range('Hoch / Runter',s.key+'_dy',-25,55)}${range('Größe %',s.key+'_scale',40,130)}</div></div>`}
+ h+=`</div></details>`;
+ $('editor').innerHTML=h;
+ syncEditor();
+ updateGuide();
+}
+function syncEditor(){
+ for(const el of document.querySelectorAll('#editor [data-field]')){const value=model[el.dataset.field];if(el.type==='checkbox')el.checked=!!value;else el.value=value==null?'':value;}
+ for(const o of document.querySelectorAll('output[id^="out_"]'))o.textContent=model[o.id.slice(4)]??'';
+ const v2=$('vehicle2Fields');if(v2)v2.hidden=!model.vehicle2Enabled;
+ for(let i=1;i<=2;i++){
+  const hint=$('kmHelp'+i);const site=getSelectedSite();if(hint){const raw=safe(site?.distance_km).trim();const base=parseKilometers(raw);hint.textContent=raw?(base==null?'Baustellen-KM „'+raw+'“ ist kein reiner Zahlenwert. Bitte KM individuell eintragen.':'Baustellenentfernung: '+raw+' km pro Strecke'):'Keine Entfernung hinterlegt. KM bleiben manuell editierbar.';}
+ }
+ for(const el of document.querySelectorAll('[data-quarter]')){
+  const key=el.dataset.quarter, raw=safe(model[key]).trim(),max=Number(el.dataset.quarterMax);
+  const n=Number(raw.replace(',','.'));
+  const match=raw!=='' && Number.isFinite(n) && n>=0 && n<=max && Math.abs(n*4-Math.round(n*4))<1e-7;
+  const val=match?n.toFixed(2).replace('.',','):'';
+  const custom=Boolean(model['quarterCustom_'+key])||Boolean(raw && !match);
+  el.value=custom?'custom':val;
+  const holder=$('qc_'+key);if(holder)holder.style.display=custom?'block':'none';
+  const input=$('qi_'+key);if(input && document.activeElement!==input)input.value=custom?raw:'';
+ }
+}
+$('editor').addEventListener('focusin',e=>{if(e.target.matches('[data-material-search]'))showMaterialResults(Number(e.target.dataset.materialSearch));});
+$('editor').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.matches('[data-material-search]'))closeMaterialResults(Number(e.target.dataset.materialSearch));});
+document.addEventListener('click',e=>{if(!e.target.closest('.report-material-search-wrap'))for(let i=1;i<=8;i++)closeMaterialResults(i);});
+$('editor').addEventListener('input',e=>{
+ if(e.target.matches('[data-material-search]')){showMaterialResults(Number(e.target.dataset.materialSearch));return;}
+ if(e.target.hasAttribute('data-work-task')){
+  model.workTasks[Number(e.target.dataset.workTask)]=e.target.value;
+  updateTasksText();return;
+ }
+ if(e.target.matches('[data-quarter-custom]')){
+  const key=e.target.dataset.quarterCustom;model[key]=e.target.value;dirty();return;
+ }
+ if(e.target.matches('[data-field]') && e.target.type!=='select')editValue(e.target);
+});
+$('editor').addEventListener('change',e=>{
+ if(e.target.matches('[data-quarter-custom]')){
+  const key=e.target.dataset.quarterCustom,check=validateHourValue(key,e.target.value);
+  if(!check.valid){model[key]='';e.target.value='';setStatus(check.message+' Der ungültige Wert wurde entfernt.',false);dirty();return;}
+  model[key]=check.value;e.target.value=check.value;dirty();return;
+ }
+ if(e.target.matches('[data-quarter]')){
+  const key=e.target.dataset.quarter,val=e.target.value;
+  model['quarterCustom_'+key]=val==='custom';
+  if(val!=='custom')model[key]=val;
+  syncEditor();if(val==='custom')$('qi_'+key)?.focus();dirty();return;
+ }
+ if(e.target.matches('[data-field]'))editValue(e.target);
+});
+$('editor').addEventListener('click',e=>{
+ const pick=e.target.closest('[data-material-pick]');
+ if(pick){
+  const i=Number(pick.dataset.materialPick);
+  const material=availableMaterials.find(m=>String(m.id)===pick.dataset.materialId);
+  if(material){const label=reportMaterialLabel(material);model['mat'+i+'_name']=label;const nameField=$('f_mat'+i+'_name');if(nameField)nameField.value=label;const search=$('materialSearch'+i);if(search)search.value='';closeMaterialResults(i);dirty();}
+  return;
+ }
+ if(e.target.closest('#addWorkTask')){model.workTasks.push('');refreshTaskList();dirty();$('workTaskList')?.lastElementChild?.querySelector('textarea')?.focus();return;}
+ const del=e.target.closest('[data-remove-task]');if(del){model.workTasks.splice(Number(del.dataset.removeTask),1);refreshTaskList();updateTasksText();}
+});
+$('editor').addEventListener('click',async e=>{
+ const apply=e.target.closest('[data-apply-template]');if(apply){applyHourTemplate(Number(apply.dataset.applyTemplate));return;}
+ if(e.target.id==='adminTemplateSave'){await saveHourTemplate();return;}
+ if(e.target.id==='adminTemplateDeleteBtn'){await deleteHourTemplate();return;}
+});
+$('editor').addEventListener('click',e=>{const sign=e.target.closest('[data-sign]');if(sign){requestSignature(sign.dataset.sign);return;}if(e.target.closest('#reloadSites')){loadAvailableSites();return;}if(e.target.closest('#reloadMaterials')){loadAvailableMaterials();return;}const del=e.target.closest('[data-clear-sign]');if(del){delete model[del.dataset.clearSign];dirty();}});
+function editValue(el){const key=el.dataset.field;model[key]=el.type==='checkbox'?el.checked:el.value;
+ if(key==='arbeiten'){model.workTasks=normalizeTasksFromText(model.arbeiten);refreshTaskList();}
+ if(key==='vehicle2Enabled'){
+  if(!model.vehicle2Enabled)clearSecondVehicle();
+  else if(model.kmMode2!=='custom'&&!safe(model.km2).trim())setSiteKm(2);
+  syncEditor();dirty();return;
+ }
+ if(/^mat[1-8]_name$/.test(key)){const i=Number(key.match(/^mat([1-8])_/)[1]);closeMaterialResults(i);}
+ if(key==='polier'){model.angeordnet=composeResponsible(model.polier);syncEditor();}
+ const vehicleMatch=key.match(/^vehicle([12])Id$/);
+ if(vehicleMatch){const i=Number(vehicleMatch[1]);const vehicle=availableVehicles.find(v=>String(v.id)===safe(model[key]));if(vehicle)model['kfz'+i]=safe(vehicle.plate||vehicle.name);syncEditor();}
+ if(key==='kfz1'||key==='kfz2'){const i=Number(key.slice(-1));const v=availableVehicles.find(v=>String(v.id)===safe(model['vehicle'+i+'Id']));if(v&&safe(v.plate||v.name)!==safe(model[key])){model['vehicle'+i+'Id']='';syncEditor();}}
+ if(/^kmMode[12]$/.test(key)){const i=Number(key.slice(-1));if(model[key]!=='custom')setSiteKm(i);syncEditor();}
+ if(/^km[12]$/.test(key)&&!el.dataset.kmAutofill){const i=Number(key.slice(-1));model['kmMode'+i]='custom';syncEditor();}
+ if(key==='siteId'){applySiteSelection();syncEditor()}
+ if(key==='orderType'){applyOrderType();syncEditor();updateSheetControls()}
+ if(el.checked&&/^(gewalt|inspektion)(Ja|Nein)$/.test(key)){model[key.replace(/Ja$/,'TEMP').replace(/Nein$/,'Ja').replace(/TEMP$/,'Nein')]=false;syncEditor()}
+ const match=key.match(/^kfz([12])_(bis15|ueber15)$/);if(match&&el.checked){model[`kfz${match[1]}_${match[2]==='bis15'?'ueber15':'bis15'}`]=false;syncEditor()}
+ if(key==='employeeCount'){buildEditor()}
+ const o=$('out_'+key);if(o)o.textContent=model[key];dirty();
+}
+function applySiteSelection(){
+ const site=availableSites.find(s=>String(s.id)===String(model.siteId));
+ if(!site)return;
+ model.kunde=safe(site.name);
+ model.polier=safe(site.contact_person);
+ model.angeordnet=composeResponsible(model.polier);
+ // Entfernung ist immer EINFACHE Strecke; bei zwei Fahrten verdoppeln wir nur echte Zahlenwerte.
+ if(model.kmMode1!=='custom')setSiteKm(1);
+ if(model.vehicle2Enabled&&model.kmMode2!=='custom')setSiteKm(2);
+ model.orderType=site.order_number?'auftrag':site.extra_order_number?'zusatz':'auftrag';
+ applyOrderType();
+}
+function getSelectedSite(){return availableSites.find(s=>String(s.id)===String(model.siteId));}
+function composeResponsible(polier){return safe(polier).trim()?`${safe(polier).trim()} / Schlottau`:'Schlottau';}
+function parseKilometers(v){
+ const raw=safe(v).trim().replace(/\s/g,'').replace(',','.');
+ if(!/^\d+(?:\.\d+)?$/.test(raw))return null;
+ const n=Number(raw);return Number.isFinite(n)?n:null;
+}
+function formatKm(n){return Number(n.toFixed(2)).toLocaleString('de-DE',{maximumFractionDigits:2,useGrouping:false});}
+function setSiteKm(i){
+ if(i===2&&!model.vehicle2Enabled)return;
+ const raw=getSelectedSite()?.distance_km;
+ const base=parseKilometers(raw);
+ model[`km${i}`]=base==null?'':formatKm(base*(model[`kmMode${i}`]==='two'?2:1));
+}
+function applyOrderType(){
+ const site=availableSites.find(s=>String(s.id)===String(model.siteId));
+ if(!site)return;
+ model.auftragsnummer=safe(model.orderType==='zusatz'?site.extra_order_number:site.order_number);
+}
+async function getSiteToken(){
+ let session;
+ try{session=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')}catch{}
+ if(!session?.access_token)return SITE_SUPABASE_KEY;
+ const expires=Number(session.expires_at||0);
+ if(!expires||expires>Math.floor(Date.now()/1000)+60)return session.access_token;
+ if(!session.refresh_token)return SITE_SUPABASE_KEY;
+ try{
+  const resp=await fetch(SITE_SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+   method:'POST',headers:{'apikey':SITE_SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh_token})
+  });
+  if(!resp.ok)throw new Error('Anmeldung abgelaufen');
+  const newSession=await resp.json();localStorage.setItem('materialverwaltung_auth',JSON.stringify(newSession));
+  return newSession.access_token;
+ }catch(e){throw new Error('Bitte zunächst in der Materialverwaltung anmelden. '+e.message)}
+}
+function refreshSelectContainer(id,html){
+ const el=$(id);if(!el)return;
+ const parent=el.closest('.field'),wrap=document.createElement('div');wrap.innerHTML=html;
+ parent.replaceWith(wrap.firstElementChild);
+}
+async function apiRest(path,options={}){
+ const token=await getSiteToken();
+ const response=await fetch(SITE_SUPABASE_URL+'/rest/v1/'+path,{
+  ...options,headers:{'apikey':SITE_SUPABASE_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json',...(options.headers||{})}
+ });
+ if(!response.ok){const body=await response.text();throw new Error('HTTP '+response.status+(body?' '+body.slice(0,130):''));}
+ if(response.status===204)return null;
+ const raw=await response.text();return raw?JSON.parse(raw):null;
+}
+async function loadAvailableVehicles(){
+ vehicleState='loading';
+ try{
+  availableVehicles=await apiRest('vehicles?select=id,name,plate,active&order=name.asc');
+  vehicleState='ready';
+ }catch(e){vehicleState='error';console.warn('Fahrzeugliste:',e);}
+ for(let i=1;i<=2;i++)refreshSelectContainer('f_vehicle'+i+'Id',vehicleChoice(i));
+ syncEditor();
+}
+async function loadAvailableMaterials(){
+ materialState='loading';
+ try{
+  const items=await apiRest('materials?select=id,name,unit,stock,material_number&order=name.asc');
+  availableMaterials=Array.isArray(items)?items.filter(m=>safe(m.name).trim()):[];
+  materialState='ready';
+ }catch(e){materialState='error';console.warn('Lager-Material:',e);}
+ for(let i=1;i<=8;i++)refreshSelectContainer('materialSearch'+i,materialPicker(i));
+ syncEditor();
+ if(materialState==='error')setStatus('Lagerliste konnte nicht geladen werden. Material bleibt frei eingabebar.',false);
+}
+async function checkReportAdmin(){
+ try{
+  const session=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null');
+  if(!session?.access_token){reportIsAdmin=false;return;}
+  const token=await getSiteToken();
+  if(token===SITE_SUPABASE_KEY){reportIsAdmin=false;return;}
+  const r=await fetch(SITE_SUPABASE_URL+'/rest/v1/rpc/is_admin',{method:'POST',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:'{}'});
+  reportIsAdmin=r.ok&&(await r.json())===true;
+ }catch(e){reportIsAdmin=false;console.warn('Adminstatus:',e)}
+ // Adminbereiche dynamisch anzeigen ohne Eingaben zu verlieren.
+ const existing=$('adminTemplateSave');
+ const panel=$('templateAdminMount');
+ if(panel)panel.innerHTML=templateAdminPanel();
+}
+async function loadHourTemplates(){
+ templateState='loading';
+ try{
+  availableTemplates=await apiRest('report_hour_templates?select=id,name,hours,active&active=eq.true&order=name.asc');
+  templateState='ready';
+ }catch(e){templateState='error';availableTemplates=[];console.warn('Stundenvorlagen (SQL ausgeführt?):',e);}
+ updateTemplateSelects();
+}
+function updateTemplateSelects(){
+ for(let r=1;r<=4;r++)refreshSelectContainer('template'+r,hoursTemplateChooser(r));
+ const panel=$('templateAdminMount');if(panel)panel.innerHTML=templateAdminPanel();
+}
+function applyHourTemplate(r){
+ const id=$('template'+r)?.value;
+ const t=availableTemplates.find(x=>String(x.id)===String(id));
+ if(!t){setStatus('Bitte eine Stunden-Vorlage auswählen',false);return;}
+ const hours=t.hours||{};
+ const valid=validateStoredHours(hours,r);if(!valid.valid){setStatus('Vorlage nicht übernommen: '+valid.message,false);return;}
+ DAYS.forEach(d=>{model[`m${r}_${d}`]=safe(hours.days?.[d]);});
+ SUMS.forEach((s,i)=>{model[`m${r}_sum${i}`]=safe(hours.totals?.[i]);});
+ model['pauseCustom'+r]=false;
+ for(const d of DAYS)model['quarterCustom_m'+r+'_'+d]=false;
+ for(let i=0;i<SUMS.length;i++)model['quarterCustom_m'+r+'_sum'+i]=false;
+ syncEditor();dirty();setStatus('✓ Vorlage „'+t.name+'“ für Monteur '+r+' übernommen');
+}
+async function saveHourTemplate(){
+ if(!reportIsAdmin){setStatus('Nur Admins dürfen Vorlagen speichern',false);return;}
+ const name=$('f_templateName')?.value.trim(),r=Number($('adminTemplateEmployee')?.value||1);
+ if(!name){setStatus('Bitte Namen für Stunden-Vorlage eingeben',false);return;}
+ const hours={days:Object.fromEntries(DAYS.map(d=>[d,safe(model[`m${r}_${d}`])])),totals:SUMS.map((_,i)=>safe(model[`m${r}_sum${i}`]))};
+ const check=validateStoredHours(hours,r);if(!check.valid){setStatus('Vorlage nicht gespeichert: '+check.message,false);return;}
+ try{
+  await apiRest('report_hour_templates',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name,hours})});
+  await loadHourTemplates();setStatus('✓ Stunden-Vorlage „'+name+'“ gespeichert');
+ }catch(e){setStatus('Vorlage nicht gespeichert: '+e.message,false);}
+}
+async function deleteHourTemplate(){
+ if(!reportIsAdmin)return;
+ const id=$('adminTemplateDelete')?.value,t=availableTemplates.find(x=>String(x.id)===String(id));
+ if(!t){setStatus('Vorlage zum Löschen auswählen',false);return;}
+ if(!confirm('Vorlage „'+t.name+'“ wirklich löschen?'))return;
+ try{
+  await apiRest('report_hour_templates?id=eq.'+encodeURIComponent(id),{method:'DELETE'});
+  await loadHourTemplates();setStatus('✓ Stunden-Vorlage gelöscht');
+ }catch(e){setStatus('Löschen fehlgeschlagen: '+e.message,false);}
+}
+async function loadAvailableSites(){
+ sitesState='loading';
+ try{
+  const token=await getSiteToken();
+  const response=await fetch(SITE_SUPABASE_URL+'/rest/v1/sites?select=id,name,active,order_number,extra_order_number,distance_km,contact_person,contact_email,sort_order&order=sort_order.asc.nullslast,name.asc',{
+   headers:{'apikey':SITE_SUPABASE_KEY,'Authorization':'Bearer '+token}
+  });
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  availableSites=await response.json();sitesState='ready';
+  const selected=availableSites.find(s=>String(s.id)===String(model.siteId));
+  if(selected && !model.kunde && !v32Review)applySiteSelection();
+ }catch(e){sitesState='error';console.warn('Baustellen laden:',e);setStatus('Baustellen nicht verfügbar: '+e.message,false)}
+ // Die Formularwerte einschließlich bereits bearbeiteter Einträge bleiben erhalten.
+ refreshSelectContainer('f_siteId',siteChoice());
+ refreshSelectContainer('f_polier',polierChoice());
+ syncEditor();
+ if(!v32Review&&sitesState==='ready'&&availableSites.length) setStatus('Baustellen aus der Materialverwaltung geladen');
+ queuePaint();
+}
+function dirty(){if(v32Review&&!v32Signing){for(const sheet of Object.values(sheetModels)){if(sheet)delete sheet.sign_meister;}v32Fresh.clear();}changed=true;setStatus('Änderungen noch nicht gespeichert',false);queuePaint()}
+function setStatus(msg,ok=true){if(v32Review&&$('v32Message')){$('v32Message').textContent=msg;$('v32Message').style.color=ok?'#a8e7be':'#ffcf78';}$('status').textContent=msg;$('status').style.color=ok?'#9fe2ae':'#ffdb84'}
+const trimCache=new WeakMap();
+function trimSignature(img){
+ if(trimCache.has(img))return trimCache.get(img);
+ const c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
+ const x=c.getContext('2d');x.drawImage(img,0,0);let out=c;
+ try{const d=x.getImageData(0,0,c.width,c.height).data;let l=c.width,t=c.height,r=-1,b=-1;
+  for(let y=0;y<c.height;y++)for(let i=0;i<c.width;i++){if(d[(y*c.width+i)*4+3]>8){if(i<l)l=i;if(i>r)r=i;if(y<t)t=y;if(y>b)b=y;}}
+  if(r>=l&&b>=t){const pad=6;l=Math.max(0,l-pad);t=Math.max(0,t-pad);r=Math.min(c.width-1,r+pad);b=Math.min(c.height-1,b+pad);
+   out=document.createElement('canvas');out.width=r-l+1;out.height=b-t+1;out.getContext('2d').drawImage(c,l,t,out.width,out.height,0,0,out.width,out.height);}
+ }catch(e){console.warn('Unterschrift zuschneiden:',e);}
+ trimCache.set(img,out);return out;
+}
+function loadImage(src){if(!imagePromises.has(src)){imagePromises.set(src,new Promise((res,rej)=>{const i=new Image;i.onload=()=>res(i);i.onerror=rej;i.src=src}))}return imagePromises.get(src)}
+function clipped(ctx,x1,y1,x2,y2,fn){ctx.save();ctx.beginPath();ctx.rect(x1+2,y1+2,x2-x1-4,y2-y1-4);ctx.clip();fn();ctx.restore()}
+// Reale Pixelkoordinaten und ein gemeinsames Textlayout; kein CSS-Overlay.
+function put(ctx,value,rect,{center=false,font=16,weight=600}={}){
+ const text=safe(value).trim();if(!text)return;
+ const [x1,y1,x2,y2]=rect;const maxWidth=x2-x1-12;
+ let size=font;ctx.save();ctx.fillStyle='#15202b';ctx.textAlign=center?'center':'left';ctx.textBaseline='middle';
+ do{ctx.font=`${weight} ${size}px Arial, sans-serif`;if(ctx.measureText(text).width<=maxWidth)break;size--}while(size>11);
+ clipped(ctx,x1,y1,x2,y2,()=>ctx.fillText(text,center?(x1+x2)/2:x1+5,(y1+y2)/2));ctx.restore();
+}
+function checkmark(ctx,x,y,on){if(!on)return;ctx.save();ctx.strokeStyle='#13202d';ctx.lineWidth=1.8;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x-1,y+2.5);ctx.lineTo(x+3.5,y-3.2);ctx.stroke();ctx.restore()}
+function overwriteZeros(ctx){ // Vier gedruckte Nullen der Originalvorlage durch Checkboxen ersetzen.
+ const marks=[[512,361,'kfz1_bis15'],[599,361,'kfz1_ueber15'],[512,402,'kfz2_bis15'],[599,402,'kfz2_ueber15']];
+ for(const [x,y,key] of marks){
+  // Der Scan hat einen sehr feinen Blautonverlauf. Diesen lokal nachzeichnen.
+  const pTop=ctx.getImageData(x,y-14,1,1).data,pBottom=ctx.getImageData(x,y+14,1,1).data;
+  const gr=ctx.createLinearGradient(0,y-12,0,y+12);gr.addColorStop(0,`rgb(${pTop[0]},${pTop[1]},${pTop[2]})`);gr.addColorStop(1,`rgb(${pBottom[0]},${pBottom[1]},${pBottom[2]})`);
+  ctx.save();ctx.fillStyle=gr;ctx.fillRect(x-11,y-12,22,24);ctx.strokeStyle='#263c50';ctx.lineWidth=1.2;ctx.strokeRect(x-7,y-7,14,14);ctx.restore();checkmark(ctx,x,y,key.startsWith('kfz2_')&&!model.vehicle2Enabled?false:model[key]);
+ }
+}
+function printedTime(ctx,value,type,second){
+ const m=/^(\d{2}):(\d{2})$/.exec(safe(value));if(!m)return;
+ // Beide Zahlen direkt NEBEN den bereits auf der Vorlage gedruckten Doppelpunkt setzen.
+ // Die Positionen stammen aus dem Originalbild, nicht aus geschätzten Feldbreiten.
+ const colonX=type==='rueckkehr'?883:639, centerY=second?475:440;
+ ctx.save();
+ ctx.fillStyle='#15202b';ctx.font=FIELD_FONT;ctx.textBaseline='middle';
+ ctx.textAlign='right';ctx.fillText(m[1],colonX-8,centerY);
+ ctx.textAlign='left';ctx.fillText(m[2],colonX+8,centerY);
+ ctx.restore();
+}
+function wrapText(ctx,v,max){const all=[];ctx.save();
+ for(const paragraph of safe(v).replace(/\r/g,'').split('\n')){
+  if(!paragraph.trim()){all.push('');continue;}
+  let line='';for(const word of paragraph.trim().split(/\s+/)){
+   if(ctx.measureText(line?line+' '+word:word).width<=max){line=line?line+' '+word:word;continue;}
+   if(line){all.push(line);line=''}
+   let part='';for(const char of word){if(part&&ctx.measureText(part+char).width>max){all.push(part);part=char}else part+=char}line=part;
+  }all.push(line);
+ }ctx.restore();return all;
+}
+function getRows(text,font,width){const ctx=$('page').getContext('2d');ctx.save();ctx.font=`600 ${font}px Arial, sans-serif`;const rows=wrapText(ctx,text,width);ctx.restore();return rows;}
+function materialRows(){const rows=[];const font=number(model.material_font,16);
+ for(let i=1;i<=8;i++){
+  const qty=safe(model[`mat${i}_menge`]).trim(),name=safe(model[`mat${i}_name`]).trim();if(!qty&&!name)continue;
+  const lines=getRows(name,font,848);const list=lines.length?lines:[''];for(let j=0;j<list.length;j++)rows.push({qty:j?'':qty,name:list[j]});
+ }return rows;
+}
+function validate(){const issues=[];
+ for(const [key,title,edges] of [['arbeiten','Ausgeführte Arbeiten',WORK_EDGES],['maengel','Weitere Mängel',DEFECT_EDGES.slice(1)]]){
+  const max=edges.length-1,lines=getRows(model[key],number(model[key+'_font'],16),924);let n=lines.length;if(!safe(model[key]).trim())n=0;
+  if(n>max)issues.push(`${title}: ${n} Zeilen, nur ${max} verfügbar`);
+  const hint=$(key==='arbeiten'?'workHint':'defectHint');if(hint){hint.textContent=`${Math.min(n,max)} von ${max} Zeilen belegt${n>max?' · Text zu lang!':''}`;hint.className=n>max?'tiny danger-note':'tiny';}
+ }
+ const mat=materialRows();if(mat.length>7)issues.push(`Materialien: ${mat.length} Zeilen, nur 7 verfügbar`);
+ const hint=$('materialHint');if(hint){hint.textContent=`${Math.min(mat.length,7)} von 7 Materialzeilen belegt${mat.length>7?' · Bitte kürzen!':''}`;hint.className=mat.length>7?'tiny danger-note':'tiny';}
+ return issues;
+}
+function ruled(ctx,txt,edges,font,start=0,maxLines=edges.length-1){const list=getRows(txt,font,924);for(let i=0;i<Math.min(maxLines,list.length);i++){put(ctx,list[i],[48,edges[start+i]+1,1000,edges[start+i+1]-1],{font,weight:600})}}
+function drawReportNumber(ctx){
+ // Die auf der Vorlage gedruckte Nummer 0116300 liegt nur in dieser Zone.
+ // Den leicht variierenden Blauton zeilenweise aus sauberen Nachbarpixeln übernehmen.
+ for(let y=67;y<113;y++){
+  const a=ctx.getImageData(817,y,1,1).data;
+  const b=ctx.getImageData(977,y,1,1).data;
+  const g=ctx.createLinearGradient(819,y,974,y);
+  g.addColorStop(0,`rgb(${a[0]},${a[1]},${a[2]})`);
+  g.addColorStop(1,`rgb(${b[0]},${b[1]},${b[2]})`);
+  ctx.fillStyle=g;ctx.fillRect(819,y,156,1);
+ }
+ const n=safe(model.reportNumber);
+ ctx.save();ctx.textBaseline='middle';ctx.textAlign='center';
+ ctx.font='400 30px Arial, sans-serif';ctx.fillStyle='#17202a';
+ ctx.fillText(/^\d{7,}$/.test(n)?n:'– – – – – – –',896,88);
+ ctx.restore();
+}
+function paintText(ctx){
+ const left=[['standort',162,183],['angeordnet',194,214],['kunde',225,245],['kostenstelle',256,276],['auftragsnummer',287,307]];
+ for(const [key,y1,y2] of left)put(ctx,model[key],[194,y1,490,y2]);
+ const right=[['geraet',138,158],['eigentuemer',169,189],['equipment',200,220],['fabrikat',231,251],['typ',262,282],['betriebsstunden',293,313]];
+ for(const [key,y1,y2] of right)put(ctx,model[key],[740,y1,980,y2]);
+ // Erst die tatsächlichen gedruckten Grenzen verwenden: (143..432) und (740..1009), (337..381) usw.
+ put(ctx,model.kfz1,[145,339,432,379],{center:true});
+ if(model.vehicle2Enabled)put(ctx,model.kfz2,[145,383,432,420],{center:true});
+ put(ctx,model.km1,[746,339,1008,379],{center:true});
+ if(model.vehicle2Enabled)put(ctx,model.km2,[746,383,1008,420],{center:true});
+ // Jahreszahl im freien Kopfbereich zwischen Beschreibung und Tabelle.
+ put(ctx,model.jahr,[318,424,485,488],{center:true});
+ for(let i=1;i<=2;i++){if(i===2&&!model.vehicle2Enabled)continue;for(const prefix of ['abfahrt','rueckkehr'])printedTime(ctx,model[prefix+i],prefix,i===2);}
+ DAYS.forEach((d,i)=>put(ctx,model[`date_${d}`],[DAY_EDGES[i]+1,525,DAY_EDGES[i+1]-1,558],{center:true,font:15}));
+ for(let r=1;r<=Math.max(1,Math.min(4,number(model.employeeCount,1)));r++){
+  const y1=ROW_EDGES[r-1]+2,y2=ROW_EDGES[r]-2;
+  put(ctx,model[`monteur${r}`],[56,y1,192,y2],{center:true});
+  DAYS.forEach((d,i)=>put(ctx,model[`m${r}_${d}`],[DAY_EDGES[i]+1,y1,DAY_EDGES[i+1]-1,y2],{center:true}));
+  SUMS.forEach((s,i)=>put(ctx,model[`m${r}_sum${i}`],[SUM_EDGES[i]+1,y1,SUM_EDGES[i+1]-1,y2],{center:true}));
+ }
+ const boxes={gewaltJa:[429,759],gewaltNein:[493,759],inspektionJa:[646,759],inspektionNein:[710,759]};
+ for(const [key,[x,y]] of Object.entries(boxes))checkmark(ctx,x,y,model[key]);
+ ruled(ctx,model.arbeiten,WORK_EDGES,number(model.arbeiten_font,16));
+ ruled(ctx,model.maengel,DEFECT_EDGES.slice(1),15);
+ const mats=materialRows();for(let i=0;i<Math.min(mats.length,7);i++){
+  const [y1,y2]=[MAT_EDGES[i],MAT_EDGES[i+1]];
+  put(ctx,mats[i].qty,[42,y1+1,142,y2-1],{center:true,font:number(model.material_font,16)});
+  put(ctx,mats[i].name,[150,y1+1,1008,y2-1],{font:number(model.material_font,16)});
+ }
+}
+async function drawPage(canvas){const img=$('template');if(!img.complete||!img.naturalWidth)await new Promise((res,rej)=>{img.addEventListener('load',res,{once:true});img.addEventListener('error',rej,{once:true})});
+ canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,W,H);drawReportNumber(ctx);overwriteZeros(ctx);paintText(ctx);
+ for(const s of SIGNATURES){const v=model[s.key];if(!v)continue;try{const sig=await loadImage(v);const [x1,y1,x2,y2]=s.box,dx=number(model[s.key+'_dx']),dy=number(model[s.key+'_dy']),scale=number(model[s.key+'_scale'],100)/100;
+  // V36: Leerraum abschneiden und Seitenverhältnis behalten (nicht mehr gequetscht).
+  const ink=trimSignature(sig),fit=Math.min((x2-x1)*scale/ink.width,(y2-y1)*scale/ink.height);
+  const w=ink.width*fit,h=ink.height*fit,mx=(x1+x2)/2+dx,my=(y1+y2)/2+dy;
+  ctx.drawImage(ink,mx-w/2,my-h/2,w,h);
+ }catch(e){console.warn('Unterschrift:',e)}}return canvas;
+}
+function queuePaint(){const seq=++paintSeq;cancelAnimationFrame(raf);raf=requestAnimationFrame(async()=>{try{const temp=document.createElement('canvas');await drawPage(temp);if(seq!==paintSeq)return;const cv=$('page');cv.getContext('2d').clearRect(0,0,W,H);cv.getContext('2d').drawImage(temp,0,0);validate()}catch(e){console.error(e);setStatus('Vorschau: '+e.message,false)}})}
+function allReports(){try{const list=JSON.parse(localStorage.getItem(STORAGE)||'{}');return list&&typeof list==='object'&&!Array.isArray(list)?list:{}}catch{return {}}}
+function uid(){return `bericht_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`}
+function validReportNumber(n){return /^\d{7,}$/.test(safe(n))}
+async function reserveNumber(sheet){
+ // V35: Nummernvergabe nur mit Anmeldung (Schutz vor fremdem Nummernverbrauch).
+ // Dieselbe Anfrage-ID nach Verbindungsfehler wiederverwenden.
+ const key=PENDING_NUMBER_KEY+sheet;
+ let claim=localStorage.getItem(key);
+ if(!claim){claim=crypto.randomUUID();localStorage.setItem(key,claim)}
+ const result=await apiRest('rpc/allocate_montagebericht_number',{
+  method:'POST',body:JSON.stringify({p_request_id:claim})
+ });
+ if(!validReportNumber(result))throw new Error('Supabase hat keine gültige Berichtsnummer geliefert.');
+ localStorage.removeItem(key);
+ return result;
+}
+function setNumberBusy(on){numberBusy=on;$('add').disabled=on;$('addSecond').disabled=on;$('assignReportNumber').disabled=on;}
+async function assignMissingNumber(){
+ if(numberBusy||validReportNumber(model.reportNumber))return;
+ setNumberBusy(true);setStatus('Berichtsnummer wird von Supabase angefordert …');
+ try{
+  const n=await reserveNumber(activeSheet);
+  model.reportNumber=n;saveCurrent();updateSheetControls();queuePaint();
+  setStatus('✓ Berichtsnummer '+n+' dauerhaft vergeben');
+ }catch(e){console.error(e);setStatus('Nummer nicht vergeben: '+e.message,false)}
+ finally{setNumberBusy(false)}
+}
+$('assignReportNumber').onclick=assignMissingNumber;
+function currentRole(){return safe(model.orderType)==='zusatz'?'Zusatz':'Auftrag'}
+function updateSheetControls(){
+ const second=Boolean(sheetModels.second),first=$('sheetFirst'),extra=$('sheetSecond');
+ first.textContent='📄 1 · '+(sheetModels.first?.orderType==='zusatz'?'Zusatz':'Auftrag')+(validReportNumber(sheetModels.first?.reportNumber)?' · '+sheetModels.first.reportNumber:'');
+ if(second) extra.textContent='📄 2 · '+(sheetModels.second?.orderType==='auftrag'?'Auftrag':'Zusatz')+(validReportNumber(sheetModels.second?.reportNumber)?' · '+sheetModels.second.reportNumber:'');
+ extra.hidden=!second;$('addSecond').hidden=second;$('removeSecond').hidden=!second;$('pdfBoth').hidden=!second;
+ first.setAttribute('aria-selected',String(activeSheet==='first'));
+ extra.setAttribute('aria-selected',String(activeSheet==='second'));
+ $('sheetHint').textContent=second?'Zwei eigenständige nummerierte Blauenzettel. Speichern sich zusammen, Texte, Stunden und Material bleiben getrennt.':'Ein Blauenzettel. Bei Zusatzarbeiten kannst du rechts ein zweites Blatt hinzufügen.';
+ $('currentReportNumber').textContent=validReportNumber(model?.reportNumber)?model.reportNumber:'Noch nicht vergeben';
+ $('assignReportNumber').hidden=validReportNumber(model?.reportNumber);
+}
+function selectSheet(which){
+ if(which==='second'&&!sheetModels.second)return;
+ if(which===activeSheet)return;
+ activeSheet=which;model=sheetModels[which];defaults();buildEditor();updateSheetControls();queuePaint();
+ setStatus(which==='second'?'Zusatz-Blatt geöffnet':'Auftrag-Blatt geöffnet');
+}
+async function makeSecondSheet(){
+ if(numberBusy)return;
+ if(sheetModels.second){selectSheet('second');return;}
+ setNumberBusy(true);setStatus('Nummer für das Zusatz-Blatt wird vergeben …');
+ let newNumber;
+ try{newNumber=await reserveNumber('second')}
+ catch(e){console.error(e);setStatus('Zusatz-Blatt nicht angelegt: '+e.message,false);setNumberBusy(false);return}
+ setNumberBusy(false);
+ // Baustelle, Personal und Fahrzeug übernehmen. Stunden, gefahrene KM, Arbeiten,
+ // Material und Unterschriften absichtlich NICHT doppelt erfassen.
+ const first=sheetModels.first,extra={reportNumber:newNumber,employeeCount:first.employeeCount||1,jahr:first.jahr,arbeiten_font:first.arbeiten_font||16,material_font:first.material_font||16,orderType:'zusatz'};
+ for(const key of ['siteId','standort','polier','angeordnet','kunde','kostenstelle','vehicle1Id','kfz1','kmMode1','kfz1_bis15','kfz1_ueber15','vehicle2Enabled','vehicle2Id','kfz2','kmMode2','kfz2_bis15','kfz2_ueber15', 'geraet','eigentuemer','equipment','fabrikat','typ','betriebsstunden'])if(first[key]!=null)extra[key]=structuredClone(first[key]);
+ for(const day of DAYS)if(first['date_'+day]!=null)extra['date_'+day]=first['date_'+day];
+ for(let r=1;r<=4;r++)if(first['monteur'+r]!=null)extra['monteur'+r]=first['monteur'+r];
+ // KM dürfen nicht doppelt gebucht werden. Freie Eingabe ist weiterhin möglich.
+ extra.kmMode1='custom';extra.km1='';extra.kmMode2='custom';extra.km2='';
+ const site=availableSites.find(s=>String(s.id)===String(extra.siteId));
+ extra.auftragsnummer=site?safe(site.extra_order_number):'';
+ sheetModels.second=extra;changed=true;selectSheet('second');saveCurrent();
+ setStatus('Zusatz-Blatt angelegt: Baustelle/Namen übernommen. Stunden, KM, Arbeiten und Material bitte getrennt eintragen.',false);
+}
+function removeSecondSheet(){
+ if(!sheetModels.second)return;
+ if(!confirm('Zusatz-Blatt wirklich entfernen? Die bereits vergebene Berichtsnummer bleibt reserviert und wird nicht erneut verwendet. Seine Einträge und Unterschriften gehen verloren.'))return;
+ sheetModels.second=null;changed=true;
+ if(activeSheet==='second'){activeSheet='first';model=sheetModels.first;buildEditor();queuePaint()}
+ updateSheetControls();setStatus('Zusatz-Blatt entfernt. Bitte speichern.',false);
+}
+$('sheetFirst').onclick=()=>selectSheet('first');
+$('sheetSecond').onclick=()=>selectSheet('second');
+$('addSecond').onclick=makeSecondSheet;
+$('removeSecond').onclick=removeSecondSheet;
+function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]?.updated).localeCompare(safe(a[1]?.updated)));
+ $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')}${obj.extraData?' · Auftrag + Zusatz':''} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
+function saveCurrent(){if(v32Review)return v32Commit('offen');try{
+ reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};
+ if(!foreignReportIds.has(currentId)){localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);}
+ changed=false;updateSaved();updateSheetControls();void syncCurrentCloudReport();setStatus(sheetModels.second?'✓ Beide Blätter auf diesem Gerät gespeichert':'✓ Auf diesem Gerät gespeichert');
+ try{
+  const payload=[];
+  [sheetModels.first,sheetModels.second].forEach((sheet,ix)=>{
+   if(!sheet?.siteId)return;
+   // V35: Alle Monteur-Zeilen mitschicken. Die Materialverwaltung übernimmt nur die Zeile des angemeldeten Mitarbeiters.
+   const weekdays=['Mo','Di','Mi','Do','Fr','Sa','So'];
+   const isoFor=day=>{
+    const raw=String(sheet['date_'+day]||'').trim();let iso='';
+    if(/^\d{4}-\d{2}-\d{2}$/.test(raw))iso=raw;
+    else{const m=raw.match(/^(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{4}))?$/);if(m){const year=Number(m[3]||sheet.jahr||new Date().getFullYear());iso=`${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}}
+    if(!iso||isNaN(new Date(iso+'T12:00:00')))return '';
+    // Die Spalte (Mo, Di, ...) ist verbindlich. Ein falsch gesetztes Datum
+    // darf Stunden nicht unbemerkt auf den nächsten Tag verschieben.
+    const parsed=new Date(iso+'T12:00:00');
+    const columnIndex=weekdays.indexOf(day),dateIndex=(parsed.getDay()+6)%7;
+    if(columnIndex!==dateIndex){
+     console.warn('Montagebericht: Datum passt nicht zur Wochentagsspalte:',day,iso);
+     parsed.setDate(parsed.getDate()+columnIndex-dateIndex);
+     iso=`${parsed.getFullYear()}-${String(parsed.getMonth()+1).padStart(2,'0')}-${String(parsed.getDate()).padStart(2,'0')}`;
+    }
+    return iso;
+   };
+   const rows=[];
+   for(let r=1;r<=4;r++){
+    const days={};
+    weekdays.forEach(day=>{
+     const hour=Number(String(sheet['m'+r+'_'+day]||'').replace(',','.'));
+     if(!Number.isFinite(hour)||hour<=0)return;
+     const iso=isoFor(day);if(iso)days[iso]=hour;
+    });
+    const pause=Number(String(sheet['m'+r+'_sum3']||0).replace(',','.'))||0;
+    if(Object.keys(days).length)rows.push({row:r,monteur:String(sheet['monteur'+r]||'').trim(),days,pause});
+   }
+   if(rows.length)payload.push({sheetType:ix?'second':'first',siteId:sheet.siteId,siteName:sheet.kunde,order:sheet.auftragsnummer,orderType:sheet.orderType,rows});
+  });
+  if(payload.length&&window.parent!==window)window.parent.postMessage({type:'mv_montagebericht_saved_v29',reportId:currentId,sheets:payload},'*');
+ }catch(err){console.warn('Stundenzettel-Synchronisierung:',err);}
+ }catch(e){setStatus('Speichern fehlgeschlagen: '+e.message,false)}}
+async function fresh(ask=true){
+ if(numberBusy)return;
+ if(ask&&changed&&!confirm('Ungespeicherte Änderungen verwerfen?'))return;
+ setNumberBusy(true);setStatus('Neue Berichtsnummer wird von Supabase vergeben …');
+ let newNumber;
+ try{newNumber=await reserveNumber('first')}
+ catch(e){console.error(e);setStatus('Kein neuer Bericht angelegt: '+e.message+' Bitte die SQL-Einrichtung prüfen.',false);
+   // Nur beim allerersten Start ein nicht exportierbares Formular zeigen, damit
+   // nach der Einrichtung die Nummer über „Nummer vergeben“ ergänzt werden kann.
+   if(!sheetModels.first){currentId=uid();activeSheet='first';model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};
+     sheetModels={first:model,second:null};defaults();buildEditor();updateSaved();updateSheetControls();queuePaint()}
+   setNumberBusy(false);return;}
+ currentId=uid();activeSheet='first';
+ model={reportNumber:newNumber,employeeCount:1,jahr:String(new Date().getFullYear()),arbeiten_font:16,material_font:16,standort:DEFAULT_STANDORT,orderType:'auftrag'};
+ sheetModels={first:model,second:null};defaults();changed=false;buildEditor();updateSaved();updateSheetControls();queuePaint();
+ saveCurrent();setStatus('✓ Neuer Blauenzettel mit Nummer '+newNumber+' angelegt');
+ setNumberBusy(false);
+}
+function loadRecord(id){
+ const rec=reports[id];if(!rec)return false;
+ currentId=id;activeSheet='first';sheetModels={first:structuredClone(rec.data||{}),second:rec.extraData?structuredClone(rec.extraData):null};
+ model=sheetModels.first;defaults();changed=false;buildEditor();updateSaved();updateSheetControls();queuePaint();if(!v32Review&&!foreignReportIds.has(id))localStorage.setItem(ACTIVE,id);return true;
+}
+function restore(id){
+ if(changed&&!confirm('Ungespeicherte Änderungen verwerfen?')){updateSaved();return}
+ if(loadRecord(id))setStatus(sheetModels.second?'Beide gespeicherten Blätter geladen':'Bericht geladen');
+}
+$('saved').addEventListener('change',e=>{if(e.target.value)restore(e.target.value)});
+$('add').onclick=()=>fresh();$('save').onclick=saveCurrent;
+// Bestehende lokale Berichte werden nur auf ausdrücklichen Wunsch hochgeladen.
+const cloudImportBtn=document.createElement('button');cloudImportBtn.textContent='☁ Alte lokale Berichte synchronisieren';cloudImportBtn.type='button';cloudImportBtn.onclick=async()=>{if(!confirm('Eigene lokale Berichte in Supabase übernehmen? Bitte nur Berichte hochladen, die du selbst erstellt hast.'))return;let ok=0,bad=0;for(const [id,entry] of Object.entries(reports)){try{await cloudStoreReport(id,entry);ok++;}catch(e){console.warn(id,e);bad++;}}alert(ok+' Berichte synchronisiert, '+bad+' fehlgeschlagen.');};$('save').parentElement.append(cloudImportBtn);
+$('remove').onclick=()=>{
+ if(!reports[currentId]){fresh(false);return}
+ if(!confirm('Gespeicherten Bericht'+(sheetModels.second?' mit BEIDEN Blättern':'')+' auf diesem Gerät löschen?'))return;
+ delete reports[currentId];localStorage.setItem(STORAGE,JSON.stringify(reports));changed=false;fresh(false)
+};
+function utf8(v){return new TextEncoder().encode(v)}
+function bytesJoin(parts){let len=0;for(const p of parts)len+=p.length;const res=new Uint8Array(len);let start=0;for(const p of parts){res.set(p,start);start+=p.length}return res}
+function makePdf(jpeg,w,h){const parts=[],offsets=[0];let count=0;const add=bytes=>{parts.push(bytes);count+=bytes.length};add(utf8('%PDF-1.4\n'));
+ function obj(n,buf){offsets[n]=count;add(utf8(n+' 0 obj\n'));add(typeof buf==='string'?utf8(buf):buf);add(utf8('\nendobj\n'))}
+ obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Count 1 /Kids [3 0 R] >>');obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
+ const cmds=utf8('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n');obj(4,bytesJoin([utf8('<< /Length '+cmds.length+' >>\nstream\n'),cmds,utf8('endstream')]));
+ obj(5,bytesJoin([utf8('<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n'),jpeg,utf8('\nendstream')]));
+ const start=count;add(utf8('xref\n0 6\n0000000000 65535 f \n'));for(let i=1;i<=5;i++)add(utf8(safe(offsets[i]).padStart(10,'0')+' 00000 n \n'));
+ add(utf8('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));return new Blob(parts,{type:'application/pdf'});
+}
+// Zwei originale Blaue Zettel als zwei Seiten in EINER PDF, ohne Fremdbibliothek.
+function makeTwoPagePdf(jpegs){
+ const parts=[],offsets=[0];let count=0;
+ const append=bytes=>{parts.push(bytes);count+=bytes.length};
+ const object=(n,body)=>{offsets[n]=count;append(utf8(n+' 0 obj\n'));append(typeof body==='string'?utf8(body):body);append(utf8('\nendobj\n'))};
+ append(utf8('%PDF-1.4\n'));
+ object(1,'<< /Type /Catalog /Pages 2 0 R >>');
+ object(2,'<< /Type /Pages /Count 2 /Kids [3 0 R 6 0 R] >>');
+ for(let i=0;i<2;i++){
+  const pg=i===0?3:6,content=pg+1,img=pg+2;
+  object(pg,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${img} 0 R >> >> /Contents ${content} 0 R >>`);
+  const commands=utf8('q\n595.28 0 0 841.89 0 0 cm\n/Im0 Do\nQ\n');
+  object(content,bytesJoin([utf8('<< /Length '+commands.length+' >>\nstream\n'),commands,utf8('endstream')]));
+  const jpg=jpegs[i];
+  object(img,bytesJoin([utf8('<< /Type /XObject /Subtype /Image /Width '+W+' /Height '+H+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'),jpg,utf8('\nendstream')]));
+ }
+ const start=count;append(utf8('xref\n0 9\n0000000000 65535 f \n'));
+ for(let i=1;i<=8;i++)append(utf8(safe(offsets[i]).padStart(10,'0')+' 00000 n \n'));
+ append(utf8('trailer\n<< /Size 9 /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));
+ return new Blob(parts,{type:'application/pdf'});
+}
+function jpegBytes(canvas){
+ const bin=atob(canvas.toDataURL('image/jpeg',.96).split(',')[1]);const bytes=new Uint8Array(bin.length);
+ for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+ return bytes;
+}
+function triggerDownload(blob,filename){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+$('pdfBoth').onclick=async()=>{
+ if(!sheetModels.second)return;
+ if(!validReportNumber(sheetModels.first.reportNumber)||!validReportNumber(sheetModels.second.reportNumber)){setStatus('Bitte zuerst beiden Blättern eine Berichtsnummer vergeben.',false);return}
+ const original=model,originalSheet=activeSheet,btn=$('pdfBoth');
+ btn.disabled=true;btn.textContent='Beide PDFs werden erstellt …';
+ try{
+  const pages=[];
+  for(const which of ['first','second']){
+   model=sheetModels[which];const issues=validate();
+   if(issues.length)throw new Error((which==='first'?'Auftrag':'Zusatz')+': '+issues.join(' · '));
+   const canvas=document.createElement('canvas');await drawPage(canvas);pages.push(jpegBytes(canvas));
+  }
+  const basename=safe(sheetModels.first.standort||sheetModels.first.kunde||'Baustelle').replace(/[^\wäöüÄÖÜß-]+/g,'_').slice(0,35);
+  triggerDownload(makeTwoPagePdf(pages),'Montageberichte_Auftrag_Zusatz_'+basename+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  setStatus('✓ Beide Blauenzettel als zweiseitige PDF erstellt');
+ }catch(e){console.error(e);setStatus('PDF-Fehler: '+e.message,false)}
+ finally{model=original;activeSheet=originalSheet;btn.disabled=false;btn.textContent='📚 Beide Blätter als PDF';queuePaint()}
+};
+$('pdf').onclick=async()=>{if(!validReportNumber(model.reportNumber)){setStatus('Bitte zuerst eine Berichtsnummer vergeben.',false);return}const issues=validate();if(issues.length){setStatus('PDF nicht erstellt: '+issues.join(' · '),false);return}const btn=$('pdf');btn.disabled=true;btn.textContent='PDF wird erstellt …';try{const cv=document.createElement('canvas');await drawPage(cv);const b64=cv.toDataURL('image/jpeg',.96).split(',')[1];const bin=atob(b64),jpeg=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)jpeg[i]=bin.charCodeAt(i);
+ const pdf=makePdf(jpeg,W,H),url=URL.createObjectURL(pdf),a=document.createElement('a');a.href=url;a.download='Montagebericht_'+safe(model.standort||model.kunde||'Baustelle').replace(/[^\wäöüÄÖÜß-]+/g,'_').slice(0,35)+'_'+currentRole()+'_'+new Date().toISOString().slice(0,10)+'.pdf';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);setStatus('✓ PDF erstellt')}catch(e){console.error(e);setStatus('PDF-Fehler: '+e.message,false)}finally{btn.disabled=false;btn.textContent='📄 Aktuelles Blatt als PDF'}};
+// PDF als echte Dateianlage ans Teilen-Menü des Gerätes übergeben.
+// E-Mail-App und Empfänger werden dort ausgewählt; mailto: kann keine Anhänge hinzufügen.
+async function shareReportPdf(both){
+ const btn=$(both?'emailPdfBoth':'emailPdf');
+ if(!btn)return;
+ if(!navigator.share || !navigator.canShare){
+  setStatus('Dein Browser unterstützt das Teilen von PDF-Dateien nicht. Bitte die PDF herunterladen und in deiner E-Mail-App anhängen.',false);return;
+ }
+ if(both&&!sheetModels.second)return;
+ const originals={sheet:activeSheet,current:model};
+ btn.disabled=true;btn.textContent='PDF wird vorbereitet …';
+ try{
+  const pages=[];
+  for(const which of (both?['first','second']:[activeSheet])){
+   model=sheetModels[which];
+   if(!validReportNumber(model.reportNumber))throw new Error('Bitte zuerst die Berichtsnummer vergeben.');
+   const issues=validate();if(issues.length)throw new Error(issues.join(' · '));
+   const canvas=document.createElement('canvas');await drawPage(canvas);pages.push(jpegBytes(canvas));
+  }
+  const pdf=both?makeTwoPagePdf(pages):makePdf(pages[0],W,H);
+  const basename=safe(sheetModels.first.standort||sheetModels.first.kunde||'Baustelle').replace(/[^\wäöüÄÖÜß-]+/g,'_').slice(0,35);
+  const filename=both?'Montageberichte_Auftrag_Zusatz_'+basename+'.pdf':'Montagebericht_'+basename+'_'+currentRole()+'.pdf';
+  const file=new File([pdf],filename,{type:'application/pdf'});
+  if(!navigator.canShare({files:[file]})){
+   setStatus('Dein Gerät kann die PDF nicht direkt teilen. Bitte PDF herunterladen und per E-Mail anhängen.',false);return;
+  }
+  await navigator.share({files:[file],title:both?'Montageberichte Auftrag und Zusatz':'Montagebericht',text:'Montagebericht als PDF im Anhang'});
+  setStatus('PDF an das Teilen-Menü übergeben. Der Versand erfolgt in deiner Mail-App.');
+ }catch(e){
+  if(e?.name!=='AbortError'){console.error(e);setStatus('PDF konnte nicht geteilt werden: '+e.message,false)}
+ }finally{model=originals.current;activeSheet=originals.sheet;btn.disabled=false;btn.textContent=both?'✉️ Beide Blätter per E-Mail':'✉️ PDF per E-Mail teilen';queuePaint()}
+}
+$('emailPdf').onclick=()=>shareReportPdf(false);
+$('emailPdfBoth').onclick=()=>shareReportPdf(true);
+const emailBothObserver=new MutationObserver(()=>{$('emailPdfBoth').hidden=$('pdfBoth').hidden});
+emailBothObserver.observe($('pdfBoth'),{attributes:true,attributeFilter:['hidden']});
+$('emailPdfBoth').hidden=$('pdfBoth').hidden;
+// Unterschriften-Freigabe: der Monteur darf direkt, externe Abnahme erst nach Vollbild-Vorschau.
+let pendingReviewerSignature='';
+async function requestSignature(key){
+ if(v32Review){if(key!=='sign_meister'){setStatus('Nur die Meister-Unterschrift darf hier geändert werden.',false);return;}if(v32Busy||!v32Ready)return;openSign(key);return;}if(key==='sign_meister'){setStatus('Die Meister-Unterschrift erfolgt im Prüfbereich.',false);return;}
+ if(key==='sign_monteur'){openSign(key);return;}
+ pendingReviewerSignature=key;
+ const modal=$('signPreview');
+ modal.classList.add('visible');
+ $('signPreviewAccept').disabled=true;
+ try{
+  await drawPage($('signPreviewCanvas'));
+  $('signPreviewAccept').disabled=false;
+ }catch(error){
+  console.error(error);
+  modal.classList.remove('visible');
+  pendingReviewerSignature='';
+  setStatus('Vorschau konnte nicht geladen werden. Bitte erneut versuchen.',false);
+ }
+}
+$('signPreviewBack').onclick=()=>{pendingReviewerSignature='';$('signPreview').classList.remove('visible');};
+$('signPreviewAccept').onclick=()=>{
+ const key=pendingReviewerSignature;
+ pendingReviewerSignature='';
+ $('signPreview').classList.remove('visible');
+ if(key)openSign(key);
+};
+// Unterschriften per Pointer zeichnen
+const pad=$('sigPad'),pctx=pad.getContext('2d');let isDrawing=false;
+function pointerXY(e){const b=pad.getBoundingClientRect();return [(e.clientX-b.left)*pad.width/b.width,(e.clientY-b.top)*pad.height/b.height]}
+function updateSignOrientation(){
+ const modal=$('sigModal');
+ // Gedrehte Querformat-Ansicht, wenn der Bildschirm weiterhin hochkant ist.
+ modal.classList.toggle('rotated',modal.classList.contains('visible')&&window.innerHeight>window.innerWidth);
+}
+async function openSign(key){
+ signatureKey=key;
+ $('sigTitle').textContent='Unterschrift: '+SIGNATURES.find(s=>s.key===key).name;
+ const modal=$('sigModal');modal.classList.add('visible');
+ updateSignOrientation();
+ pctx.clearRect(0,0,pad.width,pad.height);
+ pctx.lineWidth=3.5;pctx.lineCap='round';pctx.lineJoin='round';pctx.strokeStyle='#18202b';
+ try{if(modal.requestFullscreen)await modal.requestFullscreen()}catch(e){/* Vollbild kann im PWA-/iFrame-Browser gesperrt sein. */}
+ try{if(screen.orientation?.lock)await screen.orientation.lock('landscape')}catch(e){/* CSS-Querformat bleibt nutzbar. */}
+ updateSignOrientation();
+}
+async function closeSign(){
+ const modal=$('sigModal');modal.classList.remove('visible','rotated');
+ try{if(screen.orientation?.unlock)screen.orientation.unlock()}catch(e){}
+ try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){}
+}
+window.addEventListener('resize',updateSignOrientation);
+
+pad.addEventListener('pointerdown',e=>{isDrawing=true;pad.setPointerCapture(e.pointerId);const [x,y]=pointerXY(e);pctx.beginPath();pctx.moveTo(x,y);pctx.lineTo(x+.01,y+.01);pctx.stroke()});
+pad.addEventListener('pointermove',e=>{if(!isDrawing)return;const [x,y]=pointerXY(e);pctx.lineTo(x,y);pctx.stroke()});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])pad.addEventListener(ev,()=>isDrawing=false);
+$('sigClear').onclick=()=>pctx.clearRect(0,0,pad.width,pad.height);$('sigCancel').onclick=closeSign;$('sigDone').onclick=()=>{if(signatureKey){if(!pctx.getImageData(0,0,pad.width,pad.height).data.some((v,i)=>i%4===3&&v>0)){setStatus('Bitte zuerst unterschreiben.',false);return;}if(signatureKey==='sign_meister'&&!v32Review)return;model[signatureKey]=pad.toDataURL('image/png');if(v32Review){v32Fresh.add(activeSheet);v32Signing=true;dirty();v32Signing=false;}else dirty();}closeSign().then(()=>{try{window.ezAfterSign&&window.ezAfterSign();}catch(e){console.warn(e);}})};
+window.addEventListener('beforeunload',e=>{if(changed){e.preventDefault();e.returnValue=''}});
+
+// V30: Bericht wird zusätzlich in Supabase gespeichert. Lokale Originale bleiben erhalten.
+let cloudReportIds=new Set(),cloudReportOwners=new Map(),foreignReportIds=new Set();
+async function cloudStoreReport(id,entry){
+ const token=await getSiteToken();if(token===SITE_SUPABASE_KEY)throw new Error('Bitte zuerst anmelden.');
+ const user=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id;
+ if(!user)throw new Error('Kein Mitarbeiter-Account.');
+ const doc={data:entry.data,extraData:entry.extraData};
+ if(cloudReportIds.has(id)){
+  await apiRest('app_montage_reports?report_id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({document:doc})});
+ }else{
+  await apiRest('app_montage_reports',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({report_id:id,owner_user_id:user,document:doc})});
+  cloudReportIds.add(id);cloudReportOwners.set(id,user);
+ }
+}
+async function syncCurrentCloudReport(){
+ if(!reports[currentId])return;
+ try{await cloudStoreReport(currentId,reports[currentId]);setStatus('✓ Auf dem Gerät und in Supabase gespeichert');}
+ catch(error){setStatus('⚠ Nur auf diesem Gerät gespeichert! Cloud: '+error.message,false);console.warn('Cloud-Monteurbericht:',error);}
+}
+async function loadCloudReport(reportId){
+ const rows=await apiRest('app_montage_reports?select=report_id,owner_user_id,document,updated_at&report_id=eq.'+encodeURIComponent(reportId)+'&limit=1');
+ const row=rows?.[0];if(!row)throw new Error('Bericht nicht gefunden oder keine Berechtigung.');
+ reports[row.report_id]={data:row.document?.data||{},extraData:row.document?.extraData||null,updated:row.updated_at};
+ cloudReportIds.add(row.report_id);cloudReportOwners.set(row.report_id,row.owner_user_id);
+ const me=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id;
+ if(row.owner_user_id!==me)foreignReportIds.add(row.report_id);
+ else localStorage.setItem(STORAGE,JSON.stringify(reports));
+ loadRecord(row.report_id);setStatus('Bericht aus Supabase geladen. Änderungen werden protokolliert.');
+}
+async function loadMyCloudReports(){
+ try{
+  const user=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id;
+  if(!user)return;
+  const rows=await apiRest('app_montage_reports?select=report_id,owner_user_id,document,updated_at&owner_user_id=eq.'+encodeURIComponent(user)+'&order=updated_at.desc&limit=200');
+  for(const row of rows||[]){cloudReportIds.add(row.report_id);cloudReportOwners.set(row.report_id,row.owner_user_id);
+    if(!reports[row.report_id] || new Date(reports[row.report_id].updated||0)<new Date(row.updated_at)){
+      reports[row.report_id]={data:row.document?.data||{},extraData:row.document?.extraData||null,updated:row.updated_at};
+    }
+  }
+  localStorage.setItem(STORAGE,JSON.stringify(reports));updateSaved();
+ }catch(e){console.warn('Cloud-Berichte:',e.message);}
+}
+window.addEventListener('message',async event=>{
+ if(v32Review||event.origin!==location.origin || event.source!==window.parent || event.data?.type!=='mv_open_cloud_report_v30')return;
+ try{await loadCloudReport(event.data.reportId);}catch(e){alert('Bericht konnte nicht geöffnet werden: '+e.message);}
+});
+
+if(!v32Review){reports=allReports();setTimeout(loadMyCloudReports,800);const old=localStorage.getItem(ACTIVE);if(old&&reports[old]){loadRecord(old);setStatus('Gespeicherten Bericht geladen')}else fresh(false);Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadAvailableMaterials(),loadHourTemplates(),checkReportAdmin()]);}
+
+// V13: direkte Eingabe direkt auf der Original-PDF-Vorschau.
+// Bestehende Eingabelogik bleibt für alle Spezialfelder erhalten.
+const HIT=[];
+function hit(x1,y1,x2,y2,key,title,mode='text'){
+ HIT.push({x1,y1,x2,y2,key,title,mode});
+}
+function initHits(){
+ HIT.length=0;
+ [['standort',162,183],['angeordnet',194,214],['kunde',225,245],['kostenstelle',256,276],['auftragsnummer',287,307]].forEach(([k,a,b])=>hit(194,a,490,b,k,({standort:'Standort',angeordnet:'Einsatz angeordnet von',kunde:'Einsatzort / Baustelle',kostenstelle:'Einsatzkostenstelle',auftragsnummer:'Auftragsnummer'})[k]));
+ [['geraet',138,158],['eigentuemer',169,189],['equipment',200,220],['fabrikat',231,251],['typ',262,282],['betriebsstunden',293,313]].forEach(([k,a,b])=>hit(740,a,980,b,k,k));
+ hit(145,338,432,380,'kfz1','Kennzeichen 1','vehicle');hit(746,338,1008,380,'km1','Kilometer 1','km');
+ hit(145,382,432,421,'kfz2','Kennzeichen 2','vehicle');hit(746,382,1008,421,'km2','Kilometer 2','km');
+ hit(595,425,690,454,'abfahrt1','Abfahrt 1','time');hit(844,425,930,454,'rueckkehr1','Rückkehr 1','time');
+ hit(595,457,690,489,'abfahrt2','Abfahrt 2','time');hit(844,457,930,489,'rueckkehr2','Rückkehr 2','time');
+ hit(315,425,485,488,'jahr','Jahreszahl');
+ DAYS.forEach((d,i)=>hit(DAY_EDGES[i],525,DAY_EDGES[i+1],559,'date_'+d,'Datum '+d));
+ for(let r=1;r<=4;r++){
+  const y1=ROW_EDGES[r-1]+2,y2=ROW_EDGES[r]-2;
+  hit(55,y1,193,y2,'monteur'+r,'Monteur '+r);
+  DAYS.forEach((d,i)=>hit(DAY_EDGES[i],y1,DAY_EDGES[i+1],y2,'m'+r+'_'+d,`Monteur ${r} · ${d} Stunden`,'hours'));
+  SUMS.forEach((s,i)=>hit(SUM_EDGES[i],y1,SUM_EDGES[i+1],y2,`m${r}_sum${i}`,`Monteur ${r} · ${s}`,'hours'));
+ }
+ [['gewaltJa',429,759],['gewaltNein',493,759],['inspektionJa',646,759],['inspektionNein',710,759]].forEach(([k,x,y])=>hit(x-13,y-14,x+13,y+14,k,k,'check'));
+ for(let i=0;i<WORK_EDGES.length-1;i++)hit(48,WORK_EDGES[i],1005,WORK_EDGES[i+1],'arbeiten','Ausgeführte Arbeiten','textarea');
+ for(let i=1;i<DEFECT_EDGES.length-1;i++)hit(48,DEFECT_EDGES[i],1005,DEFECT_EDGES[i+1],'maengel','Weitere Mängel','textarea');
+ for(let i=0;i<Math.min(7,MAT_EDGES.length-1);i++){
+  hit(40,MAT_EDGES[i],144,MAT_EDGES[i+1],`mat${i+1}_menge`,`Material ${i+1} · Menge`);
+  hit(146,MAT_EDGES[i],1005,MAT_EDGES[i+1],`mat${i+1}_name`,`Material ${i+1} · Bezeichnung`,'material');
+ }
+ for(const s of SIGNATURES)hit(...s.box,s.key,s.name,'signature');
+}
+let editing=null;
+function makeDirectOptions(list,current){return list.map(([value,label])=>`<option value="${esc(value)}" ${String(current)===String(value)?'selected':''}>${esc(label)}</option>`).join('')}
+function openDirect(h){
+ if(v32Review&&(!v32Ready||v32Busy))return;
+ const key=h.key;if(v32Review&&h.mode==='signature'&&key!=='sign_meister'){setStatus('Unterschriften anderer Personen bleiben unverändert.',false);return;}
+ if(/^kfz2|^km2|^abfahrt2|^rueckkehr2/.test(key)&&!model.vehicle2Enabled){
+  if(!confirm('Zweites Fahrzeug für diesen Bericht aktivieren?'))return;
+  model.vehicle2Enabled=true;buildEditor();dirty();
+ }
+ if(/^monteur[2-4]$|^m[2-4]_/.test(key)&&Number(model.employeeCount)<Number(key.match(/[2-4]/)[0])){
+  model.employeeCount=Number(key.match(/[2-4]/)[0]);buildEditor();dirty();
+ }
+ if(h.mode==='signature'){requestSignature(key);return}
+ if(h.mode==='check'){
+  model[key]=!model[key];
+  if(model[key]){
+   const opposite={gewaltJa:'gewaltNein',gewaltNein:'gewaltJa',inspektionJa:'inspektionNein',inspektionNein:'inspektionJa'}[key];model[opposite]=false;
+  }syncEditor();dirty();return;
+ }
+ editing=h;
+ const current=safe(model[key]);let input='';
+ if(h.mode==='textarea')input=`<textarea id="directInput" rows="5">${esc(current)}</textarea>`;
+ else if(h.mode==='time')input=`<input id="directInput" type="time" value="${esc(current)}">`;
+ else if(h.mode==='hours')input=`<select id="directInput">${makeDirectOptions([['','Leer'],...quarterValues(quarterMax(key)).map(x=>[x,x]),['custom','Eigener Wert …']],quarterValues(quarterMax(key)).includes(current)?current:'custom')}</select><input id="directCustom" inputmode="decimal" placeholder="Individuelle Stunden" value="${esc(current)}" style="margin-top:8px">`;
+ else if(h.mode==='vehicle')input=`<select id="directChoice">${makeDirectOptions([['','Kennzeichen selbst eingeben'],...availableVehicles.filter(v=>v.active!==false).map(v=>[String(v.id),v.name+' · '+safe(v.plate)])],model[key==='kfz1'?'vehicle1Id':'vehicle2Id'])}</select><input id="directInput" value="${esc(current)}" placeholder="Kennzeichen" style="margin-top:8px">`;
+ else if(h.mode==='km')input=`<select id="directChoice">${makeDirectOptions([['one','1 Strecke'],['two','2 Strecken'],['custom','Individuell']],model[key==='km1'?'kmMode1':'kmMode2'])}</select><input id="directInput" inputmode="decimal" value="${esc(current)}" style="margin-top:8px">`;
+ else if(h.mode==='material')input=`<label for="directMaterialSearch">Material im Lager suchen</label><input type="search" id="directMaterialSearch" placeholder="Name oder M-Nummer suchen" autocomplete="off"><div id="directMaterialResults" class="report-material-results report-material-direct" role="listbox"></div><input id="directInput" value="${esc(current)}" placeholder="Oder Material frei eintragen" style="margin-top:8px">`;
+ else if(key==='kunde')input=`<select id="directChoice">${makeDirectOptions([['','Baustelle auswählen'],...availableSites.map(s=>[String(s.id),s.name])],model.siteId)}</select><input id="directInput" value="${esc(current)}" style="margin-top:8px">`;
+ else if(key==='auftragsnummer')input=`<select id="directChoice">${makeDirectOptions([['auftrag','Auftrag'],['zusatz','Zusatz']],model.orderType)}</select><input id="directInput" value="${esc(current)}" style="margin-top:8px">`;
+ else input=`<input id="directInput" value="${esc(current)}" autocomplete="off">`;
+ $('directTitle').textContent=h.title;$('directContents').innerHTML=input;
+ $('directModal').classList.add('visible');
+ $('directChoice')?.addEventListener('change',e=>{
+  const val=e.target.value;
+  if(h.mode==='vehicle'){const vehicle=availableVehicles.find(v=>String(v.id)===val);if(vehicle)$('directInput').value=safe(vehicle.plate||vehicle.name)}
+  else if(key==='kunde'){const site=availableSites.find(s=>String(s.id)===val);if(site)$('directInput').value=site.name;}
+  else if(key==='auftragsnummer'){const site=getSelectedSite();if(site)$('directInput').value=safe(val==='zusatz'?site.extra_order_number:site.order_number)}
+  else if(h.mode==='km'){const site=getSelectedSite();const base=parseKilometers(site?.distance_km);if(base!==null&&val!=='custom')$('directInput').value=formatKm(base*(val==='two'?2:1));}
+ });
+ if(h.mode==='material'){
+  const search=$('directMaterialSearch'),results=$('directMaterialResults');
+  function filterDirect(){
+   const filtered=sortReportMaterials(availableMaterials.filter(m=>reportMaterialSearchMatches(search.value,m))).slice(0,35);
+   let group='';results.innerHTML=filtered.map(m=>{const cat=reportMaterialCategory(m);let heading='';if(cat!==group){group=cat;heading=`<div class="report-material-group">${esc(cat)}</div>`;}
+     return heading+`<button class="report-material-option" type="button" data-direct-material="${esc(m.id)}"><span>${esc(m.name)}</span><small>${m.material_number?'M'+esc(m.material_number)+' · ':''}${esc(m.unit||'Stk')}</small></button>`;
+   }).join('')||'<p class="report-material-empty">Kein Treffer. Unten frei eintragen.</p>';
+  }
+  search.addEventListener('input',filterDirect);
+  results.addEventListener('click',e=>{const btn=e.target.closest('[data-direct-material]');if(!btn)return;const m=availableMaterials.find(v=>String(v.id)===btn.dataset.directMaterial);if(m){$('directInput').value=reportMaterialLabel(m);search.value=m.name;results.innerHTML='';}});
+  filterDirect();
+ }
+ if(h.mode==='hours')$('directInput').addEventListener('change',()=>{$('directCustom').style.display=$('directInput').value==='custom'?'block':'none'});
+ if(h.mode==='hours')$('directCustom').style.display=$('directInput').value==='custom'?'block':'none';
+ $('directInput')?.focus();
+}
+function closeDirect(){editing=null;$('directModal').classList.remove('visible')}
+$('directCancel').onclick=closeDirect;
+$('directSave').onclick=()=>{
+ if(!editing)return;const h=editing,k=h.key;
+ let value=$('directInput')?.value??'';
+ if(h.mode==='hours'){
+  value=value==='custom'?$('directCustom').value:value;
+  const check=validateHourValue(k,value);if(!check.valid){setStatus(check.message,false);return;}
+  value=check.value;model['quarterCustom_'+k]=value!==''&&!quarterValues(quarterMax(k)).includes(value);
+ }
+ model[k]=value;
+ if(h.mode==='vehicle'){const id=$('directChoice').value;model[k==='kfz1'?'vehicle1Id':'vehicle2Id']=id}
+ if(h.mode==='material'){/* Freie Lagerauswahl bleibt unabhängig von einer Buchung. */}
+ if(h.mode==='km')model[k==='km1'?'kmMode1':'kmMode2']=$('directChoice').value;
+ if(k==='kunde'){const id=$('directChoice').value;if(id){model.siteId=id;applySiteSelection();model.kunde=value}}
+ if(k==='auftragsnummer')model.orderType=$('directChoice').value;
+ if(k==='arbeiten'){model.workTasks=normalizeTasksFromText(value);refreshTaskList();}
+ if(k==='angeordnet')model.polier=value.replace(/\s*\/\s*Schlottau\s*$/i,'');
+ closeDirect();syncEditor();dirty();
+};
+$('directModal').addEventListener('click',e=>{if(e.target.id==='directModal')closeDirect()});
+// Nur die angezeigte Breite skalieren; die internen Bildpixel bleiben unverändert.
+const sheetScroll=$('sheetScroll');
+const pageCanvas=$('page');
+let pageZoom=1;
+function fitPage(){return Math.min(1,(sheetScroll.clientWidth-8)/1054)}
+function setPageZoom(z,resetPosition=false){
+ const oldW=pageCanvas.getBoundingClientRect().width || 1054;
+ const relX=(sheetScroll.scrollLeft+sheetScroll.clientWidth/2)/oldW;
+ const relY=(sheetScroll.scrollTop+sheetScroll.clientHeight/2)/(oldW*1492/1054);
+ pageZoom=Math.max(.25,Math.min(2.5,z));
+ pageCanvas.style.width=(1054*pageZoom)+'px';
+ pageCanvas.style.height='auto';
+ pageCanvas.style.maxWidth='none';
+ $('zoomLabel').textContent=Math.round(pageZoom*100)+' %';
+ $('zoomFit').classList.toggle('active',Math.abs(pageZoom-fitPage())<.01);
+ $('zoomReadable').classList.toggle('active',Math.abs(pageZoom-.85)<.01);
+ requestAnimationFrame(()=>{
+  sheetScroll.scrollLeft=resetPosition?0:Math.max(0,relX*1054*pageZoom-sheetScroll.clientWidth/2);
+  sheetScroll.scrollTop=resetPosition?0:Math.max(0,relY*1492*pageZoom-sheetScroll.clientHeight/2);
+ });
+}
+$('zoomIn').onclick=()=>setPageZoom(pageZoom*1.3);
+$('zoomOut').onclick=()=>setPageZoom(pageZoom/1.3);
+$('zoomFit').onclick=()=>setPageZoom(fitPage(),true);
+$('zoomReadable').onclick=()=>setPageZoom(.85,true);
+window.addEventListener('resize',()=>{if(Math.abs(pageZoom-fitPage())<.03)setPageZoom(fitPage())});
+requestAnimationFrame(()=>setPageZoom(fitPage(),true));
+$('page').addEventListener('click',e=>{
+ const rect=e.currentTarget.getBoundingClientRect();const x=(e.clientX-rect.left)/rect.width*W,y=(e.clientY-rect.top)/rect.height*H;
+ const matches=HIT.filter(h=>x>=h.x1&&x<=h.x2&&y>=h.y1&&y<=h.y2);
+ if(matches.length){openDirect(matches[matches.length-1]);return}
+ setStatus('Tippe direkt auf einen beschrifteten Bereich des Blauenzettels.');
+});
+initHits();
+
+// Gemeinsame Berichtsvorlagen. Nur Admins dürfen sie anlegen oder löschen.
+let wholeTemplates=[];
+const PRESET_KEYS=['siteId','standort','polier','angeordnet','kunde','kostenstelle','auftragsnummer','orderType','vehicle1Id','kfz1','kmMode1','km1','vehicle2Enabled','vehicle2Id','kfz2','kmMode2','km2','kfz1_bis15','kfz1_ueber15','kfz2_bis15','kfz2_ueber15','employeeCount','arbeiten_font','material_font'];
+for(let r=1;r<=4;r++){
+ PRESET_KEYS.push(`monteur${r}`);
+ for(const d of DAYS)PRESET_KEYS.push(`m${r}_${d}`);
+ for(let i=0;i<SUMS.length;i++)PRESET_KEYS.push(`m${r}_sum${i}`);
+}
+function refreshWholeTemplateOptions(){
+ const select=$('wholeTemplate');const old=select.value;
+ select.innerHTML='<option value="">Ohne Vorlage</option>'+wholeTemplates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+ if(wholeTemplates.some(t=>String(t.id)===old))select.value=old;
+ $('saveWholeTemplate').hidden=!reportIsAdmin;$('deleteWholeTemplate').hidden=!reportIsAdmin;
+}
+async function loadWholeTemplates(){
+ try{wholeTemplates=await apiRest('report_full_templates?select=id,name,fields,active&active=eq.true&order=name.asc');refreshWholeTemplateOptions()}
+ catch(e){console.warn('Berichtsvorlagen:',e);setStatus('Admin-Berichtsvorlagen noch nicht eingerichtet: '+e.message,false)}
+}
+$('applyWholeTemplate').onclick=()=>{
+ const t=wholeTemplates.find(t=>String(t.id)===$('wholeTemplate').value);
+ if(!t){setStatus('Bitte erst eine Vorlage auswählen.',false);return}
+ const preserved={reportNumber:model.reportNumber,sign_monteur:model.sign_monteur,sign_bauleitung:model.sign_bauleitung,sign_meister:model.sign_meister};
+ for(const [k,v] of Object.entries(t.fields||{}))if(PRESET_KEYS.includes(k))model[k]=v;
+ Object.assign(model,preserved);
+ model.standort=DEFAULT_STANDORT;
+ model.jahr=String(new Date().getFullYear());
+ buildEditor();queuePaint();dirty();setStatus('✓ Vorlage „'+t.name+'“ übernommen. Du kannst alles direkt auf dem Zettel ändern.');
+};
+$('saveWholeTemplate').onclick=async()=>{
+ if(!reportIsAdmin)return;
+ const name=prompt('Name der neuen Berichtsvorlage (z. B. ECD):');if(!name?.trim())return;
+ const fields=Object.fromEntries(PRESET_KEYS.filter(k=>model[k]!==undefined).map(k=>[k,model[k]]));
+ try{await apiRest('report_full_templates',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name:name.trim(),fields,active:true})});await loadWholeTemplates();setStatus('✓ Admin-Vorlage gespeichert')}
+ catch(e){setStatus('Vorlage nicht gespeichert: '+e.message,false)}
+};
+$('deleteWholeTemplate').onclick=async()=>{
+ if(!reportIsAdmin)return;const id=$('wholeTemplate').value;const t=wholeTemplates.find(x=>String(x.id)===id);
+ if(!t||!confirm(`Vorlage „${t.name}“ wirklich löschen?`))return;
+ try{await apiRest('report_full_templates?id=eq.'+encodeURIComponent(id),{method:'DELETE'});await loadWholeTemplates();setStatus('✓ Vorlage gelöscht')}
+ catch(e){setStatus('Löschen fehlgeschlagen: '+e.message,false)}
+};
+Promise.allSettled([loadWholeTemplates(),checkReportAdmin()]).then(refreshWholeTemplateOptions);
+
+// V15: Ein Berichtsassistent zeigt die bestehenden Original-Eingabefelder nacheinander.
+// Er benutzt dieselben data-field-Eingaben, dieselben model-Daten und denselben PDF-Renderer.
+function guideHasData(step){
+ const s=[['siteId','kunde','auftragsnummer'],['kfz1','km1','abfahrt1'],['monteur1','m1_Mo','m1_Di','m1_Mi','m1_Do','m1_Fr','m1_Sa','m1_So'],['arbeiten'],['mat1_name','mat2_name'],['sign_monteur','sign_bauleitung']][step]||[];
+ return s.some(k=>safe(model?.[k]).trim()!=='' && model?.[k]!==false);
+}
+function updateGuide(){
+ const root=$('editor'), progress=$('guideProgress');
+ if(!root||!progress)return;
+ const sections=[...root.querySelectorAll(':scope > details')];
+ for(const [i,d] of sections.entries()){
+  const active=!guideAdvanced && GUIDE_STEPS[guideStep].idx===i;
+  d.classList.toggle('guide-active',active);
+  if(active)d.open=true;
+ }
+ document.body.classList.toggle('guide-advanced',guideAdvanced);
+ document.body.classList.toggle('guide-preview',guideView==='preview');
+ const current=GUIDE_STEPS[guideStep];
+ $('guideTitle').textContent=guideView==='preview'?'Dein fertiger Blauenzettel':current.title;
+ $('guideStepCount').textContent=guideView==='preview'?'Vorschau':`${guideStep+1} von ${GUIDE_STEPS.length}`;
+ $('guideSubheading').textContent=guideView==='preview'?'Vor dem Versenden oder Unterschreiben prüfen':'Auftrag und Zusatz getrennt ausfüllen';
+ $('guideHint').textContent=current.hint;
+ progress.innerHTML=GUIDE_STEPS.map((s,i)=>`<button type="button" data-guide-step="${i}" class="${i===guideStep?'active':''} ${guideHasData(i)?'done':''}" aria-current="${i===guideStep?'step':'false'}">${i+1}. ${esc(s.short)}</button>`).join('');
+ $('guidePrev').disabled=guideStep===0;
+ $('guideNext').textContent=guideStep===GUIDE_STEPS.length-1?'📄 Bericht ansehen':'Weiter →';
+ $('guideEditAdvanced').textContent=guideAdvanced?'✓ Zurück zur einfachen Ansicht':'⚙️ Erweiterte Felder & Stunden-Vorlagen';
+ $('modeEasy').setAttribute('aria-pressed',String(!guideAdvanced));
+ $('modeFast').setAttribute('aria-pressed',String(guideAdvanced));
+ $('modeExplanation').textContent=guideAdvanced?'Schnellmodus: alle Bereiche auf einmal.':'Einfacher Modus: mit Weiter und Zurück durch den Bericht.';
+ $('guideHeader').style.display='';
+ if(guideAdvanced){sections.forEach(d=>d.open=true);$('editorWrap').open=true;}
+ $('guideActions').style.display=guideView==='preview'?'none':'flex';
+ const currentBtn=progress.querySelector('.active'); if(currentBtn)currentBtn.scrollIntoView({behavior:'instant',block:'nearest',inline:'nearest'});
+}
+function goGuide(n){
+ if(v32Review)return;
+ guideView='edit';guideStep=Math.max(0,Math.min(GUIDE_STEPS.length-1,n));
+ $('editorWrap').open=true;
+ updateGuide();
+ const top=$('mobileGuide').getBoundingClientRect().top+window.scrollY;
+ window.scrollTo({top:Math.max(0,top-12),behavior:'instant'});
+}
+function showGuidePreview(){
+ guideView='preview';updateGuide();queuePaint();
+ setPageZoom(fitPage(),true);
+ window.scrollTo({top:Math.max(0,$('mobileGuide').getBoundingClientRect().top+window.scrollY-10),behavior:'instant'});
+}
+$('guideProgress').addEventListener('click',e=>{
+ const btn=e.target.closest('[data-guide-step]');if(btn)goGuide(Number(btn.dataset.guideStep));
+});
+$('guidePrev').onclick=()=>goGuide(guideStep-1);
+$('guideNext').onclick=()=>guideStep===GUIDE_STEPS.length-1?showGuidePreview():goGuide(guideStep+1);
+$('guideSave').onclick=saveCurrent;
+$('guidePeek').onclick=showGuidePreview;
+$('guideBackToEdit').onclick=()=>goGuide(guideStep);
+$('guideReviewSign').onclick=()=>requestSignature('sign_bauleitung');
+$('guideReviewPdf').onclick=()=>$('pdf').click();
+$('guideReviewMail').onclick=()=>$('emailPdf').click();
+function setReportMode(mode){
+ guideAdvanced=mode==='fast';guideView='edit';
+ localStorage.setItem('mv_report_edit_mode_v22',mode);
+ $('editorWrap').open=true;updateGuide();
+}
+$('modeEasy').onclick=()=>setReportMode('easy');
+$('modeFast').onclick=()=>setReportMode('fast');
+$('guideEditAdvanced').onclick=()=>setReportMode(guideAdvanced?'easy':'fast');
+$('editorWrap').open=true;
+updateGuide();
+
+// V20: Wisch-Gesten zwischen großem Eingabeassistenten und Vollbildvorschau.
+// Keine Änderungen an Datenmodell, Supabase, Signaturen oder PDF-Ausgabe.
+$('previewClose').onclick=()=>goGuide(guideStep);
+$('previewSave').onclick=saveCurrent;
+$('previewPdf').onclick=()=>$('pdf').click();
+$('previewShare').onclick=()=>$('emailPdf').click();
+$('previewSign').onclick=()=>requestSignature('sign_bauleitung');
+
+// Zoomen um den Finger-Mittelpunkt, nicht um den Bildschirmmittelpunkt.
+function zoomAtPoint(targetZoom,clientX,clientY){
+ const frame=$('sheetScroll');
+ const rect=frame.getBoundingClientRect();
+ const px=clientX-rect.left, py=clientY-rect.top;
+ const originalX=(frame.scrollLeft+px)/pageZoom;
+ const originalY=(frame.scrollTop+py)/pageZoom;
+ pageZoom=Math.max(.25,Math.min(2.5,targetZoom));
+ pageCanvas.style.width=(W*pageZoom)+'px';
+ pageCanvas.style.height='auto';pageCanvas.style.maxWidth='none';
+ $('zoomLabel').textContent=Math.round(pageZoom*100)+' %';
+ $('zoomFit').classList.toggle('active',Math.abs(pageZoom-fitPage())<.01);
+ $('zoomReadable').classList.toggle('active',Math.abs(pageZoom-.85)<.01);
+ frame.scrollLeft=originalX*pageZoom-px;
+ frame.scrollTop=originalY*pageZoom-py;
+}
+const previewFrame=$('sheetScroll');
+let pinchStart=null;
+const fingerDistance=touches=>Math.hypot(touches[0].clientX-touches[1].clientX,touches[0].clientY-touches[1].clientY);
+previewFrame.addEventListener('touchstart',e=>{
+ if(e.touches.length===2){
+  pinchStart={distance:fingerDistance(e.touches),zoom:pageZoom};
+ }
+},{passive:true});
+previewFrame.addEventListener('touchmove',e=>{
+ if(e.touches.length!==2||!pinchStart)return;
+ e.preventDefault();
+ const x=(e.touches[0].clientX+e.touches[1].clientX)/2;
+ const y=(e.touches[0].clientY+e.touches[1].clientY)/2;
+ zoomAtPoint(pinchStart.zoom*fingerDistance(e.touches)/Math.max(1,pinchStart.distance),x,y);
+},{passive:false});
+previewFrame.addEventListener('touchend',e=>{if(e.touches.length<2)pinchStart=null},{passive:true});
+previewFrame.addEventListener('touchcancel',()=>{pinchStart=null},{passive:true});
+
+let swipeStart=null,swipeSuppressTapUntil=0;
+function isModalVisible(){return [...document.querySelectorAll('#directModal,#signPreview,#sigModal')].some(m=>m.classList.contains('visible'))}
+function shouldBeginEditorSwipe(target){
+ if(!target.closest('#mobileGuide,#editorWrap,#templateBar,#reportManage'))return false;
+ return !target.closest('#guideProgress,input[type=range],a[href],.sheetSwitch');
+}
+document.addEventListener('touchstart',e=>{
+ if(e.touches.length!==1 || matchMedia('(min-width:801px)').matches || isModalVisible()){swipeStart=null;return}
+ const t=e.touches[0];
+ if(guideView==='edit'){
+  if(!shouldBeginEditorSwipe(e.target)){swipeStart=null;return}
+  swipeStart={x:t.clientX,y:t.clientY,time:Date.now(),view:'edit'};
+ }else if(e.target.closest('#reportPreview')){
+  if(e.target.closest('button')){swipeStart=null;return}
+  const atFit=Math.abs(pageZoom-fitPage())<.03;
+  const fromHandle=!!e.target.closest('.previewTitle,.zoomBar');
+  const fromEdge=t.clientX<38;
+  // Im vergrößerten Zettel seitlich scrollen; Schließen nur vom Rand oder von der Kopfzeile.
+  swipeStart=(atFit||fromHandle||fromEdge)?{x:t.clientX,y:t.clientY,time:Date.now(),view:'preview',fromHandle,fromEdge}:null;
+ }else swipeStart=null;
+},{passive:true});
+document.addEventListener('touchend',e=>{
+ if(!swipeStart||e.changedTouches.length!==1)return;
+ const start=swipeStart; swipeStart=null;
+ if(isModalVisible()||Date.now()-start.time>1200)return;
+ const t=e.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+ if(Math.abs(dx)<85||Math.abs(dx)<Math.abs(dy)*1.35)return;
+ if(start.view==='edit'&&dx<0){swipeSuppressTapUntil=Date.now()+450;showGuidePreview()}
+ else if(start.view==='preview'&&dx>0&&(!pinchStart)){
+  // Bei Vergrößerung erst normal horizontal scrollen, außer am linken Rand oder an der Kopfzeile.
+  if(pageZoom>fitPage()+.04 && !start.fromHandle && !start.fromEdge)return;
+  swipeSuppressTapUntil=Date.now()+450;goGuide(guideStep);
+ }
+},{passive:true});
+document.addEventListener('touchcancel',()=>{swipeStart=null},{passive:true});
+// Ein Finger kann das große Blatt verschieben; Doppeltippen zoomt an die Stelle.
+let lastPreviewTap=0;
+$('page').addEventListener('click',e=>{
+ if(Date.now()<swipeSuppressTapUntil){e.stopImmediatePropagation();e.preventDefault();return}
+ if(!matchMedia('(max-width:800px)').matches||guideView!=='preview')return;
+ const now=Date.now();
+ if(now-lastPreviewTap<310){
+  e.stopImmediatePropagation();e.preventDefault();
+  zoomAtPoint(pageZoom<.8?.95:fitPage(),e.clientX,e.clientY);
+  lastPreviewTap=0;
+ }else lastPreviewTap=now;
+},true);
+
+// V32: isolierter Prüfmodus, derselbe Canvas und dieselben direkten Formularfelder.
+function v32CanLeave(){return !v32Busy&&(!changed||confirm('Ungespeicherte Änderungen am Bericht verwerfen?'));}
+function v32Buttons(){for(const id of ['v32Draft','v32Later','v32Approve','v32First','v32Second','v33Sign'])$(id).disabled=v32Busy||!v32Ready;}
+async function v32Load(id){
+ v32Ready=false;v32Buttons();try{
+ const rows=await apiRest('app_montage_reports?select=report_id,owner_user_id,document,updated_at,review_status&report_id=eq.'+encodeURIComponent(id)+'&limit=1');const r=rows?.[0];if(!r)throw Error('Bericht nicht verfügbar');
+ reports={};reports[id]={data:r.document.data,extraData:r.document.extraData||null,updated:r.updated_at};foreignReportIds.add(id);loadRecord(id);v32Version=r.updated_at;v32Status=r.review_status;v32Fresh.clear();v32Ready=true;changed=false;
+ $('v32Title').textContent='Blauenzettel '+(model.reportNumber||'')+' · '+(model.kunde||model.standort||'');$('v32Second').hidden=!sheetModels.second; $('v32First').textContent='Blatt 1 · '+(sheetModels.first.orderType==='zusatz'?'Zusatz':'Auftrag'); $('v32Second').textContent='Blatt 2 · '+(sheetModels.second?.orderType==='auftrag'?'Auftrag':'Zusatz');
+ setStatus(v32Status==='geprueft'?'✓ Geprüft – bei Korrekturen erneut unterschreiben':v32Status==='spaeter'?'◷ Zurückgestellt':'! Ungeprüft – bitte prüfen und unterschreiben');
+ guideView='preview';queuePaint();requestAnimationFrame(()=>setPageZoom(fitPage(),true));
+ await Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadAvailableMaterials()]);
+ }catch(e){setStatus('Bericht konnte nicht geladen werden: '+e.message,false);}finally{v32Buttons();}
+}
+async function v32Commit(status){
+ if(!v32Ready||v32Busy)return;
+ if(status==='geprueft'&&(!v32Fresh.has('first')||(sheetModels.second&&!v32Fresh.has('second')))){setStatus('Bitte auf jedem vorhandenen Blatt im Meister-Feld neu unterschreiben.',false);return;}
+ v32Busy=true;v32Buttons();try{
+ const doc={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null};
+ if(status!=='geprueft'){delete doc.data.sign_meister;if(doc.extraData)delete doc.extraData.sign_meister;}
+ const result=await apiRest('rpc/app_v32_review_save',{method:'POST',body:JSON.stringify({target_report:currentId,expected_updated:v32Version,new_document:doc,new_status:status})});
+ v32Version=result.updated_at;v32Status=result.review_status;v32Fresh.clear();changed=false;
+ if(status!=='geprueft'){delete sheetModels.first.sign_meister;if(sheetModels.second)delete sheetModels.second.sign_meister;queuePaint();}
+ setStatus(status==='geprueft'?'✓ Prüfung abgeschlossen und unterschrieben':status==='spaeter'?'◷ Gespeichert – später weiterbearbeiten':'✓ Änderungen gespeichert – ungeprüft');
+ parent.v32RefreshReviewRow(currentId,result,doc);
+ if(status==='geprueft')setTimeout(()=>{try{parent.v33AfterApproval(currentId);}catch(e){console.warn(e);}},0);
+ }catch(e){setStatus('Nicht gespeichert: '+e.message,false);}finally{v32Busy=false;v32Buttons();}
+}
+if(v32Review){
+ $('reportPreview').style.display='block';
+ $('v33Sign').onclick=()=>requestSignature('sign_meister');$('v32First').onclick=()=>selectSheet('first');$('v32Second').onclick=()=>selectSheet('second');$('v32Draft').onclick=()=>v32Commit('offen');$('v32Later').onclick=()=>v32Commit('spaeter');$('v32Approve').onclick=()=>v32Commit('geprueft');v32Buttons();
+ window.addEventListener('message',e=>{if(e.source===parent&&e.origin===parent.location.origin&&e.data?.type==='mv_v32_open')v32Load(e.data.id);});
+}
+</script>
+<style id="ez-style">
+/* V41: Einfacher Ablauf für den blauen Zettel – eine Frage pro Bildschirm. */
+#ez{position:fixed;inset:0;z-index:60;background:#0B111C;color:#E8EDF4;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.45;display:flex;flex-direction:column}
+#ez[hidden]{display:none}
+#ez *{box-sizing:border-box}
+#ez button,#ez input,#ez textarea,#ez select{font:inherit;color:inherit}
+#ez .ez-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 20px 24px}
+#ez .ez-inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+#ez .ez-top{display:flex;align-items:center;gap:12px}
+#ez .ez-x{flex:none;width:46px;height:46px;border-radius:14px;border:1px solid #2A3750;background:transparent;color:#C9D3E2;display:grid;place-items:center;cursor:pointer}
+#ez .ez-toptxt{flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0}
+#ez .ez-toptxt span{font-size:14px;color:#9AA6B8}
+#ez .ez-toptxt strong{font-size:16px;font-weight:600}
+#ez .ez-saved{font-size:13px;color:#6BD6A8;white-space:nowrap}
+#ez .ez-saved.busy{color:#9AA6B8}
+#ez .ez-bar{display:flex;gap:5px}
+#ez .ez-bar i{flex:1;height:6px;border-radius:3px;background:#1F2A3C}
+#ez .ez-bar i.on{background:#6E9BFF}
+#ez h1{margin:4px 0 0;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+#ez h2{margin:8px 0 0;font-size:18px;font-weight:650}
+#ez .ez-hint{font-size:15px;color:#9AA6B8;margin:0}
+#ez .ez-foot{flex:none;display:flex;gap:10px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));background:#0E1520;border-top:1px solid #1F2A3C}
+#ez .ez-foot>div{max-width:560px;margin:0 auto;display:flex;gap:10px;width:100%}
+#ez .ez-back{width:104px;height:60px;border-radius:16px;border:1px solid #2A3750;background:transparent;font-weight:600;cursor:pointer}
+#ez .ez-next{flex:1;height:60px;border-radius:16px;border:0;background:#3567E0;color:#fff;font-size:18px;font-weight:650;cursor:pointer}
+#ez .ez-next:disabled{opacity:.45;cursor:not-allowed}
+#ez .ez-pick{display:flex;align-items:center;gap:14px;width:100%;min-height:66px;padding:12px 16px;border-radius:16px;border:1px solid #2A3750;background:#111926;text-align:left;cursor:pointer}
+#ez .ez-pick.on{border:2px solid #6E9BFF;background:rgba(110,155,255,.10)}
+#ez .ez-pick span{flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0}
+#ez .ez-pick strong{font-size:18px;font-weight:600}
+#ez .ez-pick small{font-size:14px;color:#9AA6B8}
+#ez .ez-dot{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid #3A475E}
+#ez .ez-pick.on .ez-dot{border:0;background:#6E9BFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B111C' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4 4 8-9'/%3E%3C/svg%3E") center/18px no-repeat}
+#ez .ez-input{width:100%;height:54px;padding:0 16px;border-radius:14px;border:1px solid #2A3750;background:#111926;color:#E8EDF4;outline:0}
+#ez textarea.ez-input{height:auto;min-height:110px;padding:14px 16px;resize:vertical}
+#ez .ez-input:focus{border-color:#6E9BFF;box-shadow:0 0 0 3px rgba(110,155,255,.2)}
+#ez label.ez-l{font-size:14px;font-weight:600;color:#9AA6B8;margin:4px 0 -6px}
+#ez .ez-info{padding:12px 14px;border-radius:14px;background:rgba(76,201,148,.10);color:#A8E8CB;font-size:15px}
+#ez .ez-warn{padding:12px 14px;border-radius:14px;background:rgba(240,176,74,.12);color:#F3C77A;font-size:15px}
+#ez .ez-err{padding:12px 14px;border-radius:14px;background:rgba(242,122,122,.12);color:#F7A3A3;font-size:15px}
+#ez .ez-seg{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:6px;padding:5px;border-radius:16px;background:#0E1520;border:1px solid #1F2A3C}
+#ez .ez-seg button{min-height:52px;border-radius:12px;border:0;background:transparent;color:#9AA6B8;font-weight:600;cursor:pointer;padding:6px}
+#ez .ez-seg button.on{background:#23314A;color:#E8EDF4}
+#ez .ez-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+#ez .ez-days button{height:56px;border-radius:14px;border:1px solid #2A3750;background:#111926;color:#C9D3E2;font-weight:650;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+#ez .ez-days button small{font-size:11px;font-weight:500;opacity:.8}
+#ez .ez-days button.on{background:#6E9BFF;border-color:#6E9BFF;color:#0B111C}
+#ez .ez-week{display:flex;align-items:center;gap:8px}
+#ez .ez-week strong{flex:1;text-align:center;font-weight:600}
+#ez .ez-week button{width:46px;height:46px;border-radius:12px;border:1px solid #2A3750;background:transparent;cursor:pointer;font-size:20px}
+#ez .ez-card{padding:14px 16px;border-radius:18px;background:#111926;border:1px solid #1F2A3C;display:flex;flex-direction:column;gap:10px}
+#ez .ez-row{display:flex;align-items:center;gap:10px}
+#ez .ez-row>strong{flex:1}
+#ez .ez-step{width:52px;height:52px;border-radius:14px;border:1px solid #2A3750;background:transparent;font-size:24px;cursor:pointer;flex:none}
+#ez .ez-val{min-width:92px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+#ez .ez-quick{display:flex;gap:6px;flex-wrap:wrap}
+#ez .ez-quick button{height:40px;padding:0 14px;border-radius:20px;border:1px solid #2A3750;background:transparent;color:#C9D3E2;cursor:pointer;font-size:15px}
+#ez .ez-quick button.on{border-color:#6E9BFF;color:#E8EDF4;background:rgba(110,155,255,.12)}
+#ez .ez-dash{width:100%;min-height:54px;border-radius:14px;border:1px dashed #3A475E;background:transparent;color:#8FB2FF;font-weight:600;cursor:pointer}
+#ez .ez-sum{display:flex;justify-content:space-between;font-size:17px;padding:2px 4px}
+#ez .ez-mat{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:#111926;border:1px solid #1F2A3C}
+#ez .ez-mat span{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+#ez .ez-mat input{width:110px;height:48px;padding:0 10px;border-radius:12px;border:1px solid #2A3750;background:#0B111C;text-align:center;font-weight:650}
+#ez .ez-mat button{width:44px;height:44px;border-radius:12px;border:1px solid rgba(242,122,122,.35);background:transparent;color:#F59090;cursor:pointer;font-size:18px}
+#ez .ez-results{display:flex;flex-direction:column;gap:6px}
+#ez .ez-results button{display:flex;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2A3750;background:#0E1520;text-align:left;cursor:pointer}
+#ez .ez-results small{color:#9AA6B8}
+#ez .ez-chips{display:flex;flex-wrap:wrap;gap:8px}
+#ez .ez-chips button{min-height:44px;padding:6px 14px;border-radius:22px;border:1px solid #2A3750;background:#111926;color:#C9D3E2;cursor:pointer;font-size:15px;text-align:left}
+#ez .ez-big{display:flex;align-items:center;gap:16px;width:100%;padding:22px 20px;border-radius:20px;border:0;background:#3567E0;color:#fff;text-align:left;cursor:pointer}
+#ez .ez-big b{width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:30px;font-weight:600;flex:none}
+#ez .ez-big span{display:flex;flex-direction:column;line-height:1.3}
+#ez .ez-big strong{font-size:20px}
+#ez .ez-big small{font-size:15px;opacity:.88}
+#ez .ez-tag{flex:none;height:28px;padding:0 10px;border-radius:14px;font-size:13px;font-weight:600;display:flex;align-items:center;background:rgba(240,176,74,.13);color:#F0B04A}
+#ez .ez-link{align-self:center;background:none;border:0;color:#8FB2FF;font-size:15px;cursor:pointer;padding:12px}
+#ez .ez-preview{display:flex;gap:14px;align-items:center}
+#ez .ez-preview img{width:104px;height:147px;object-fit:cover;border-radius:8px;border:1px solid #2A3750;background:#fff;cursor:zoom-in;flex:none}
+#ez .ez-sumrow{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #1F2A3C}
+#ez .ez-sumrow:first-child{border-top:0}
+#ez .ez-sumrow span{flex:1;display:flex;flex-direction:column;line-height:1.3}
+#ez .ez-sumrow small{font-size:13px;color:#9AA6B8}
+#ez .ez-sumrow button{background:none;border:0;color:#8FB2FF;font-weight:600;cursor:pointer;padding:8px}
+#ez .ez-signed{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(76,201,148,.10);border:1px solid rgba(76,201,148,.35);color:#A8E8CB;font-weight:600}
+#ez .ez-check{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:#111926;border:1px solid #2A3750;cursor:pointer}
+#ez .ez-check input{width:26px;height:26px;accent-color:#6E9BFF;flex:none}
+#ez .ez-check span{flex:1;display:flex;flex-direction:column;line-height:1.3}
+#ez .ez-check small{font-size:14px;color:#9AA6B8}
+#ez .ez-done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:30px 10px}
+#ez .ez-done .ez-ok{width:84px;height:84px;border-radius:50%;background:rgba(76,201,148,.14);color:#6BD6A8;display:grid;place-items:center;font-size:44px}
+#ez .ez-zoom{position:fixed;inset:0;z-index:70;background:#000d;overflow:auto;padding:12px}
+#ez .ez-zoom img{width:100%;max-width:900px;display:block;margin:0 auto;background:#fff}
+#ez .ez-zoom button{position:fixed;top:12px;right:12px;width:50px;height:50px;border-radius:50%;border:0;background:#fff;color:#111;font-size:22px;cursor:pointer}
+#ezOpen{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:40;height:50px;padding:0 18px;border-radius:25px;border:0;background:#3567E0;color:#fff;font-weight:650;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer}
+#ezOpen[hidden]{display:none}
+</style>
+<div id="ez" role="dialog" aria-label="Blauer Zettel" hidden></div>
+<button id="ezOpen" type="button" hidden>Einfache Ansicht</button>
+<script id="ez-js">
+(function(){
+'use strict';
+if(document.body.dataset.review==='yes')return;
+const ez=$('ez'),openBtn=$('ezOpen');
+const MODE_KEY='mv_bz_mode_v41';
+const STEPS=['Baustelle','Fahrt','Zeit','Arbeiten','Fertig'];
+let numberTried='',step='start',saveTimer=0,matQuery='',siteQuery='',meisters=null,mail={send:true,meister:false,meisterEmail:'',to:''},result=null,busy=false;
+const E=v=>esc(v);
+const fmtH=n=>(Math.round(n*4)/4).toFixed(2).replace('.',',');
+const numH=v=>{const n=Number(safe(v).replace(',','.'));return Number.isFinite(n)?n:0;};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const monday=d=>{const x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x;};
+const myName=()=>{try{return (typeof parent.v41UserName==='function'&&parent.v41UserName())||'';}catch(e){return '';}};
+function site(){return availableSites.find(s=>String(s.id)===String(model.siteId));}
+function weekOfModel(){
+  for(const [i,d] of DAYS.entries()){const raw=safe(model['date_'+d]).trim();const m=raw.match(/^(\d{1,2})[.\/](\d{1,2})/);if(m){const y=Number(model.jahr)||new Date().getFullYear();const dt=new Date(y,Number(m[2])-1,Number(m[1]),12);if(!isNaN(dt)){dt.setDate(dt.getDate()-i);return monday(dt);}}}
+  return null;
+}
+let week=null;
+function dayDate(i){const d=new Date(week);d.setDate(d.getDate()+i);return d;}
+function kw(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));t.setUTCDate(t.getUTCDate()+4-(t.getUTCDay()||7));return Math.ceil(((t-Date.UTC(t.getUTCFullYear(),0,1))/86400000+1)/7);}
+function touch(){
+  dirty();clearTimeout(saveTimer);const s=ez.querySelector('.ez-saved');if(s){s.textContent='Speichert …';s.classList.add('busy');}
+  saveTimer=setTimeout(()=>{localSave();const t=ez.querySelector('.ez-saved');if(t){t.textContent='✓ Gespeichert';t.classList.remove('busy');}},500);
+}
+// Zwischendurch nur auf dem Gerät sichern. Cloud und Stundenzettel-Übernahme erst bei „Alles richtig?“ und beim Abschluss.
+function localSave(){
+  try{reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);}catch(e){console.warn('Lokal speichern:',e);}
+}
+function flush(full){clearTimeout(saveTimer);if(!changed&&!full)return;if(full){try{saveCurrent();}catch(e){console.warn(e);}}else localSave();}
+function head(n,title){
+  return `<div class="ez-top"><button type="button" class="ez-x" data-go="start" aria-label="Zur Übersicht">✕</button><div class="ez-toptxt"><span>Schritt ${n} von 5</span><strong>${STEPS[n-1]}</strong></div><span class="ez-saved">✓ Gespeichert</span></div><div class="ez-bar" aria-hidden="true">${STEPS.map((_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div><h1>${title}</h1>`;
+}
+function foot(prev,next,label='Weiter →',disabled=false){
+  return `<div class="ez-foot"><div><button type="button" class="ez-back" data-go="${prev}">← Zurück</button><button type="button" class="ez-next" data-go="${next}" ${disabled?'disabled':''}>${label}</button></div></div>`;
+}
+function shell(inner,footer=''){ez.innerHTML=`<div class="ez-scroll"><div class="ez-inner">${inner}</div></div>${footer}`;}
+function unfinished(){
+  return Object.entries(reports).filter(([id,r])=>r?.data&&!r.data.sign_bauleitung&&(r.data.siteId||r.data.kunde||r.data.sign_monteur)).sort((a,b)=>safe(b[1].updated).localeCompare(safe(a[1].updated))).slice(0,6);
+}
+function lastStepFor(d){
+  if(d.sign_monteur)return 'check';
+  if(safe(d.arbeiten).trim()||safe(d.mat1_name).trim())return 'check';
+  if(DAYS.some(x=>safe(d['m1_'+x]).trim()))return 'work';
+  if(safe(d.kfz1).trim())return 'time';
+  if(d.siteId)return 'trip';
+  return 'site';
+}
+// ---------- Bildschirme ----------
+const R={};
+R.start=()=>{
+  const list=unfinished();
+  shell(`<div class="ez-top"><button type="button" class="ez-x" data-act="home" aria-label="Zurück zur Materialverwaltung">←</button><div class="ez-toptxt"><span>Montagebericht</span><strong>Blauer Zettel</strong></div></div>
+   <button type="button" class="ez-big" data-act="new"><b>+</b><span><strong>Neuen Zettel anfangen</strong><small>Schritt für Schritt</small></span></button>
+   ${list.length?`<h2 style="font-size:15px;color:#9AA6B8;font-weight:600">Angefangen, noch nicht fertig</h2>${list.map(([id,r])=>{const d=r.data;const when=new Date(r.updated);return `<button type="button" class="ez-pick" data-open="${E(id)}"><span><strong>${E(d.kunde||'Ohne Baustelle')}</strong><small>${when.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})}${d.reportNumber?' · Nr. '+E(d.reportNumber):''}</small></span>${d.sign_monteur?'<span class="ez-tag">Polier fehlt</span>':'<span style="color:#8794A8;font-size:22px">›</span>'}</button>`;}).join('')}`:''}
+   <button type="button" class="ez-link" data-act="classic">Alle Felder auf einmal (für Geübte)</button>`);
+};
+R.site=()=>{
+  const q=siteQuery.trim().toLocaleLowerCase('de');
+  const list=availableSites.filter(s=>s.active!==false||String(s.id)===String(model.siteId)).filter(s=>!q||[s.name,s.order_number,s.contact_person].join(' ').toLocaleLowerCase('de').includes(q));
+  const s=site();const both=s&&s.order_number&&s.extra_order_number;
+  shell(head(1,'Wo hast du gearbeitet?')+`
+   <label for="ezSiteQ" class="ez-l">Baustelle suchen</label><input id="ezSiteQ" class="ez-input" type="search" value="${E(siteQuery)}" placeholder="Name oder Auftragsnummer" autocomplete="off">
+   ${sitesState==='loading'?'<p class="ez-hint">Baustellen werden geladen …</p>':''}
+   ${sitesState==='error'?'<div class="ez-err">Baustellen konnten nicht geladen werden. Bitte Internet prüfen.</div>':''}
+   <div style="display:flex;flex-direction:column;gap:8px">${list.map(x=>`<button type="button" class="ez-pick ${String(x.id)===String(model.siteId)?'on':''}" data-site="${E(x.id)}"><span><strong>${E(x.name)}</strong><small>${E([x.order_number?'Auftrag '+x.order_number:'',x.contact_person].filter(Boolean).join(' · ')||'Baustelle')}</small></span><i class="ez-dot"></i></button>`).join('')||(sitesState==='ready'?'<p class="ez-hint">Keine Baustelle gefunden.</p>':'')}</div>
+   ${both?`<h2>Auftrag oder Zusatz?</h2><div class="ez-seg"><button type="button" class="${model.orderType!=='zusatz'?'on':''}" data-order="auftrag">Auftrag<br><small>${E(s.order_number)}</small></button><button type="button" class="${model.orderType==='zusatz'?'on':''}" data-order="zusatz">Zusatz<br><small>${E(s.extra_order_number)}</small></button></div>`:''}
+   ${s?`<div class="ez-info">${E([model.auftragsnummer?'Auftrag '+model.auftragsnummer:'',model.polier?'Polier '+model.polier:''].filter(Boolean).join(' und ')||'Die Baustelle')} ${model.auftragsnummer&&model.polier?'werden':'wird'} automatisch eingetragen.</div>`:''}`,foot('start','trip','Weiter →',!s));
+  const inp=$('ezSiteQ');inp.oninput=()=>{siteQuery=inp.value;const pos=inp.selectionStart;render();const n=$('ezSiteQ');n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
+  if(sitesState==='loading')setTimeout(()=>{if(step==='site')render();},600);
+};
+R.trip=()=>{
+  const v=availableVehicles.filter(x=>x.active!==false||String(x.id)===String(model.vehicle1Id));
+  const s=site();const dist=s?parseKilometers(s.distance_km):null;
+  const mode=model.kmMode1||'two';
+  shell(head(2,'Mit welchem Fahrzeug?')+`
+   <div style="display:flex;flex-direction:column;gap:8px">${v.map(x=>`<button type="button" class="ez-pick ${String(x.id)===String(model.vehicle1Id)?'on':''}" data-veh="${E(x.id)}"><span><strong>${E(x.name)}</strong><small>${E(x.plate||'')}</small></span><i class="ez-dot"></i></button>`).join('')}
+   <button type="button" class="ez-pick ${!model.vehicle1Id&&!safe(model.kfz1).trim()&&model.ezNoVehicle?'on':''}" data-veh=""><span><strong>Kein Firmenfahrzeug</strong><small>Fahrt-Felder bleiben leer</small></span><i class="ez-dot"></i></button></div>
+   ${vehicleState==='loading'?'<p class="ez-hint">Fahrzeuge werden geladen …</p>':''}
+   ${model.vehicle1Id||safe(model.kfz1).trim()?`
+   <h2>Gewicht</h2><div class="ez-seg"><button type="button" class="${model.kfz1_bis15?'on':''}" data-weight="bis15">bis 1,5 t</button><button type="button" class="${model.kfz1_ueber15?'on':''}" data-weight="ueber15">über 1,5 t</button></div>
+   <h2>Strecke</h2><div class="ez-seg" style="--n:3"><button type="button" class="${mode==='two'?'on':''}" data-km="two">Hin und zurück</button><button type="button" class="${mode==='one'?'on':''}" data-km="one">Eine Strecke</button><button type="button" class="${mode==='custom'?'on':''}" data-km="custom">Andere km</button></div>
+   ${mode==='custom'?`<label for="ezKm" class="ez-l">Gefahrene Kilometer</label><input id="ezKm" class="ez-input" inputmode="decimal" value="${E(model.km1)}" placeholder="z. B. 42">`:`<div class="ez-info">${dist==null?'Für diese Baustelle ist keine Entfernung hinterlegt. Bitte „Andere km“ wählen.':`${E(model.km1)} km werden eingetragen (${E(formatKm(dist))} km pro Strecke).`}</div>`}
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="display:flex;flex-direction:column;gap:6px"><label for="ezAb" class="ez-l" style="margin:0">Abfahrt</label><input id="ezAb" class="ez-input" type="time" value="${E(model.abfahrt1)}"></div><div style="display:flex;flex-direction:column;gap:6px"><label for="ezRk" class="ez-l" style="margin:0">Rückkehr</label><input id="ezRk" class="ez-input" type="time" value="${E(model.rueckkehr1)}"></div></div>`:''}`,foot('site','time'));
+  const km=$('ezKm');if(km)km.oninput=()=>{model.km1=km.value;model.kmMode1='custom';touch();};
+  const ab=$('ezAb');if(ab)ab.onchange=()=>{model.abfahrt1=ab.value;touch();};
+  const rk=$('ezRk');if(rk)rk.onchange=()=>{model.rueckkehr1=rk.value;touch();};
+  if(vehicleState==='loading')setTimeout(()=>{if(step==='trip')render();},600);
+};
+function updateSums(){
+  for(let i=1;i<=Number(model.employeeCount||1);i++){
+    const t=DAYS.reduce((a,d)=>a+numH(model[`m${i}_${d}`]),0);
+    model[`m${i}_sum0`]=t?fmtH(t):'';
+  }
+}
+R.time=()=>{
+  if(!week)week=weekOfModel()||monday(new Date());
+  if(!safe(model.monteur1).trim()&&myName())model.monteur1=myName();
+  const n=Number(model.employeeCount||1);
+  const sel=DAYS.map((d,i)=>!!safe(model['date_'+d]).trim());
+  const card=(i)=>{
+    const days=DAYS.map((d,j)=>sel[j]?`<div class="ez-row"><strong>${['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][j]}</strong><button type="button" class="ez-step" data-h="${i}:${d}:-0.25" aria-label="Weniger">−</button><span class="ez-val">${model[`m${i}_${d}`]?E(model[`m${i}_${d}`]):'–'}</span><button type="button" class="ez-step" data-h="${i}:${d}:0.25" aria-label="Mehr">+</button></div>
+      <div class="ez-quick">${[8,8.5,9,10].map(v=>`<button type="button" class="${numH(model[`m${i}_${d}`])===v?'on':''}" data-hset="${i}:${d}:${v}">${fmtH(v)}</button>`).join('')}</div>`:'').filter(Boolean).join('<hr style="border:0;border-top:1px solid #1F2A3C;width:100%;margin:2px 0">');
+    return `<div class="ez-card"><div class="ez-row"><label for="ezName${i}" style="flex:none;font-size:14px;color:#9AA6B8;font-weight:600">${i===1?'Monteur':'Kollege'}</label><input id="ezName${i}" class="ez-input" data-name="${i}" value="${E(model['monteur'+i])}" placeholder="Name" style="height:48px">${i>1?`<button type="button" class="ez-step" style="width:48px;height:48px;font-size:18px;color:#F59090;border-color:rgba(242,122,122,.35)" data-rmemp="${i}" aria-label="Kollege entfernen">✕</button>`:''}</div>${days||'<p class="ez-hint">Oben die Tage antippen.</p>'}${sel.some(Boolean)?`<div class="ez-sum"><span style="color:#9AA6B8">Zusammen</span><strong>${E(model[`m${i}_sum0`]||'0,00')} Std.</strong></div>`:''}</div>`;
+  };
+  shell(head(3,'Wann hast du gearbeitet?')+`
+   <div class="ez-week"><button type="button" data-week="-1" aria-label="Vorherige Woche">‹</button><strong>KW ${kw(week)} · ${dayDate(0).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})} – ${dayDate(6).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}</strong><button type="button" data-week="1" aria-label="Nächste Woche">›</button></div>
+   <div class="ez-days" role="group" aria-label="Arbeitstage">${DAYS.map((d,i)=>`<button type="button" class="${sel[i]?'on':''}" data-day="${d}" aria-pressed="${sel[i]}">${d}<small>${dayDate(i).getDate()}.</small></button>`).join('')}</div>
+   <p class="ez-hint">Tage antippen, dann die Stunden eintragen (Viertelstunden möglich).</p>
+   ${Array.from({length:n},(_,k)=>card(k+1)).join('')}
+   ${n<4&&sel.some(Boolean)?`<button type="button" class="ez-dash" data-act="addemp">+ Kollege war dabei</button>`:''}`,foot('trip','work','Weiter →',!sel.some(Boolean)));
+  ez.querySelectorAll('[data-name]').forEach(inp=>inp.oninput=()=>{model['monteur'+inp.dataset.name]=inp.value;touch();});
+};
+function recentTasks(){
+  const out=[];const seen=new Set((model.workTasks||[]).map(t=>safe(t).trim()));
+  for(const [id,r] of Object.entries(reports).sort((a,b)=>safe(b[1].updated).localeCompare(safe(a[1].updated)))){
+    if(id===currentId)continue;
+    for(const t of (r.data?.workTasks||[])){const v=safe(t).trim();if(v&&v.length<=80&&!seen.has(v)){seen.add(v);out.push(v);}if(out.length>=6)return out;}
+  }
+  return out;
+}
+R.work=()=>{
+  const tasks=Array.isArray(model.workTasks)&&model.workTasks.length?model.workTasks:[''];
+  const mats=[];for(let i=1;i<=8;i++){if(safe(model[`mat${i}_name`]).trim()||safe(model[`mat${i}_menge`]).trim())mats.push(i);}
+  const q=matQuery.trim();const hits=q?availableMaterials.filter(m=>reportMaterialSearchMatches(q,m)).slice(0,6):[];
+  const recent=recentTasks();
+  const issues=validate();
+  shell(head(4,'Was hast du gemacht?')+`
+   ${tasks.map((t,i)=>`<label for="ezTask${i}" class="ez-l">${tasks.length>1?'Arbeit '+(i+1):'Ausgeführte Arbeiten'}</label><textarea id="ezTask${i}" class="ez-input" data-task="${i}" rows="3" placeholder="Was wurde gemacht?">${E(t)}</textarea>`).join('')}
+   <p class="ez-hint">Tipp: Auf der Tastatur das Mikrofon drücken und sprechen.</p>
+   ${recent.length?`<p class="ez-hint" style="color:#C9D3E2">Zuletzt geschrieben – antippen zum Übernehmen:</p><div class="ez-chips">${recent.map((t,i)=>`<button type="button" data-recent="${i}">+ ${E(t)}</button>`).join('')}</div>`:''}
+   <button type="button" class="ez-dash" data-act="addtask">+ Weitere Arbeit</button>
+   <h2>Material</h2>
+   ${mats.map(i=>`<div class="ez-mat"><span>${E(model[`mat${i}_name`])}</span><label for="ezMq${i}" style="position:absolute;width:1px;height:1px;overflow:hidden">Menge</label><input id="ezMq${i}" data-mq="${i}" inputmode="decimal" value="${E(model[`mat${i}_menge`])}" placeholder="Menge"><button type="button" data-mrm="${i}" aria-label="Material entfernen">✕</button></div>`).join('')}
+   ${mats.length<7?`<label for="ezMatQ" class="ez-l">Material hinzufügen</label><input id="ezMatQ" class="ez-input" type="search" value="${E(matQuery)}" placeholder="Name oder M-Nummer suchen" autocomplete="off">
+   <div class="ez-results">${hits.map((m,i)=>`<button type="button" data-madd="${i}"><span>${E(m.name)}<br><small>${m.material_number?'M'+E(m.material_number):''}</small></span><small>${E(m.unit||'')}</small></button>`).join('')}${q?`<button type="button" data-mfree="1"><span>„${E(q)}“ frei eintragen</span></button>`:''}</div>`:'<p class="ez-hint">Mehr Material passt nicht auf den Zettel.</p>'}
+   ${issues.length?`<div class="ez-warn">${issues.map(E).join('<br>')}</div>`:''}`,foot('time','check'));
+  ez.querySelectorAll('[data-task]').forEach(t=>t.oninput=()=>{model.workTasks=[...tasks];model.workTasks[+t.dataset.task]=t.value;updateTasksText();touch();});
+  ez.querySelectorAll('[data-mq]').forEach(t=>t.oninput=()=>{model[`mat${t.dataset.mq}_menge`]=t.value;touch();});
+  const mq=$('ezMatQ');if(mq)mq.oninput=()=>{matQuery=mq.value;const pos=mq.selectionStart;render();const n=$('ezMatQ');n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}};
+  ez._hits=hits;ez._recent=recent;
+};
+let previewUrl='';
+async function makePreview(){
+  try{const c=document.createElement('canvas');await drawPage(c);previewUrl=c.toDataURL('image/jpeg',.85);const img=ez.querySelector('[data-preview]');if(img)img.src=previewUrl;}catch(e){console.warn('Vorschau:',e);}
+}
+R.check=()=>{
+  if(!validReportNumber(model.reportNumber)&&!numberBusy&&numberTried!==currentId){numberTried=currentId;assignMissingNumber().then(()=>{if(step==='check'&&validReportNumber(model.reportNumber))render();});}
+  const s=site();const issues=validate();
+  const hours=DAYS.filter(d=>safe(model['date_'+d]).trim());
+  const total=Array.from({length:Number(model.employeeCount||1)},(_,k)=>numH(model[`m${k+1}_sum0`])).reduce((a,b)=>a+b,0);
+  const mats=[1,2,3,4,5,6,7,8].filter(i=>safe(model[`mat${i}_name`]).trim()).length;
+  shell(head(5,'Alles richtig?')+`
+   <div class="ez-preview"><img data-preview alt="Vorschau des blauen Zettels" src="${previewUrl}"><div style="display:flex;flex-direction:column;gap:8px;flex:1"><span class="ez-hint">So sieht dein Zettel aus.</span><button type="button" class="ez-back" style="width:100%;height:48px" data-act="zoom">Zettel groß ansehen</button></div></div>
+   <div class="ez-card" style="gap:0">
+    <div class="ez-sumrow"><span><small>Baustelle</small><strong>${E(s?.name||model.kunde||'–')}${model.auftragsnummer?' · '+E(model.auftragsnummer):''}</strong></span><button type="button" data-go="site">Ändern</button></div>
+    <div class="ez-sumrow"><span><small>Fahrt</small><strong>${E(model.kfz1||'Kein Fahrzeug')}${model.km1?' · '+E(model.km1)+' km':''}</strong></span><button type="button" data-go="trip">Ändern</button></div>
+    <div class="ez-sumrow"><span><small>Zeit</small><strong>${hours.length?hours.join(', ')+' · '+fmtH(total)+' Std.':'–'}</strong></span><button type="button" data-go="time">Ändern</button></div>
+    <div class="ez-sumrow"><span><small>Arbeiten &amp; Material</small><strong>${(model.workTasks||[]).filter(t=>safe(t).trim()).length} Arbeiten · ${mats} Material</strong></span><button type="button" data-go="work">Ändern</button></div>
+   </div>
+   ${issues.length?`<div class="ez-warn">${issues.map(E).join('<br>')}</div>`:''}
+   ${validReportNumber(model.reportNumber)?'':'<div class="ez-warn">Berichtsnummer wird noch vergeben … (Internet nötig)</div>'}
+   ${model.sign_monteur?`<div class="ez-signed">✓ Du hast unterschrieben<button type="button" class="ez-link" style="margin-left:auto;padding:4px" data-sign="sign_monteur">Neu</button></div>`:`<button type="button" class="ez-big" data-sign="sign_monteur"><b>✍</b><span><strong>Jetzt unterschreiben</strong><small>Handy quer halten, mit dem Finger</small></span></button>`}
+   <p class="ez-hint">Zusatz-Blatt nötig? Das geht in der <button type="button" class="ez-link" style="padding:0;font-size:15px" data-act="classic">Ansicht für Geübte</button>.</p>`,
+   foot('work','polier','Handy an den Polier geben →',!model.sign_monteur||issues.length>0));
+  makePreview();
+};
+async function loadMeisters(){if(meisters)return;try{const rows=await apiRest('rpc/app_v41_meister_contacts',{method:'POST',body:'{}'});meisters=Array.isArray(rows)?rows:[];}catch(e){meisters=[];console.warn('E-Meister:',e);}if(meisters.length&&!mail.meisterEmail)mail.meisterEmail=meisters[0].email;if(step==='polier')render();}
+R.polier=()=>{
+  const s=site();if(!mail.to)mail.to=safe(s?.contact_email);
+  loadMeisters();
+  const signed=!!model.sign_bauleitung;
+  shell(`<div class="ez-top"><button type="button" class="ez-x" data-go="check" aria-label="Zurück">←</button><div class="ez-toptxt"><span>Für den Polier</span><strong>${E(s?.name||model.kunde||'Baustelle')}</strong></div></div>
+   <h1>Bitte prüfen und unterschreiben</h1>
+   <div class="ez-preview"><img data-preview alt="Vorschau des blauen Zettels" src="${previewUrl}"><div style="display:flex;flex-direction:column;gap:8px;flex:1"><span class="ez-hint">${E(model.polier||'Polier')}, bitte den Zettel kurz ansehen.</span><button type="button" class="ez-back" style="width:100%;height:48px" data-act="zoom">Zettel groß ansehen</button></div></div>
+   <label class="ez-check"><input type="checkbox" data-mail="send" ${mail.send?'checked':''}><span><strong>Per E-Mail an den Polier</strong><small>Nach der Unterschrift öffnet sich die fertige E-Mail</small></span></label>
+   ${mail.send?`<label for="ezTo" class="ez-l">E-Mail Polier</label><input id="ezTo" class="ez-input" type="email" value="${E(mail.to)}" placeholder="name@firma.de" autocomplete="email">${s?.contact_email?'':'<p class="ez-hint">Für diese Baustelle ist noch keine Adresse hinterlegt. Admin oder E-Meister können sie bei der Baustelle eintragen.</p>'}
+   ${meisters&&meisters.length?`<label class="ez-check"><input type="checkbox" data-mail="meister" ${mail.meister?'checked':''}><span><strong>Kopie an E-Meister</strong><small>${meisters.length===1?E(meisters[0].name):'Bitte auswählen'}</small></span></label>${mail.meister&&meisters.length>1?`<select id="ezMeister" class="ez-input">${meisters.map(m=>`<option value="${E(m.email)}" ${m.email===mail.meisterEmail?'selected':''}>${E(m.name)}</option>`).join('')}</select>`:''}`:''}`:''}
+   ${signed?'<div class="ez-signed">✓ Polier hat unterschrieben</div>':''}`,
+   `<div class="ez-foot"><div><button type="button" class="ez-next" ${busy?'disabled':''} data-act="${signed?'finish':'polsign'}">${busy?'Wird vorbereitet …':signed?(mail.send?'E-Mail vorbereiten':'Fertig'):'✍ Polier unterschreibt'}</button></div></div>`);
+  const to=$('ezTo');if(to)to.oninput=()=>{mail.to=to.value.trim();};
+  const ms=$('ezMeister');if(ms)ms.onchange=()=>{mail.meisterEmail=ms.value;};
+  makePreview();
+};
+async function buildPdf(){
+  const originals={sheet:activeSheet,current:model};const pages=[];
+  try{
+    for(const which of (sheetModels.second?['first','second']:['first'])){
+      model=sheetModels[which];
+      if(!validReportNumber(model.reportNumber))throw new Error('Berichtsnummer fehlt noch. Bitte mit Internet erneut versuchen.');
+      const c=document.createElement('canvas');await drawPage(c);pages.push(jpegBytes(c));
+    }
+  }finally{model=originals.current;activeSheet=originals.sheet;}
+  return pages.length>1?makeTwoPagePdf(pages):makePdf(pages[0],W,H);
+}
+async function uploadPdf(blob){
+  const token=await getSiteToken();if(token===SITE_SUPABASE_KEY)throw new Error('Bitte in der Materialverwaltung anmelden.');
+  const user=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id;if(!user)throw new Error('Kein Mitarbeiter-Account.');
+  const name=`${user}/${safe(model.reportNumber||'ohne-nummer').replace(/[^\w-]/g,'')}_${Date.now()}.pdf`;
+  const h={apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token};
+  const up=await fetch(`${SITE_SUPABASE_URL}/storage/v1/object/berichte/${name}`,{method:'POST',headers:{...h,'Content-Type':'application/pdf','x-upsert':'true'},body:blob});
+  if(!up.ok)throw new Error('PDF-Ablage: HTTP '+up.status);
+  const sg=await fetch(`${SITE_SUPABASE_URL}/storage/v1/object/sign/berichte/${name}`,{method:'POST',headers:{...h,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:60*60*24*365})});
+  if(!sg.ok)throw new Error('PDF-Link: HTTP '+sg.status);
+  const j=await sg.json();const rel=j.signedURL||j.signedUrl;if(!rel)throw new Error('PDF-Link fehlt');
+  return rel.startsWith('http')?rel:SITE_SUPABASE_URL+'/storage/v1'+(rel.startsWith('/')?rel:'/'+rel);
+}
+function mailto(link){
+  const s=site();const nr=model.reportNumber?'Nr. '+model.reportNumber+' ':'';
+  const days=DAYS.filter(d=>safe(model['date_'+d]).trim()).map(d=>d+' '+safe(model['date_'+d]));
+  const subject=`Montagebericht ${nr}– ${s?.name||model.kunde||'Baustelle'}`;
+  const greet=model.polier?`Guten Tag ${model.polier},`:'Guten Tag,';
+  const body=`${greet}\n\nhier ist der unterschriebene Montagebericht ${nr}für ${s?.name||model.kunde||'die Baustelle'}${days.length?' ('+days.join(', ')+')':''}.\n\nPDF ansehen und speichern:\n${link}\n\nViele Grüße\n${safe(model.monteur1)||myName()}`;
+  const cc=mail.meister&&mail.meisterEmail?`&cc=${encodeURIComponent(mail.meisterEmail)}`:'';
+  return `mailto:${encodeURIComponent(mail.to).replace(/%40/g,'@')}?subject=${encodeURIComponent(subject)}${cc}&body=${encodeURIComponent(body)}`;
+}
+async function finish(){
+  if(busy)return;
+  if(mail.send&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail.to)){alert('Bitte eine gültige E-Mail-Adresse für den Polier eintragen.');return;}
+  busy=true;render();
+  try{
+    flush(true);
+    if(!mail.send){result={sent:false};step='done';return;}
+    const blob=await buildPdf();
+    let link='';
+    try{link=await uploadPdf(blob);}catch(e){console.warn(e);result={sent:false,error:e.message,blob};step='done';return;}
+    result={sent:true,href:mailto(link),link};step='done';
+  }catch(e){alert('Der Zettel konnte nicht vorbereitet werden: '+e.message);}
+  finally{busy=false;render();}
+  if(result?.href){try{window.top.location.href=result.href;}catch(e){}}
+}
+R.done=()=>{
+  const r=result||{};
+  shell(`<div class="ez-done"><div class="ez-ok">✓</div><h1>Zettel ist unterschrieben</h1>
+   ${r.sent?`<p style="margin:0;color:#C9D3E2">Die E-Mail an <strong>${E(mail.to)}</strong>${mail.meister&&mail.meisterEmail?' (Kopie an E-Meister)':''} ist vorbereitet.<br>In deiner Mail-App noch auf <strong>Senden</strong> tippen.</p>
+   <a class="ez-big" style="text-decoration:none;justify-content:center" href="${E(r.href)}" target="_top"><span style="align-items:center"><strong>E-Mail öffnen</strong><small>falls sie sich nicht von selbst geöffnet hat</small></span></a>`:
+   r.error?`<div class="ez-warn">Der Link zum PDF konnte nicht erstellt werden (${E(r.error)}). Du kannst das PDF stattdessen über „Teilen“ verschicken.</div><button type="button" class="ez-big" style="justify-content:center" data-act="share"><span style="align-items:center"><strong>PDF teilen</strong></span></button>`:
+   '<p style="margin:0;color:#C9D3E2">Der Zettel ist gespeichert.</p>'}
+   <p class="ez-hint">Du findest ihn jederzeit wieder unter „Meine Berichte“.</p></div>`,
+   `<div class="ez-foot"><div><button type="button" class="ez-back" style="flex:1;width:auto" data-go="start">Fertig</button></div></div>`);
+};
+function render(){ez.hidden=false;openBtn.hidden=true;(R[step]||R.start)();}
+function go(s){if(s===step)return;flush(s==='check'||s==='start');step=s;if(s!=='done')result=null;if(['site','trip','time','work'].includes(s)){}render();ez.querySelector('.ez-scroll')?.scrollTo(0,0);}
+window.ezAfterSign=()=>{if(ez.hidden)return;if(step==='polier'&&model.sign_bauleitung){render();finish();}else render();};
+async function startNew(){
+  flush();await fresh(false);
+  if(!safe(model.monteur1).trim()&&myName())model.monteur1=myName();
+  week=monday(new Date());siteQuery='';matQuery='';previewUrl='';mail={send:true,meister:false,meisterEmail:mail.meisterEmail||'',to:''};
+  step='site';render();
+}
+function openReport(id){
+  flush();if(!loadRecord(id))return;
+  week=weekOfModel();siteQuery='';matQuery='';previewUrl='';mail={send:true,meister:false,meisterEmail:mail.meisterEmail||'',to:''};
+  step=lastStepFor(model);render();
+}
+function toClassic(){flush(true);localStorage.setItem(MODE_KEY,'classic');ez.hidden=true;openBtn.hidden=false;try{setReportMode('fast');buildEditor();}catch(e){}}
+function toEasy(){localStorage.setItem(MODE_KEY,'easy');step='start';render();}
+openBtn.onclick=toEasy;
+ez.addEventListener('click',async e=>{
+  const t=e.target.closest('button,[data-go],[data-act]');if(!t||t.disabled)return;
+  const d=t.dataset;
+  if(d.go){go(d.go);return;}
+  if(d.act==='home'){flush(true);try{parent.closeMontagebericht();}catch(_){}return;}
+  if(d.act==='new'){startNew();return;}
+  if(d.act==='classic'){toClassic();return;}
+  if(d.open){openReport(d.open);return;}
+  if(d.site!==undefined){model.siteId=d.site;applySiteSelection();if(model.vehicle1Id||model.kfz1){if(model.kmMode1!=='custom')setSiteKm(1);}mail.to='';touch();render();return;}
+  if(d.order){model.orderType=d.order;applyOrderType();touch();render();return;}
+  if(d.veh!==undefined){
+    if(d.veh===''){model.vehicle1Id='';model.kfz1='';model.km1='';model.abfahrt1='';model.rueckkehr1='';model.kfz1_bis15=false;model.kfz1_ueber15=false;model.ezNoVehicle=true;}
+    else{const v=availableVehicles.find(x=>String(x.id)===d.veh);model.vehicle1Id=d.veh;model.kfz1=safe(v?.plate||v?.name);model.ezNoVehicle=false;if(!model.kmMode1)model.kmMode1='two';if(model.kmMode1!=='custom')setSiteKm(1);}
+    touch();render();return;
+  }
+  if(d.weight){model.kfz1_bis15=d.weight==='bis15';model.kfz1_ueber15=d.weight==='ueber15';touch();render();return;}
+  if(d.km){model.kmMode1=d.km;if(d.km!=='custom')setSiteKm(1);touch();render();return;}
+  if(d.week){week.setDate(week.getDate()+7*Number(d.week));for(const [i,day] of DAYS.entries()){if(safe(model['date_'+day]).trim()){const dt=dayDate(i);model['date_'+day]=`${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}`;}}model.jahr=String(dayDate(3).getFullYear());touch();render();return;}
+  if(d.day){
+    const i=DAYS.indexOf(d.day);const on=!!safe(model['date_'+d.day]).trim();
+    if(on){model['date_'+d.day]='';for(let k=1;k<=4;k++)model[`m${k}_${d.day}`]='';}
+    else{const dt=dayDate(i);model['date_'+d.day]=`${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}`;model.jahr=String(dayDate(3).getFullYear());}
+    updateSums();touch();render();return;
+  }
+  if(d.h){const [i,day,delta]=d.h.split(':');const k=`m${i}_${day}`;const v=Math.max(0,Math.min(13,numH(model[k])+Number(delta)));model[k]=v?fmtH(v):'';updateSums();touch();render();return;}
+  if(d.hset){const [i,day,v]=d.hset.split(':');model[`m${i}_${day}`]=fmtH(Number(v));updateSums();touch();render();return;}
+  if(d.act==='addemp'){const n=Math.min(4,Number(model.employeeCount||1)+1);model.employeeCount=n;for(const day of DAYS){if(safe(model['date_'+day]).trim()&&!model[`m${n}_${day}`])model[`m${n}_${day}`]=model[`m1_${day}`]||'';}updateSums();touch();render();return;}
+  if(d.rmemp){const n=Number(d.rmemp),cnt=Number(model.employeeCount||1);for(let k=n;k<cnt;k++){model['monteur'+k]=model['monteur'+(k+1)];for(const day of DAYS)model[`m${k}_${day}`]=model[`m${k+1}_${day}`];}model['monteur'+cnt]='';for(const day of DAYS)model[`m${cnt}_${day}`]='';for(const x of ['sum0','sum1','sum2','sum3','sum4','sum5'])model[`m${cnt}_${x}`]='';model.employeeCount=cnt-1;updateSums();touch();render();return;}
+  if(d.act==='addtask'){model.workTasks=[...(model.workTasks||[]),''];updateTasksText();touch();render();const ts=ez.querySelectorAll('[data-task]');ts[ts.length-1]?.focus();return;}
+  if(d.recent!==undefined){const v=ez._recent?.[+d.recent];if(v){const list=(model.workTasks||[]).filter(t=>safe(t).trim());list.push(v);model.workTasks=list;updateTasksText();touch();render();}return;}
+  if(d.madd!==undefined||d.mfree){
+    let i=1;while(i<=8&&(safe(model[`mat${i}_name`]).trim()||safe(model[`mat${i}_menge`]).trim()))i++;if(i>8)return;
+    if(d.mfree)model[`mat${i}_name`]=matQuery.trim();else{const m=ez._hits?.[+d.madd];if(!m)return;model[`mat${i}_name`]=reportMaterialLabel(m);}
+    matQuery='';touch();render();ez.querySelector(`[data-mq="${i}"]`)?.focus();return;
+  }
+  if(d.mrm){const i=Number(d.mrm);for(let k=i;k<8;k++){model[`mat${k}_name`]=model[`mat${k+1}_name`]||'';model[`mat${k}_menge`]=model[`mat${k+1}_menge`]||'';}model.mat8_name='';model.mat8_menge='';touch();render();return;}
+  if(d.sign){await openSign(d.sign);return;}
+  if(d.act==='polsign'){if(mail.send&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail.to)){alert('Bitte zuerst die E-Mail-Adresse des Poliers eintragen.');$('ezTo')?.focus();return;}await openSign('sign_bauleitung');return;}
+  if(d.act==='finish'){finish();return;}
+  if(d.act==='zoom'){if(!previewUrl)await makePreview();const z=document.createElement('div');z.className='ez-zoom';z.innerHTML=`<img alt="Blauer Zettel" src="${previewUrl}"><button type="button" aria-label="Schließen">✕</button>`;z.querySelector('button').onclick=()=>z.remove();ez.appendChild(z);return;}
+  if(d.act==='share'){try{const f=new File([result.blob],'Montagebericht.pdf',{type:'application/pdf'});if(navigator.canShare?.({files:[f]}))await navigator.share({files:[f],title:'Montagebericht'});else triggerDownload(result.blob,'Montagebericht.pdf');}catch(_){}return;}
+});
+ez.addEventListener('change',e=>{const c=e.target.closest('[data-mail]');if(!c)return;mail[c.dataset.mail]=c.checked;render();});
+if(localStorage.getItem(MODE_KEY)==='classic'){openBtn.hidden=false;}else{render();}
+})();
+</script>
+</body>
+</html>
