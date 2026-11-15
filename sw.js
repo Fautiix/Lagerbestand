@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lagerbestand-v20261115-35';
+const CACHE_NAME = 'lagerbestand-v20261115-36';
 
 const APP_FILES = [
   './',
@@ -27,6 +27,19 @@ self.addEventListener('activate', event => {
   );
 });
 
+function cacheFirst(request) {
+  return caches.match(request).then(cached => {
+    if (cached) return cached;
+    return fetch(request).then(response => {
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+      }
+      return response;
+    });
+  });
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
@@ -35,17 +48,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Versionsprüfung und andere Cache-Buster immer direkt online abrufen.
-  if (
-    url.searchParams.has('version-check') ||
-    url.searchParams.has('v')
-  ) {
+  // Versionsprüfung immer direkt online abrufen.
+  if (url.searchParams.has('version-check')) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
   // HTML direkt online abrufen, damit veröffentlichte Änderungen
-  // möglichst schnell sichtbar werden.
+  // möglichst schnell sichtbar werden. Offline: letzte Kopie.
   if (request.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
@@ -65,10 +75,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Andere App-Dateien zuerst aus dem Cache laden.
-  event.respondWith(
-    caches.match(request).then(cached =>
-      cached || fetch(request)
-    )
-  );
+  // V36: Vorlagen und Monteurbericht tragen eine Version in der Adresse (?v=…).
+  // Eine neue Version hat eine neue Adresse, deshalb einmal laden und dann aus dem Cache.
+  event.respondWith(cacheFirst(request));
 });
