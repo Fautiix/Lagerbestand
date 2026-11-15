@@ -1014,14 +1014,14 @@ function saveCurrent(){if(v32Review)return v32Commit('offen');try{
    };
    const rows=[];
    for(let r=1;r<=4;r++){
-    const days={};
+    const days={},pauses={};
     weekdays.forEach(day=>{
      const hour=Number(String(sheet['m'+r+'_'+day]||'').replace(',','.'));
      if(!Number.isFinite(hour)||hour<=0)return;
-     const iso=isoFor(day);if(iso)days[iso]=hour;
+     const iso=isoFor(day);if(iso){days[iso]=hour;if(sheet.ezDayPause)pauses[iso]=Number(String(sheet['m'+r+'_p_'+day]||0).replace(',','.'))||0;}
     });
     const pause=Number(String(sheet['m'+r+'_sum3']||0).replace(',','.'))||0;
-    if(Object.keys(days).length)rows.push({row:r,monteur:String(sheet['monteur'+r]||'').trim(),days,pause});
+    if(Object.keys(days).length)rows.push({row:r,monteur:String(sheet['monteur'+r]||'').trim(),days,pause,...(sheet.ezDayPause?{pauses}:{})});
    }
    if(rows.length)payload.push({sheetType:ix?'second':'first',siteId:sheet.siteId,siteName:sheet.kunde,order:sheet.auftragsnummer,orderType:sheet.orderType,rows});
   });
@@ -1746,6 +1746,10 @@ if(v32Review){
 #ez .ez-more .ez-row{margin-bottom:8px}
 #ez .ez-card .ez-row .ez-val{min-width:76px}
 #ez .ez-more{background:transparent!important;border-left:0!important;border-right:0!important;border-bottom:0!important;border-radius:0!important;margin:0!important}
+#ez .ez-seg-sm{padding:3px;border-radius:12px}
+#ez .ez-seg-sm button{min-height:40px;font-size:15px;border-radius:9px}
+#ez .ez-net{font-size:14px;color:#6BD6A8;padding:0 2px}
+#ez .ez-net.bad{color:#F3C77A}
 #ezOpen{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:40;height:50px;padding:0 18px;border-radius:25px;border:0;background:#3567E0;color:#fff;font-weight:650;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer}
 #ezOpen[hidden]{display:none}
 </style>
@@ -1845,22 +1849,37 @@ function updateSums(){
   for(let i=1;i<=Number(model.employeeCount||1);i++){
     const t=DAYS.reduce((a,d)=>a+numH(model[`m${i}_${d}`]),0);
     model[`m${i}_sum0`]=t?fmtH(t):'';
+    if(model.ezDayPause){const p=DAYS.reduce((a,d)=>a+(safe(model['date_'+d]).trim()?numH(model[`m${i}_p_${d}`]):0),0);model[`m${i}_sum3`]=p?fmtH(Math.min(13,p)):'';}
   }
+}
+// Ältere Zettel: Wochen-Pause gleichmäßig auf die Tage verteilen, wenn das in Viertelstunden aufgeht.
+function migratePause(){
+  if(model.ezDayPause)return;
+  const days=DAYS.filter(d=>safe(model['date_'+d]).trim());
+  for(let i=1;i<=Number(model.employeeCount||1);i++){
+    const total=numH(model[`m${i}_sum3`]);const per=days.length?total/days.length:0;
+    const ok=Math.abs(per*4-Math.round(per*4))<1e-6;
+    for(const d of days)model[`m${i}_p_${d}`]=ok&&per?fmtH(per):(model[`m${i}_p_${d}`]||'');
+  }
+  model.ezDayPause=true;
 }
 R.time=()=>{
   if(!week)week=weekOfModel()||monday(new Date());
   if(!safe(model.monteur1).trim()&&myName())model.monteur1=myName();
+  if(!model.ezDayPause){migratePause();updateSums();}
   const n=Number(model.employeeCount||1);
   const sel=DAYS.map((d,i)=>!!safe(model['date_'+d]).trim());
   const extra=(i,k,label,sub)=>`<div class="ez-row"><span style="flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25"><strong>${label}</strong><small style="color:#9AA6B8;font-size:13px">ganze Woche</small></span><button type="button" class="ez-step" data-s="${i}:${k}:-0.25" aria-label="${label} weniger">−</button><span class="ez-val">${model[`m${i}_${k}`]?E(model[`m${i}_${k}`]):'–'}</span><button type="button" class="ez-step" data-s="${i}:${k}:0.25" aria-label="${label} mehr">+</button></div>`;
   const card=(i)=>{
-    const days=DAYS.map((d,j)=>sel[j]?`<div class="ez-row"><strong>${['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][j]}</strong><button type="button" class="ez-step" data-h="${i}:${d}:-0.25" aria-label="Weniger">−</button><span class="ez-val">${model[`m${i}_${d}`]?E(model[`m${i}_${d}`]):'–'}</span><button type="button" class="ez-step" data-h="${i}:${d}:0.25" aria-label="Mehr">+</button></div>
-      <div class="ez-quick">${[8,8.5,9,10].map(v=>`<button type="button" class="${numH(model[`m${i}_${d}`])===v?'on':''}" data-hset="${i}:${d}:${v}">${fmtH(v)}</button>`).join('')}</div>`:'').filter(Boolean).join('<hr style="border:0;border-top:1px solid #1F2A3C;width:100%;margin:2px 0">');
+    const days=DAYS.map((d,j)=>{if(!sel[j])return '';const h=numH(model[`m${i}_${d}`]),p=numH(model[`m${i}_p_${d}`]),net=Math.max(0,h-p);const half=Math.abs(net*2-Math.round(net*2))<1e-6;
+      return `<div class="ez-row"><strong>${['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][j]}</strong><button type="button" class="ez-step" data-h="${i}:${d}:-0.25" aria-label="Weniger">−</button><span class="ez-val">${h?fmtH(h):'–'}</span><button type="button" class="ez-step" data-h="${i}:${d}:0.25" aria-label="Mehr">+</button></div>
+      <div class="ez-quick">${[8,8.5,9.25,10].map(v=>`<button type="button" class="${h===v?'on':''}" data-hset="${i}:${d}:${v}">${fmtH(v)}</button>`).join('')}</div>
+      <div class="ez-row ez-pauserow"><span style="font-size:15px;color:#9AA6B8;flex:none">Pause</span><div class="ez-seg ez-seg-sm" style="--n:4;flex:1">${[0,0.25,0.5,0.75].map(v=>`<button type="button" class="${Math.abs(p-v)<1e-6?'on':''}" data-p="${i}:${d}:${v}">${v?fmtH(v).replace(/0$/,''):'keine'}</button>`).join('')}</div></div>
+      ${h?`<div class="ez-net ${half?'':'bad'}">${half?`→ ${fmtH(net)} Std. im Stundenzettel`:`→ ${fmtH(net)} Std. – im Stundenzettel gehen nur halbe Stunden`}</div>`:''}`;}).filter(Boolean).join('<hr style="border:0;border-top:1px solid #1F2A3C;width:100%;margin:2px 0">');
     return `<div class="ez-card"><div class="ez-row"><label for="ezName${i}" style="flex:none;font-size:14px;color:#9AA6B8;font-weight:600">${i===1?'Monteur':'Kollege'}</label><input id="ezName${i}" class="ez-input" data-name="${i}" value="${E(model['monteur'+i])}" placeholder="Name" style="height:48px">${i>1?`<button type="button" class="ez-step" style="width:48px;height:48px;font-size:18px;color:#F59090;border-color:rgba(242,122,122,.35)" data-rmemp="${i}" aria-label="Kollege entfernen">✕</button>`:''}</div>${days||'<p class="ez-hint">Oben die Tage antippen.</p>'}${sel.some(Boolean)?`<div class="ez-sum"><span style="color:#9AA6B8">Zusammen</span><strong>${E(model[`m${i}_sum0`]||'0,00')} Std.</strong></div>
       <hr style="border:0;border-top:1px solid #1F2A3C;width:100%;margin:2px 0">
       ${extra(i,'sum1','Fahrzeit','davon gefahren')}
-      ${extra(i,'sum3','Pause','davon Pause')}
-      <div class="ez-quick"><button type="button" data-pause="${i}">0,75 je Tag (${fmtH(0.75*sel.filter(Boolean).length)})</button>${numH(model[`m${i}_sum3`])?`<button type="button" data-sset="${i}:sum3:0">Keine Pause</button>`:''}</div>
+      <div class="ez-sum" style="font-size:15px"><span style="color:#9AA6B8">Pause (ganze Woche)</span><span>${E(model[`m${i}_sum3`]||'0,00')} Std.</span></div>
       <details class="ez-more" ${['sum2','sum4','sum5'].some(k=>numH(model[`m${i}_${k}`]))?'open':''}><summary>Weitere Zeiten (Rüstzeit, Überstunden, Nacht)</summary>
       ${extra(i,'sum2','Rüstzeit','davon Rüstzeit')}${extra(i,'sum4','Überstunden','davon Überstunden')}${extra(i,'sum5','Nacht','davon Nachtarbeit')}</details>`:''}</div>`;
   };
@@ -2000,12 +2019,24 @@ R.done=()=>{
    <p class="ez-hint">Du findest ihn jederzeit wieder unter „Meine Berichte“.</p></div>`,
    `<div class="ez-foot"><div><button type="button" class="ez-back" style="flex:1;width:auto" data-go="start">Fertig</button></div></div>`);
 };
-function render(){ez.hidden=false;openBtn.hidden=true;(R[step]||R.start)();}
+// Beim Neuzeichnen desselben Schritts bleibt die Scroll-Position erhalten. Der angetippte Knopf bleibt unter dem Finger.
+let anchor=null;
+function render(){
+  const old=ez.querySelector('.ez-scroll'),same=ez.dataset.step===step,top=same&&old?old.scrollTop:0;
+  ez.hidden=false;openBtn.hidden=true;(R[step]||R.start)();ez.dataset.step=step;
+  const sc=ez.querySelector('.ez-scroll');
+  if(sc&&same){
+    sc.scrollTop=top;
+    if(anchor){const el=ez.querySelector(anchor.sel);if(el){sc.scrollTop+=el.getBoundingClientRect().top-anchor.top;}}
+  }
+  anchor=null;
+}
 function go(s){if(s===step)return;flush(s==='check'||s==='start');step=s;if(s!=='done')result=null;if(['site','trip','time','work'].includes(s)){}render();ez.querySelector('.ez-scroll')?.scrollTo(0,0);}
 window.ezAfterSign=()=>{if(ez.hidden)return;if(step==='polier'&&model.sign_bauleitung){render();finish();}else render();};
 async function startNew(){
   flush();await fresh(false);
   if(!safe(model.monteur1).trim()&&myName())model.monteur1=myName();
+  model.ezDayPause=true;
   week=monday(new Date());siteQuery='';matQuery='';previewUrl='';mail={send:true,meister:false,meisterEmail:mail.meisterEmail||'',to:''};
   step='site';render();
 }
@@ -2020,6 +2051,8 @@ openBtn.onclick=toEasy;
 ez.addEventListener('click',async e=>{
   const t=e.target.closest('button,[data-go],[data-act]');if(!t||t.disabled)return;
   const d=t.dataset;
+  const k=Object.keys(d)[0];
+  if(k&&!d.go){const attr='data-'+k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());anchor={sel:`[${attr}="${CSS.escape(d[k])}"]`,top:t.getBoundingClientRect().top};}
   if(d.go){go(d.go);return;}
   if(d.act==='home'){flush(true);try{parent.closeMontagebericht();}catch(_){}return;}
   if(d.act==='new'){startNew();return;}
@@ -2037,17 +2070,19 @@ ez.addEventListener('click',async e=>{
   if(d.week){week.setDate(week.getDate()+7*Number(d.week));for(const [i,day] of DAYS.entries()){if(safe(model['date_'+day]).trim()){const dt=dayDate(i);model['date_'+day]=`${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}`;}}model.jahr=String(dayDate(3).getFullYear());touch();render();return;}
   if(d.day){
     const i=DAYS.indexOf(d.day);const on=!!safe(model['date_'+d.day]).trim();
-    if(on){model['date_'+d.day]='';for(let k=1;k<=4;k++)model[`m${k}_${d.day}`]='';}
-    else{const dt=dayDate(i);model['date_'+d.day]=`${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}`;model.jahr=String(dayDate(3).getFullYear());}
+    if(on){model['date_'+d.day]='';for(let k=1;k<=4;k++){model[`m${k}_${d.day}`]='';model[`m${k}_p_${d.day}`]='';}}
+    else{const dt=dayDate(i);model['date_'+d.day]=`${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}`;model.jahr=String(dayDate(3).getFullYear());
+      for(let k=1;k<=Number(model.employeeCount||1);k++){if(!numH(model[`m${k}_${d.day}`]))model[`m${k}_${d.day}`]=fmtH(9.25);if(model[`m${k}_p_${d.day}`]===undefined||model[`m${k}_p_${d.day}`]==='')model[`m${k}_p_${d.day}`]=fmtH(0.75);}}
     updateSums();touch();render();return;
   }
   if(d.h){const [i,day,delta]=d.h.split(':');const k=`m${i}_${day}`;const v=Math.max(0,Math.min(13,numH(model[k])+Number(delta)));model[k]=v?fmtH(v):'';updateSums();touch();render();return;}
   if(d.s){const [i,k,delta]=d.s.split(':');const key=`m${i}_${k}`;const v=Math.max(0,Math.min(quarterMax(key),numH(model[key])+Number(delta)));model[key]=v?fmtH(v):'';touch();render();return;}
   if(d.sset){const [i,k,v]=d.sset.split(':');model[`m${i}_${k}`]=Number(v)?fmtH(Number(v)):'';touch();render();return;}
   if(d.pause){const i=d.pause;const n=DAYS.filter(x=>safe(model['date_'+x]).trim()).length;model[`m${i}_sum3`]=n?fmtH(Math.min(13,0.75*n)):'';touch();render();return;}
+  if(d.p){const [i,day,v]=d.p.split(':');model[`m${i}_p_${day}`]=fmtH(Number(v));updateSums();touch();render();return;}
   if(d.hset){const [i,day,v]=d.hset.split(':');model[`m${i}_${day}`]=fmtH(Number(v));updateSums();touch();render();return;}
-  if(d.act==='addemp'){const n=Math.min(4,Number(model.employeeCount||1)+1);model.employeeCount=n;for(const day of DAYS){if(safe(model['date_'+day]).trim()&&!model[`m${n}_${day}`])model[`m${n}_${day}`]=model[`m1_${day}`]||'';}for(const k of ['sum1','sum3'])if(!model[`m${n}_${k}`])model[`m${n}_${k}`]=model[`m1_${k}`]||'';updateSums();touch();render();return;}
-  if(d.rmemp){const n=Number(d.rmemp),cnt=Number(model.employeeCount||1);for(let k=n;k<cnt;k++){model['monteur'+k]=model['monteur'+(k+1)];for(const day of DAYS)model[`m${k}_${day}`]=model[`m${k+1}_${day}`];}model['monteur'+cnt]='';for(const day of DAYS)model[`m${cnt}_${day}`]='';for(const x of ['sum0','sum1','sum2','sum3','sum4','sum5'])model[`m${cnt}_${x}`]='';model.employeeCount=cnt-1;updateSums();touch();render();return;}
+  if(d.act==='addemp'){const n=Math.min(4,Number(model.employeeCount||1)+1);model.employeeCount=n;for(const day of DAYS){if(safe(model['date_'+day]).trim()&&!model[`m${n}_${day}`])model[`m${n}_${day}`]=model[`m1_${day}`]||'';}for(const day of DAYS)if(!model[`m${n}_p_${day}`])model[`m${n}_p_${day}`]=model[`m1_p_${day}`]||'';if(!model[`m${n}_sum1`])model[`m${n}_sum1`]=model.m1_sum1||'';updateSums();touch();render();return;}
+  if(d.rmemp){const n=Number(d.rmemp),cnt=Number(model.employeeCount||1);for(let k=n;k<cnt;k++){model['monteur'+k]=model['monteur'+(k+1)];for(const day of DAYS){model[`m${k}_${day}`]=model[`m${k+1}_${day}`];model[`m${k}_p_${day}`]=model[`m${k+1}_p_${day}`];}for(const x of ['sum1','sum2','sum4','sum5'])model[`m${k}_${x}`]=model[`m${k+1}_${x}`];}for(const day of DAYS)model[`m${cnt}_p_${day}`]='';model['monteur'+cnt]='';for(const day of DAYS)model[`m${cnt}_${day}`]='';for(const x of ['sum0','sum1','sum2','sum3','sum4','sum5'])model[`m${cnt}_${x}`]='';model.employeeCount=cnt-1;updateSums();touch();render();return;}
   if(d.act==='addtask'){model.workTasks=[...(model.workTasks||[]),''];updateTasksText();touch();render();const ts=ez.querySelectorAll('[data-task]');ts[ts.length-1]?.focus();return;}
   if(d.recent!==undefined){const v=ez._recent?.[+d.recent];if(v){const list=(model.workTasks||[]).filter(t=>safe(t).trim());list.push(v);model.workTasks=list;updateTasksText();touch();render();}return;}
   if(d.madd!==undefined||d.mfree){
