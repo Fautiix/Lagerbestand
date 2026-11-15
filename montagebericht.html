@@ -778,6 +778,18 @@ async function loadAvailableSites(){
 }
 function dirty(){if(v32Review&&!v32Signing){for(const sheet of Object.values(sheetModels)){if(sheet)delete sheet.sign_meister;}v32Fresh.clear();}changed=true;setStatus('Änderungen noch nicht gespeichert',false);queuePaint()}
 function setStatus(msg,ok=true){if(v32Review&&$('v32Message')){$('v32Message').textContent=msg;$('v32Message').style.color=ok?'#a8e7be':'#ffcf78';}$('status').textContent=msg;$('status').style.color=ok?'#9fe2ae':'#ffdb84'}
+const trimCache=new WeakMap();
+function trimSignature(img){
+ if(trimCache.has(img))return trimCache.get(img);
+ const c=document.createElement('canvas');c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
+ const x=c.getContext('2d');x.drawImage(img,0,0);let out=c;
+ try{const d=x.getImageData(0,0,c.width,c.height).data;let l=c.width,t=c.height,r=-1,b=-1;
+  for(let y=0;y<c.height;y++)for(let i=0;i<c.width;i++){if(d[(y*c.width+i)*4+3]>8){if(i<l)l=i;if(i>r)r=i;if(y<t)t=y;if(y>b)b=y;}}
+  if(r>=l&&b>=t){const pad=6;l=Math.max(0,l-pad);t=Math.max(0,t-pad);r=Math.min(c.width-1,r+pad);b=Math.min(c.height-1,b+pad);
+   out=document.createElement('canvas');out.width=r-l+1;out.height=b-t+1;out.getContext('2d').drawImage(c,l,t,out.width,out.height,0,0,out.width,out.height);}
+ }catch(e){console.warn('Unterschrift zuschneiden:',e);}
+ trimCache.set(img,out);return out;
+}
 function loadImage(src){if(!imagePromises.has(src)){imagePromises.set(src,new Promise((res,rej)=>{const i=new Image;i.onload=()=>res(i);i.onerror=rej;i.src=src}))}return imagePromises.get(src)}
 function clipped(ctx,x1,y1,x2,y2,fn){ctx.save();ctx.beginPath();ctx.rect(x1+2,y1+2,x2-x1-4,y2-y1-4);ctx.clip();fn();ctx.restore()}
 // Reale Pixelkoordinaten und ein gemeinsames Textlayout; kein CSS-Overlay.
@@ -887,8 +899,10 @@ function paintText(ctx){
 async function drawPage(canvas){const img=$('template');if(!img.complete||!img.naturalWidth)await new Promise((res,rej)=>{img.addEventListener('load',res,{once:true});img.addEventListener('error',rej,{once:true})});
  canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,W,H);drawReportNumber(ctx);overwriteZeros(ctx);paintText(ctx);
  for(const s of SIGNATURES){const v=model[s.key];if(!v)continue;try{const sig=await loadImage(v);const [x1,y1,x2,y2]=s.box,dx=number(model[s.key+'_dx']),dy=number(model[s.key+'_dy']),scale=number(model[s.key+'_scale'],100)/100;
-  const w=(x2-x1)*scale,h=(y2-y1)*scale,mx=(x1+x2)/2+dx,my=(y1+y2)/2+dy;
-  ctx.drawImage(sig,mx-w/2,my-h/2,w,h);
+  // V36: Leerraum abschneiden und Seitenverhältnis behalten (nicht mehr gequetscht).
+  const ink=trimSignature(sig),fit=Math.min((x2-x1)*scale/ink.width,(y2-y1)*scale/ink.height);
+  const w=ink.width*fit,h=ink.height*fit,mx=(x1+x2)/2+dx,my=(y1+y2)/2+dy;
+  ctx.drawImage(ink,mx-w/2,my-h/2,w,h);
  }catch(e){console.warn('Unterschrift:',e)}}return canvas;
 }
 function queuePaint(){const seq=++paintSeq;cancelAnimationFrame(raf);raf=requestAnimationFrame(async()=>{try{const temp=document.createElement('canvas');await drawPage(temp);if(seq!==paintSeq)return;const cv=$('page');cv.getContext('2d').clearRect(0,0,W,H);cv.getContext('2d').drawImage(temp,0,0);validate()}catch(e){console.error(e);setStatus('Vorschau: '+e.message,false)}})}
