@@ -1,5 +1,6 @@
 /* Wintermodus: Pixel-Schnee, Tannenbaum und Weihnachtsmann.
    Eigenständige Zusatzdatei – ändert nichts an der App selbst.
+   Ab und zu fliegt der Schlitten mit Rentieren vorbei.
    Ein-/Ausschalten: unten rechts auf den Tannenbaum tippen.
    Ganz entfernen: die Zeile mit winter.js aus index.html löschen. */
 (function () {
@@ -58,12 +59,42 @@
     '.W.W.W.',
     '...W...'
   ];
+  var SLEIGH = [
+    '.......RRR......',
+    '..GGG.RRRRW.....',
+    '.GGGGGWWWW......',
+    '.GGGGGSSSS......',
+    '.GGGGGWWWW......',
+    'RGGGGRRRRRR....R',
+    'RRRRRRRRRRRR..RR',
+    'RRRRRRRRRRRRRRR.',
+    '.RRRRRRRRRRRRR..',
+    '..Y....Y....Y...',
+    '.YYYYYYYYYYYYYYY'
+  ];
+  var DEER_TOP = [
+    '.........D.D.',
+    '..........D..',
+    '.........BBB.',
+    '.........BBBN',
+    'WBBBBBBBBBB..',
+    '.BBBBBBBBB...',
+    '.BBBBBBBBB...'
+  ];
+  var DEER_LEGS = [
+    ['.B.B....B.B..', '.B.B....B.B..', '.K.K....K.K..'],
+    ['.B.B....B.B..', 'B...B..B...B.', 'K...K..K...K.']
+  ];
+  var SLEIGH_COL = { R: '#C93A33', W: '#F4F6F8', S: '#F1C29B', G: '#2F9E5B', Y: '#F2C14E' };
+  var DEER_COL = { B: '#9A6A3C', D: '#6B4A2A', N: '#9A6A3C', K: '#3A3F4A', W: '#F4F6F8' };
+  var LEAD_COL = { B: '#9A6A3C', D: '#6B4A2A', N: '#FF5A4F', K: '#3A3F4A', W: '#F4F6F8' };
   var TREE_COL = { G: '#2F9E5B', g: '#237A46', T: '#7A4E2D', Y: '#F6D25A', R: '#E5534B', B: '#6EA8FF', W: '#F4F6F8' };
   var SANTA_COL = { R: '#D8443C', W: '#F4F6F8', S: '#F1C29B', K: '#3A3F4A', Y: '#F2C14E' };
   var LIGHT_ON = { R: '#FF8A80', B: '#B5D3FF', Y: '#FFF1A8' };
 
   var canvas, ctx, button;
   var W = 0, H = 0, px = 4, flakes = [], raf = 0, last = 0, frame = 0, navOff = 0;
+  var fly = null, nextFly = 0;
 
   function navOffset() {
     var el = document.querySelector('.v38-bottom, .bottom-nav');
@@ -128,11 +159,12 @@
     return s;
   }
 
-  function sprite(rows, col, x, y, t) {
+  function sprite(rows, col, x, y, t, flip) {
     var tick = Math.floor(t / 600);
     for (var r = 0; r < rows.length; r++) {
       var line = rows[r];
-      for (var c = 0; c < line.length; c++) {
+      var n = line.length;
+      for (var c = 0; c < n; c++) {
         var ch = line.charAt(c);
         if (ch === '.') continue;
         var color = col[ch];
@@ -141,8 +173,42 @@
           if (!reduce && LIGHT_ON[ch] && (tick + r + c) % 2 === 0) color = LIGHT_ON[ch];
         }
         ctx.fillStyle = color;
-        ctx.fillRect(x + c * px, y + r * px, px, px);
+        ctx.fillRect(x + (flip ? n - 1 - c : c) * px, y + r * px, px, px);
       }
+    }
+  }
+
+  /* Schlitten mit zwei Rentieren, fliegt ab und zu quer über den Bildschirm. */
+  var FLY_W = 46;
+  function flight(t, dt) {
+    if (reduce) return;
+    if (!nextFly) nextFly = t + 6000;
+    if (!fly) {
+      if (t < nextFly) return;
+      var dir = Math.random() < 0.5 ? 1 : -1;
+      fly = { dir: dir, x: dir > 0 ? -FLY_W * px : W, y: Math.round(H * (0.1 + Math.random() * 0.25)) };
+    }
+    fly.x += fly.dir * Math.max(60, W / 9) * dt;
+    if (fly.x > W || fly.x < -FLY_W * px) {
+      fly = null;
+      nextFly = t + 45000 + Math.random() * 55000;
+      return;
+    }
+    var flip = fly.dir < 0;
+    var x0 = Math.round(fly.x / px) * px;
+    var y0 = Math.round((fly.y + Math.sin(t / 700) * 3 * px) / px) * px;
+    function at(off, w) { return x0 + (flip ? FLY_W - off - w : off) * px; }
+    var legs = DEER_LEGS[Math.floor(t / 180) % 2];
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#C9A15A';
+    ctx.fillRect(at(15, 19), y0 + 6 * px, 19 * px, px);
+    sprite(SLEIGH, SLEIGH_COL, at(0, 16), y0, t, flip);
+    for (var i = 0; i < 2; i++) {
+      var dx = at(18 + i * 15, 13);
+      var dy = y0 + px + (Math.floor(t / 360 + i) % 2) * px;
+      var col = i === 1 ? LEAD_COL : DEER_COL;
+      sprite(DEER_TOP, col, dx, dy, t, flip);
+      sprite(legs, col, dx, dy + DEER_TOP.length * px, t, flip);
     }
   }
 
@@ -177,6 +243,7 @@
         ctx.fillRect(x, y, px, px);
       }
     }
+    flight(t, dt);
     scene(t);
   }
 
