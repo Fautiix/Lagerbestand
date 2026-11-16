@@ -1,6 +1,7 @@
 /* Wintermodus: Pixel-Schnee, Tannenbaum und Weihnachtsmann.
    Eigenständige Zusatzdatei – ändert nichts an der App selbst.
-   Ab und zu fliegt der Schlitten mit Rentieren vorbei.
+   Ab und zu fliegt der Schlitten mit Rentieren vorbei, auf den Karten bleibt Schnee liegen,
+   und bis Heiligabend kommen jede Woche Geschenke unter den Baum.
    Ein-/Ausschalten: unten rechts auf den Tannenbaum tippen.
    Ganz entfernen: die Zeile mit winter.js aus index.html löschen. */
 (function () {
@@ -88,6 +89,23 @@
   var SLEIGH_COL = { R: '#C93A33', W: '#F4F6F8', S: '#F1C29B', G: '#2F9E5B', Y: '#F2C14E' };
   var DEER_COL = { B: '#9A6A3C', D: '#6B4A2A', N: '#9A6A3C', K: '#3A3F4A', W: '#F4F6F8' };
   var LEAD_COL = { B: '#9A6A3C', D: '#6B4A2A', N: '#FF5A4F', K: '#3A3F4A', W: '#F4F6F8' };
+  var GIFT = [
+    '.Y.Y.',
+    'CCYCC',
+    'YYYYY',
+    'CCYCC',
+    'CCYCC'
+  ];
+  /* Position der Geschenke: Abstand vom Baum in Pixel-Einheiten (x) und Höhe über dem Boden (up). */
+  var GIFTS = [
+    { x: 10, up: 0, c: '#E5534B', y: '#F6D25A' },
+    { x: 0, up: 0, c: '#6EA8FF', y: '#F4F6F8' },
+    { x: -19, up: 0, c: '#B48CF2', y: '#F6D25A' },
+    { x: -25, up: 0, c: '#2F9E5B', y: '#F4F6F8' },
+    { x: -22, up: 5, c: '#F2994A', y: '#F4F6F8' },
+    { x: -31, up: 0, c: '#E5534B', y: '#F4F6F8' }
+  ];
+  var CARDS = '.card,.stat-card,.desk31-metric,.home-tile,.site-card,.vehicle-card,.material-card,.note-card';
   var TREE_COL = { G: '#2F9E5B', g: '#237A46', T: '#7A4E2D', Y: '#F6D25A', R: '#E5534B', B: '#6EA8FF', W: '#F4F6F8' };
   var SANTA_COL = { R: '#D8443C', W: '#F4F6F8', S: '#F1C29B', K: '#3A3F4A', Y: '#F2C14E' };
   var LIGHT_ON = { R: '#FF8A80', B: '#B5D3FF', Y: '#FFF1A8' };
@@ -95,6 +113,62 @@
   var canvas, ctx, button;
   var W = 0, H = 0, px = 4, flakes = [], raf = 0, last = 0, frame = 0, navOff = 0;
   var fly = null, nextFly = 0;
+  var gifts = 1, snowEls = [], snowBorn = new WeakMap(), snowSeed = 0;
+
+  /* Je näher Heiligabend rückt, desto mehr Geschenke: 1 bis 6, nach dem 26.12. keine mehr. */
+  function giftCount() {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+    if (m === 11 && d >= 24 && d <= 26) return GIFTS.length;
+    if (m <= 1 || (m === 11 && d > 26)) return 0;
+    var days = Math.ceil((new Date(y, 11, 24) - now) / 86400000);
+    return Math.max(1, Math.min(GIFTS.length, GIFTS.length - Math.ceil(days / 7)));
+  }
+
+  /* Karten, auf denen Schnee liegen bleibt. Wird etwa einmal pro Sekunde neu eingesammelt. */
+  function collectSnowEls() {
+    var list = document.querySelectorAll(CARDS), out = [], i, el;
+    for (i = 0; i < list.length && out.length < 60; i++) {
+      el = list[i];
+      if (el.parentElement && el.parentElement.closest(CARDS)) continue;
+      out.push(el);
+    }
+    el = document.querySelector('.v38-bottom, .bottom-nav');
+    if (el) out.push(el);
+    for (i = 0; i < out.length; i++) {
+      if (!snowBorn.has(out[i])) snowBorn.set(out[i], { t: Date.now(), seed: ++snowSeed, nav: out[i] === el });
+    }
+    snowEls = out;
+  }
+
+  function hash(n) {
+    n = Math.imul(n ^ (n >>> 15), 2246822519);
+    n = Math.imul(n ^ (n >>> 13), 3266489917);
+    return (n ^ (n >>> 16)) >>> 0;
+  }
+
+  function snowCaps() {
+    if (reduce) return;
+    var now = Date.now(), step = 2 * px;
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = '#F4F6F8';
+    for (var i = 0; i < snowEls.length; i++) {
+      var el = snowEls[i], info = snowBorn.get(el);
+      if (!info) continue;
+      var r = el.getBoundingClientRect();
+      if (r.width < 120 || r.bottom < 0 || r.top > H || r.top < 4 * px) continue;
+      var age = (now - info.t) / 1000;
+      var inset = info.nav ? 0 : 12;
+      var x0 = Math.round((r.left + inset) / px) * px;
+      var cols = Math.floor((r.width - 2 * inset) / step);
+      var top = Math.round(r.top);
+      for (var c = 0; c < cols; c++) {
+        var h = hash(info.seed * 7919 + (c >> 1));
+        var full = 1 + h % 3;
+        var grown = Math.floor(full * Math.min(1, (age - (h >> 4) % 25) / 60));
+        if (grown > 0) ctx.fillRect(x0 + c * step, top - grown * px, step, grown * px);
+      }
+    }
+  }
 
   function navOffset() {
     var el = document.querySelector('.v38-bottom, .bottom-nav');
@@ -130,6 +204,8 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
     navOff = navOffset();
+    gifts = giftCount();
+    collectSnowEls();
     makeFlakes();
     placeButton();
     if (!on) drawOff(); else if (reduce) draw(0, 0);
@@ -140,7 +216,9 @@
     var base = H - navOff - gh;
     var treeX = W - 17 * px;
     var santaX = treeX - 13 * px;
-    return { base: base, gh: gh, treeX: treeX, santaX: santaX, left: santaX - 2 * px };
+    var left = santaX - 2 * px;
+    for (var i = 0; i < gifts; i++) left = Math.min(left, treeX + (GIFTS[i].x - 2) * px);
+    return { base: base, gh: gh, treeX: treeX, santaX: santaX, left: left };
   }
 
   function placeButton() {
@@ -223,6 +301,10 @@
     ctx.fillRect(s.left, s.base + px, W - s.left, px);
     sprite(SANTA, SANTA_COL, s.santaX, s.base - SANTA.length * px, t);
     sprite(TREE, TREE_COL, s.treeX, s.base - TREE.length * px, t);
+    for (var i = 0; i < gifts; i++) {
+      var g = GIFTS[i];
+      sprite(GIFT, { C: g.c, Y: g.y }, s.treeX + g.x * px, s.base - (GIFT.length + g.up) * px, t);
+    }
   }
 
   function draw(t, dt) {
@@ -243,6 +325,7 @@
         ctx.fillRect(x, y, px, px);
       }
     }
+    snowCaps();
     flight(t, dt);
     scene(t);
   }
@@ -269,6 +352,8 @@
       if (++frame % 30 === 0) {
         var off = navOffset();
         if (off !== navOff) { navOff = off; placeButton(); }
+        collectSnowEls();
+        gifts = giftCount();
       }
       draw(t, dt);
     }
