@@ -1014,6 +1014,8 @@ body{background:#0b1321!important}.desktop31-mobile{display:none!important}.app{
 .v50-pill.done{background:#163d31;color:#9cf0bf}
 .v50-review{margin-bottom:16px}
 .v50-review .v50-table{min-width:620px}
+.v50-submitbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.v50-submitbar .btn{min-height:42px}
 </style><style id="v34-style">.v35polier{display:inline-block;margin:2px 0 0 6px;padding:1px 6px;border-radius:6px;background:#fff3cd;color:#7a5200;font-size:.78em;font-weight:600;white-space:nowrap}
 .v33reporttext .v35polier{margin-left:0}
 /* V34 workspace */
@@ -2654,12 +2656,12 @@ async function openTimesheet(week){
  renderTimesheet();
 }
 async function tsMoveWeek(offset){if(!tsCanOpen(v34Shift(tsWeek,offset))){v38Toast('Neue Stundenzettel gibt es nur für die aktuelle und die letzte Kalenderwoche.',{kind:'err'});return;}tsCapture();await tsSave(true);const d=new Date(tsWeek+'T12:00:00');d.setDate(d.getDate()+offset*7);await openTimesheet(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);tsView='editor';tsActiveDay=0;renderTimesheet();}
-let tsRemoteWeeks=new Set();
+let tsRemoteWeeks=new Set(),tsSubmittedWeeks=new Set();
 async function tsLoadArchive(){
- const found=new Map();tsRemoteWeeks=new Set();
+ const found=new Map();tsRemoteWeeks=new Set();tsSubmittedWeeks=new Set();
  try{
-  const data=await supabase('weekly_timesheets?select=week_start,data&user_id=eq.'+encodeURIComponent((tsOwnerId||currentUserProfile.user_id))+'&order=week_start.desc&limit=156');
-  if(Array.isArray(data))data.forEach(x=>{if(x.week_start){found.set(x.week_start,x.data);tsRemoteWeeks.add(x.week_start);}});
+  const data=await supabase('weekly_timesheets?select=week_start,data,submitted_at&user_id=eq.'+encodeURIComponent((tsOwnerId||currentUserProfile.user_id))+'&order=week_start.desc&limit=156');
+  if(Array.isArray(data))data.forEach(x=>{if(x.week_start){found.set(x.week_start,x.data);tsRemoteWeeks.add(x.week_start);if(x.submitted_at)tsSubmittedWeeks.add(x.week_start);}});
  }catch(err){console.warn('Archiv derzeit nur lokal verfügbar:',err.message);}
  const prefix=`mv_timesheet_v25_${tsOwnerId||currentUserProfile.user_id}_`;
  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(prefix)){const week=k.slice(prefix.length);if(/^\d{4}-\d{2}-\d{2}$/.test(week)&&!found.has(week)&&tsCanOpen(week))found.set(week,JSON.parse(localStorage.getItem(k)));}}}catch(_){}
@@ -2744,6 +2746,7 @@ function renderTimesheet(openDay){
   const rows=tsData.days.map((d,i)=>{const h=tsTotal(i);const n=(d.entries||[]).filter(e=>e.work||e.hours||e.siteId).length;const time=d.from||d.to?`${d.from||'–'} – ${d.to||'–'}`:'';const sub=n?[time,`${n} ${n===1?'Tätigkeit':'Tätigkeiten'}`].filter(Boolean).join(' · '):(time||'Noch nichts eingetragen');return `<button type="button" class="tz-day ${h?'has':''} ${i>4?'we':''}" onclick="tsOpenDay(${i})"><span class="tz-dayname"><strong>${TS_DAYS[i]}</strong><small>${tsDate(i).slice(0,6)}</small></span><span class="tz-daysub">${tsSafe(sub)}</span><span class="tz-dayhours">${h?tsNumFormat(h):'–'}</span>${tzIcon('chev')}</button>`;}).join('');
   el.innerHTML=top+`<section class="tz-weekcard"><div class="tz-weektotal"><div><strong>${tsNumFormat(tsAllTotal())}</strong><span>Stunden diese Woche</span></div>${tzStatus(tsData)}</div>
     <div class="tz-tools"><button class="tz-tool" onclick="tsPDF('preview')">${tzIcon('file')}<span>PDF ansehen</span></button><button class="tz-tool" onclick="tsPDF('download')">${tzIcon('down')}<span>Speichern</span></button><button class="tz-tool" onclick="tsPDF('share')">${tzIcon('send')}<span>Senden</span></button></div></section>
+   <div class="v50-submitbar">${tsSubmittedWeeks.has(tsWeek)?'<span class="v50-pill done">✓ An Schlottau abgegeben</span>':'<span class="v50-pill">Entwurf · nur für dich sichtbar</span><button class="btn primary" onclick="v50SubmitWeek()">Stundenzettel abgeben</button>'}</div>
    <div class="tz-days">${rows}</div>
    <details class="tz-details"><summary>${tzIcon('cog')}<span>Angaben &amp; Einstellungen</span>${tzIcon('chev')}</summary><div class="ts-row"><div class="ts-field"><label>Personalnummer</label><input readonly value="${tsSafe(tsData.persNr)}" placeholder="vergibt der Admin"></div><div class="ts-field"><label>Name</label><input readonly value="${tsSafe(tsData.employee)}"></div></div><p class="tz-foot">Name und Personalnummer pflegt der Admin. „Geprüft durch“ füllt der E-Meister. Vorgang und L-Art bleiben leer.</p>${tsAdminTemplates()}</details>
    <div class="tz-weeknav"><button class="btn small" onclick="tsMoveWeek(-1)" ${tsCanOpen(v34Shift(tsWeek,-1))?'':'disabled'}>${tzIcon('back')} KW ${tsKw(v34Shift(tsWeek,-1))}</button><button class="btn small" onclick="tsSave()">Jetzt speichern</button><button class="btn small" onclick="tsMoveWeek(1)" ${tsCanOpen(v34Shift(tsWeek,1))?'':'disabled'}>KW ${tsKw(v34Shift(tsWeek,1))} ${tzIcon('chev')}</button>${adminModeVisible()&&tsRemoteWeeks.has(tsWeek)?`<button class="btn small red" onclick="tsDeleteWeek('${tsWeek}')">${tzIcon('trash')} Woche löschen</button>`:''}</div>${status}`;
@@ -2774,6 +2777,18 @@ async function tsSave(silent=false,skipCapture=false){if(!skipCapture)tsCapture(
  tsRemoteAvailable=true;if(msg)msg.textContent='✓ In Supabase gespeichert.';const ix=tsArchive.findIndex(x=>x.week===tsWeek);if(ix>=0)tsArchive[ix].data=structuredClone(tsData);else tsArchive.push({week:tsWeek,data:structuredClone(tsData)});tsArchive.sort((a,b)=>b.week.localeCompare(a.week));
  }catch(e){tsRemoteAvailable=false;if(msg)msg.textContent='⚠ Nur auf diesem Gerät gesichert. Supabase: '+e.message;if(!silent)alert('Nur auf diesem Gerät gespeichert. Die Cloud-Speicherung ist fehlgeschlagen: '+e.message);}
  finally{tsBusy=false;}}
+async function v50SubmitWeek(){
+ if(!currentUserProfile||(tsOwnerId&&tsOwnerId!==currentUserProfile.user_id))return;
+ if(tsSubmittedWeeks.has(tsWeek))return v38Toast('Dieser Stundenzettel wurde bereits abgegeben.');
+ if(!await v38Confirm('Stundenzettel '+tsWeekLabel(tsWeek)+' jetzt verbindlich an Schlottau abgeben?',{ok:'Abgeben'}))return;
+ await tsSave(false);
+ if(!tsRemoteAvailable)return;
+ try{
+  await rpc('app_v50_submit_week',{target_week:tsWeek});
+  tsSubmittedWeeks.add(tsWeek);renderTimesheet();v34Stats={};
+  v38Toast('Stundenzettel erfolgreich abgegeben.',{kind:'ok'});
+ }catch(e){v38Toast('Abgabe fehlgeschlagen: '+e.message,{kind:'err'});}
+}
 function tsLoadPdfLib(){return new Promise((resolve,reject)=>{if(window.PDFLib)return resolve(window.PDFLib);const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';script.onload=()=>window.PDFLib?resolve(window.PDFLib):reject(new Error('PDF-Bibliothek nicht verfügbar'));script.onerror=()=>reject(new Error('PDF-Bibliothek konnte nicht geladen werden'));document.head.appendChild(script);});}
 async function tsPDF(mode,review=null){
  if(!review)tsCapture();
