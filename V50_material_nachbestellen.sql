@@ -26,7 +26,7 @@ create policy "v50_reorders_update" on public.material_reorders for update to au
 using (public.app_is_reviewer() or public.app_is_admin(auth.uid()))
 with check (public.app_is_reviewer() or public.app_is_admin(auth.uid()));
 -- Status- und Materialfelder werden zusätzlich serverseitig vor Manipulation geschützt.
-create or replace function public.v50_reorder_guard() returns trigger language plpgsql security definer set search_path=public,pg_temp as $
+create or replace function public.v50_reorder_guard() returns trigger language plpgsql security definer set search_path=public,pg_temp as $$
 declare m record; p text;
 begin
   if TG_OP='INSERT' then
