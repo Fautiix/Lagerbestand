@@ -11,12 +11,16 @@ create index if not exists montage_reports_polier_signed_idx on public.app_monta
 drop policy if exists "v50_week_submitted_only" on public.weekly_timesheets;
 create policy "v50_week_submitted_only" on public.weekly_timesheets as restrictive
 for select to authenticated
-using (user_id = auth.uid() or submitted_at is not null or public.is_admin());
+using (user_id = auth.uid() or submitted_at is not null);
 
 drop policy if exists "v50_blue_signed_only" on public.app_montage_reports;
 create policy "v50_blue_signed_only" on public.app_montage_reports as restrictive
 for select to authenticated
-using (owner_user_id = auth.uid() or polier_signed_at is not null or public.is_admin());
+using (owner_user_id = auth.uid() or (
+  nullif(document->'data'->>'sign_bauleitung','') is not null
+  and (document->'extraData' is null or document->'extraData' = 'null'::jsonb
+       or nullif(document->'extraData'->>'sign_bauleitung','') is not null)
+));
 
 -- Direkte Manipulation des Abgabe-Zeitstempels verhindern.
 create or replace function public.v50_guard_week_submission() returns trigger
@@ -60,7 +64,9 @@ begin
  if auth.uid() is null then raise exception 'Bitte anmelden'; end if;
  delete from public.app_montage_reports
  where report_id=target_report and owner_user_id=auth.uid()
-   and polier_signed_at is null and reviewed_at is null;
+   and polier_signed_at is null and reviewed_at is null
+   and nullif(document->'data'->>'sign_bauleitung','') is null
+   and nullif(document->'extraData'->>'sign_bauleitung','') is null;
  get diagnostics deleted_count = row_count;
  if deleted_count=0 then
    if exists(select 1 from public.app_montage_reports where report_id=target_report) then
