@@ -4,6 +4,9 @@
 -- der Mitarbeiter kann sie durch den neuen Abgabe-Knopf einreichen.
 
 alter table public.weekly_timesheets add column if not exists submitted_at timestamptz;
+-- Bereits geprüfte bzw. zurückgestellte Altberichte bleiben im Prüfplatz sichtbar.
+update public.weekly_timesheets set submitted_at=coalesce(updated_at,now())
+where submitted_at is null and review_status in ('geprueft','spaeter');
 create index if not exists weekly_timesheets_submitted_idx on public.weekly_timesheets (submitted_at) where submitted_at is not null;
 create index if not exists montage_reports_polier_signed_idx on public.app_montage_reports (polier_signed_at) where polier_signed_at is not null;
 
