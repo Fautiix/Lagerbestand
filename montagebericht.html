@@ -21,7 +21,7 @@ h2{font-size:18px;margin:14px 0 10px}details{border:1px solid var(--line);margin
 #sigModal.visible{display:flex}
 .sigDialog{display:flex;flex-direction:column;gap:7px;background:#111a29;border:1px solid #45617a;padding:10px;border-radius:10px;width:100%;height:100%;max-width:none;max-height:none;min-height:0}
 .sigDialog h2{font-size:18px;margin:0}.sigDialog .tiny{margin:0}
-.sigDialog canvas{display:block;touch-action:none;width:100%;height:100%;flex:1 1 auto;min-height:0;background:white;border:2px solid #6b8299;border-radius:8px;margin:0}
+.sigDialog canvas{display:block;touch-action:none;width:100%;height:auto;aspect-ratio:900 / 280;flex:0 0 auto;min-height:0;max-width:100%;background:white;border:2px solid #6b8299;border-radius:8px;margin:0 auto}
 .sigDialog .buttons{flex:0 0 auto;margin:0;justify-content:flex-end}.sigDialog .buttons button{min-height:46px}
 /* Querformat auf kleinen Hochformat-Displays auch dann, wenn die Browser-Drehsperre greift. */
 #sigModal.rotated{width:100dvh;height:100dvw;inset:auto;top:0;left:100vw;transform-origin:top left;transform:rotate(90deg)}
