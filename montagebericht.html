@@ -1062,6 +1062,7 @@ $('saved').addEventListener('change',e=>{if(e.target.value)restore(e.target.valu
 $('add').onclick=()=>fresh();$('save').onclick=saveCurrent;
 // Bestehende lokale Berichte werden nur auf ausdrücklichen Wunsch hochgeladen.
 const cloudImportBtn=document.createElement('button');cloudImportBtn.textContent='☁ Alte lokale Berichte synchronisieren';cloudImportBtn.type='button';cloudImportBtn.onclick=async()=>{if(!confirm('Eigene lokale Berichte in Supabase übernehmen? Bitte nur Berichte hochladen, die du selbst erstellt hast.'))return;let ok=0,bad=0;for(const [id,entry] of Object.entries(reports)){try{await cloudStoreReport(id,entry);ok++;}catch(e){console.warn(id,e);bad++;}}alert(ok+' Berichte synchronisiert, '+bad+' fehlgeschlagen.');};$('save').parentElement.append(cloudImportBtn);
+let v50CloudSyncs=new Map();
 async function v50DeleteBlueDraft(id){
  const row=reports[id];
  if(!row)return;
@@ -1069,16 +1070,20 @@ async function v50DeleteBlueDraft(id){
  if(row.data?.sign_bauleitung||row.extraData?.sign_bauleitung)return setStatus('Nach der Polier-Unterschrift ist Löschen nicht möglich.',false);
  if(!confirm('Diesen angefangenen Bericht endgültig löschen?'+(row.extraData?' Beide Blätter werden gelöscht.':'')))return;
  try{
-   if(cloudReportIds.has(id)){
-     await apiRest('rpc/app_v50_delete_blue_draft',{method:'POST',body:JSON.stringify({target_report:id})});
-     cloudReportIds.delete(id);cloudReportOwners.delete(id);
-   }
+   const pending=v50CloudSyncs.get(id);
+   if(pending)await pending.catch(()=>{});
+   await apiRest('rpc/app_v50_delete_blue_draft',{method:'POST',body:JSON.stringify({target_report:id})});
+   cloudReportIds.delete(id);cloudReportOwners.delete(id);
    delete reports[id];
    localStorage.setItem(STORAGE,JSON.stringify(reports));
    if(localStorage.getItem(ACTIVE)===id)localStorage.removeItem(ACTIVE);
    changed=false;updateSaved();
-   if(currentId===id){currentId='';sheetModels={first:null,second:null};await fresh(false);}
-   else if(!ez.hidden){step='start';render();}
+   if(currentId===id){
+     currentId='';sheetModels={first:null,second:null};
+     model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};
+     defaults();buildEditor();updateSheetControls();queuePaint();
+   }
+   if(!ez.hidden){step='start';render();}
    setStatus('✓ Entwurf gelöscht');
  }catch(e){setStatus('Löschen fehlgeschlagen: '+e.message,false);}
 }
@@ -1277,9 +1282,12 @@ async function cloudStoreReport(id,entry){
  }
 }
 async function syncCurrentCloudReport(){
- if(!reports[currentId])return;
- try{await cloudStoreReport(currentId,reports[currentId]);setStatus('✓ Auf dem Gerät und in Supabase gespeichert');}
+ const id=currentId,entry=reports[id];
+ if(!entry)return;
+ const task=cloudStoreReport(id,entry);v50CloudSyncs.set(id,task);
+ try{await task;setStatus('✓ Auf dem Gerät und in Supabase gespeichert');}
  catch(error){setStatus('⚠ Nur auf diesem Gerät gespeichert! Cloud: '+error.message,false);console.warn('Cloud-Monteurbericht:',error);}
+ finally{if(v50CloudSyncs.get(id)===task)v50CloudSyncs.delete(id);}
 }
 async function loadCloudReport(reportId){
  const rows=await apiRest('app_montage_reports?select=report_id,owner_user_id,document,updated_at&report_id=eq.'+encodeURIComponent(reportId)+'&limit=1');
