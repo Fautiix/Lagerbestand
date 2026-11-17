@@ -2731,12 +2731,12 @@ function renderTimesheet(openDay){
   const prev=tsPrevWeek(),prevMissing=!tsArchive.some(x=>x.week===prev);
   el.innerHTML=`<div class="tz-pagehead"><div><h1>${other?tsSafe(tsOwnerName)+' · ':'Meine '}Stundenzettel</h1><p>Eine Kalenderwoche, ein Zettel.</p></div></div>
    <section class="tz-current" aria-label="Aktuelle Woche">
-    <div class="tz-current-top"><div><span class="tz-eyebrow">Aktuelle Woche</span><h2>${tsWeekLabel(current)}</h2><span class="tz-sub">${tsWeekRange(current)}</span></div><div class="tz-current-hours"><strong>${tsNumFormat(tsArchiveHours(curData))}</strong><span>Stunden</span>${tzStatus(curData)}</div></div>
+    <div class="tz-current-top"><div><span class="tz-eyebrow">Aktuelle Woche</span><h2>${tsWeekLabel(current)}</h2><span class="tz-sub">${tsWeekRange(current)}</span></div><div class="tz-current-hours"><strong>${tsNumFormat(tsArchiveHours(curData))}</strong><span>Stunden</span>${tzStatus(curData)}${tsSubmittedWeeks.has(current)?'<span class="v50-pill done">Abgegeben</span>':''}</div></div>
     ${tzMiniWeek(curData,current,false)}
     <div class="tz-actions"><button class="btn primary" onclick="tsOpenWeek('${current}')">${cur?'Woche öffnen':'Woche beginnen'}</button>${prevMissing?`<button class="btn" onclick="tsOpenWeek('${prev}')">KW ${tsKw(prev)} nachtragen</button>`:''}${delBtn(current)}</div>
    </section>
    <section class="tz-list" aria-label="Vergangene Wochen"><h3>Vergangene Wochen</h3>
-    ${old.length?old.map(x=>`<div class="tz-row"><button class="tz-rowmain" onclick="tsOpenWeek('${x.week}')"><span class="tz-rowtxt"><strong>${tsWeekLabel(x.week)}</strong><small>${tsWeekRange(x.week)}</small></span>${tzStatus(x.data)}<span class="tz-rowhours">${tsNumFormat(tsArchiveHours(x.data))} Std.</span>${tzIcon('chev')}</button>${delBtn(x.week)}</div>`).join(''):'<p class="tz-empty">Hier erscheinen deine gespeicherten Wochen.</p>'}
+    ${old.length?old.map(x=>`<div class="tz-row"><button class="tz-rowmain" onclick="tsOpenWeek('${x.week}')"><span class="tz-rowtxt"><strong>${tsWeekLabel(x.week)}</strong><small>${tsWeekRange(x.week)}</small></span>${tzStatus(x.data)}${tsSubmittedWeeks.has(x.week)?'<span class="v50-pill done">Abgegeben</span>':''}<span class="tz-rowhours">${tsNumFormat(tsArchiveHours(x.data))} Std.</span>${tzIcon('chev')}</button>${delBtn(x.week)}</div>`).join(''):'<p class="tz-empty">Hier erscheinen deine gespeicherten Wochen.</p>'}
    </section>
    <p class="tz-foot">Neue Stundenzettel gibt es nur für die aktuelle und die letzte Kalenderwoche.</p>`;
   return;
@@ -2780,6 +2780,7 @@ async function tsSave(silent=false,skipCapture=false){if(!skipCapture)tsCapture(
 async function v50SubmitWeek(){
  if(!currentUserProfile||(tsOwnerId&&tsOwnerId!==currentUserProfile.user_id))return;
  if(tsSubmittedWeeks.has(tsWeek))return v38Toast('Dieser Stundenzettel wurde bereits abgegeben.');
+ if(tsBusy)return v38Toast('Der Stundenzettel wird gerade gespeichert. Bitte anschließend erneut auf Abgeben tippen.');
  if(!await v38Confirm('Stundenzettel '+tsWeekLabel(tsWeek)+' jetzt verbindlich an Schlottau abgeben?',{ok:'Abgeben'}))return;
  await tsSave(false);
  if(!tsRemoteAvailable)return;
