@@ -17,16 +17,16 @@ alter table public.material_reorders enable row level security;
 grant select, insert, update on public.material_reorders to authenticated;
 grant usage, select on sequence public.material_reorders_id_seq to authenticated;
 drop policy if exists "v50_reorders_select" on public.material_reorders;
-create policy "v50_reorders_select" on public.material_reorders for select to authenticated using (true);
+create policy "v50_reorders_select" on public.material_reorders for select to authenticated using (public.app_has_access());
 drop policy if exists "v50_reorders_insert" on public.material_reorders;
 create policy "v50_reorders_insert" on public.material_reorders for insert to authenticated
-with check (employee_user_id=auth.uid() and status='offen' and ordered_at is null and ordered_by is null);
+with check (public.app_has_access() and employee_user_id=auth.uid() and status='offen' and ordered_at is null and ordered_by is null);
 drop policy if exists "v50_reorders_update" on public.material_reorders;
 create policy "v50_reorders_update" on public.material_reorders for update to authenticated
-using (public.app_is_reviewer() or public.is_admin())
-with check (public.app_is_reviewer() or public.is_admin());
+using (public.app_is_reviewer() or public.app_is_admin(auth.uid()))
+with check (public.app_is_reviewer() or public.app_is_admin(auth.uid()));
 -- Status- und Materialfelder werden zusätzlich serverseitig vor Manipulation geschützt.
-create or replace function public.v50_reorder_guard() returns trigger language plpgsql security definer set search_path=public as $$
+create or replace function public.v50_reorder_guard() returns trigger language plpgsql security definer set search_path=public,pg_temp as $
 declare m record; p text;
 begin
   if TG_OP='INSERT' then
@@ -40,7 +40,7 @@ begin
     new.material_number=m.material_number;
     new.status='offen';new.ordered_at=null;new.ordered_by=null;
   elsif TG_OP='UPDATE' then
-    if not (public.app_is_reviewer() or public.is_admin()) then raise exception 'Nur E-Meister oder Admin darf abhaken'; end if;
+    if not (public.app_is_reviewer() or public.app_is_admin(auth.uid())) then raise exception 'Nur E-Meister oder Admin darf abhaken'; end if;
     if (new.material_id,new.material_name,new.material_number,new.employee_user_id,new.employee_name,new.created_at)
       is distinct from (old.material_id,old.material_name,old.material_number,old.employee_user_id,old.employee_name,old.created_at)
     then raise exception 'Anforderungsdaten dürfen nicht verändert werden'; end if;
@@ -51,6 +51,7 @@ begin
   end if;
   return new;
 end $$;
+revoke all on function public.v50_reorder_guard() from public, anon, authenticated;
 drop trigger if exists v50_reorder_guard on public.material_reorders;
 create trigger v50_reorder_guard before insert or update on public.material_reorders
 for each row execute function public.v50_reorder_guard();
