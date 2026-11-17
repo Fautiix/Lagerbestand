@@ -83,6 +83,7 @@ function v50RefreshVisible(){
  if(document.visibilityState!=='visible'||!currentUserProfile)return;
  if(currentAppPage==='pruefbereich'&&isMeister)void v50ReviewPanel();
  else if(currentAppPage==='nachbestellen')void v50OpenOrders();
+ else if(currentAppPage==='startseite'&&!v34Editing)void v50LoadOrders().then(()=>{if(currentAppPage==='startseite'&&!v34Editing)renderStartseite();});
 }
 document.addEventListener('visibilitychange',v50RefreshVisible);
 window.addEventListener('focus',v50RefreshVisible);
