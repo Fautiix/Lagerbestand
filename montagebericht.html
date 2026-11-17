@@ -1190,11 +1190,33 @@ $('signPreviewAccept').onclick=()=>{
 };
 // Unterschriften per Pointer zeichnen
 const pad=$('sigPad'),pctx=pad.getContext('2d');let isDrawing=false;
-function pointerXY(e){const b=pad.getBoundingClientRect();return [(e.clientX-b.left)*pad.width/b.width,(e.clientY-b.top)*pad.height/b.height]}
+function pointerXY(e){
+ const b=pad.getBoundingClientRect();
+ // CSS-Querformat vertauscht die Bildschirmachsen.
+ if($('sigModal').classList.contains('rotated')){
+  return [(e.clientY-b.top)*pad.width/b.height,(b.right-e.clientX)*pad.height/b.width];
+ }
+ return [(e.clientX-b.left)*pad.width/b.width,(e.clientY-b.top)*pad.height/b.height];
+}
+function fitSignCanvas(){
+ const modal=$('sigModal');if(!modal.classList.contains('visible'))return;
+ const box=modal.querySelector('.sigDialog');
+ const title=$('sigTitle'),hint=box.querySelector('.tiny'),buttons=box.querySelector('.buttons');
+ const style=getComputedStyle(box);
+ const paddingY=parseFloat(style.paddingTop||0)+parseFloat(style.paddingBottom||0);
+ const paddingX=parseFloat(style.paddingLeft||0)+parseFloat(style.paddingRight||0);
+ const gaps=(parseFloat(style.rowGap||style.gap||0)||0)*3;
+ const height=Math.max(80,box.clientHeight-paddingY-title.offsetHeight-hint.offsetHeight-buttons.offsetHeight-gaps-8);
+ const width=Math.max(120,box.clientWidth-paddingX-4);
+ const canvasWidth=Math.min(width,height*(pad.width/pad.height));
+ pad.style.width=canvasWidth+'px';
+ pad.style.height=(canvasWidth*pad.height/pad.width)+'px';
+}
 function updateSignOrientation(){
  const modal=$('sigModal');
  // Gedrehte Querformat-Ansicht, wenn der Bildschirm weiterhin hochkant ist.
  modal.classList.toggle('rotated',modal.classList.contains('visible')&&window.innerHeight>window.innerWidth);
+ if(modal.classList.contains('visible'))requestAnimationFrame(fitSignCanvas);
 }
 async function openSign(key){
  signatureKey=key;
@@ -1213,6 +1235,7 @@ async function closeSign(){
  try{if(document.fullscreenElement)await document.exitFullscreen()}catch(e){}
 }
 window.addEventListener('resize',updateSignOrientation);
+window.visualViewport?.addEventListener('resize',updateSignOrientation);
 
 pad.addEventListener('pointerdown',e=>{isDrawing=true;pad.setPointerCapture(e.pointerId);const [x,y]=pointerXY(e);pctx.beginPath();pctx.moveTo(x,y);pctx.lineTo(x+.01,y+.01);pctx.stroke()});
 pad.addEventListener('pointermove',e=>{if(!isDrawing)return;const [x,y]=pointerXY(e);pctx.lineTo(x,y);pctx.stroke()});
