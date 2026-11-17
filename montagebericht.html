@@ -989,7 +989,7 @@ $('addSecond').onclick=makeSecondSheet;
 $('removeSecond').onclick=removeSecondSheet;
 function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]?.updated).localeCompare(safe(a[1]?.updated)));
  $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')}${obj.extraData?' · Auftrag + Zusatz':''} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
-function saveCurrent(){if(v32Review)return v32Commit('offen');try{
+function saveCurrent(){if(v32Review)return v32Commit('offen');if(!currentId){setStatus('Bitte zuerst einen neuen Bericht anlegen.',false);return;}try{
  reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};
  if(!foreignReportIds.has(currentId)){localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);}
  changed=false;updateSaved();updateSheetControls();void syncCurrentCloudReport();setStatus(sheetModels.second?'✓ Beide Blätter auf diesem Gerät gespeichert':'✓ Auf diesem Gerät gespeichert');
