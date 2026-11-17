@@ -77,3 +77,13 @@ async function v50ReviewPanel(){
  panel.querySelector('#v50ReviewBody').innerHTML=open.length?'<div class="v50-table-scroll"><table class="v50-table"><thead><tr><th>Material</th><th>M-Nummer</th><th>Mitarbeiter</th><th>Status</th><th>Aktion</th></tr></thead><tbody>'+open.map(o=>'<tr><td>'+escapeHtml(o.material_name)+'</td><td>'+(o.material_number?'M'+escapeHtml(String(o.material_number).replace(/^M/i,'')):'–')+'</td><td>'+escapeHtml(o.employee_name)+'</td><td><span class="v50-pill">Offen</span></td><td><button type="button" class="btn small" data-v50-order="'+o.id+'">Als bestellt abhaken</button></td></tr>').join('')+'</tbody></table></div>':'<p class="muted">Keine offenen Nachbestellungen.</p>';
  panel.querySelectorAll('[data-v50-order]').forEach(b=>b.onclick=()=>v50MarkOrdered(b.dataset.v50Order));
 }
+
+/* Offene Anforderungen werden bei Rückkehr in die App und während des Prüfens neu geladen. */
+function v50RefreshVisible(){
+ if(document.visibilityState!=='visible'||!currentUserProfile)return;
+ if(currentAppPage==='pruefbereich'&&isMeister)void v50ReviewPanel();
+ else if(currentAppPage==='nachbestellen')void v50OpenOrders();
+}
+document.addEventListener('visibilitychange',v50RefreshVisible);
+window.addEventListener('focus',v50RefreshVisible);
+setInterval(v50RefreshVisible,60000);
