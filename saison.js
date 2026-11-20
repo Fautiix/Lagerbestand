@@ -248,7 +248,7 @@
       if (!info) continue;
       var r = snowEls[i].getBoundingClientRect();
       info.box = null;
-      if ((W < 700 && !info.nav) || r.width < 120 || r.bottom < 0 || r.top > H || r.top < 4 * px) continue;
+      if (((W < 700 || H < 500) && !info.nav) || r.width < 120 || r.bottom < 0 || r.top > H || r.top < 4 * px) continue;
       var inset = info.nav ? 0 : 12;
       var x0 = snap(r.left + inset), cols = Math.floor((r.width - 2 * inset) / step), top = Math.round(r.top);
       info.box = { x0: x0, cols: cols, top: top };
@@ -446,7 +446,7 @@
   function resize() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
-    px = W < 700 ? 2 : 4;
+    px = (W < 700 || H < 500) ? 2 : 4;
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;

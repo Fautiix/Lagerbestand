@@ -306,3 +306,5 @@ label.wp-navbtn{margin:0!important;font-size:inherit;letter-spacing:0}
 
 /* Handy: Kacheln über dem Plan statt schmaler Spalte */
 @media(max-width:850px){.wp-layout.with-palette,.wp-layout.with-palette.pal-collapsed{grid-template-columns:minmax(0,1fr)!important}.wp-palette{position:static!important;grid-row:1;max-height:230px}}
+/* Handy quer: Plan bekommt fast die ganze Höhe, Kacheln kompakt */
+@media(orientation:landscape) and (max-height:520px){.wp-scroll{max-height:calc(100dvh - 120px)!important;min-height:220px}.wp-palette{max-height:120px!important}.wp-layout.with-palette,.wp-layout.with-palette.pal-collapsed{grid-template-columns:minmax(0,1fr)!important}}
