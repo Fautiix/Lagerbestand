@@ -1,82 +1,60 @@
--- V50: Entwürfe erst nach Abgabe im Prüfplatz sichtbar.
--- Einmalig nach Prüfung der bestehenden RLS-Regeln im Supabase SQL Editor ausführen.
--- Bereits bestehende ungeprüfte Stundenzettel gelten zunächst als Entwurf;
--- der Mitarbeiter kann sie durch den neuen Abgabe-Knopf einreichen.
+-- V50: Berichte-Abgabe – REFERENZSTAND der Live-Datenbank (abgeglichen am 20.11.2026)
+-- ACHTUNG: Diese Teile sind in Supabase bereits aktiv. NICHT erneut ausführen,
+-- außer bei einer Neueinrichtung. Das Skript ist so geschrieben, dass ein erneutes
+-- Ausführen nichts doppelt anlegt und keine bestehende Policy überschreibt.
+--
+-- Bereits vorhanden aus V30/V39/V49 (hier NICHT neu angelegt):
+--   weekly_timesheets.submitted_at, Policies timesheets_own_*, v30_week_read
+--   (E-Meister sieht nur abgegebene Zettel), v30_week_update,
+--   Trigger app_v49_week_submit_guard (setzt submitted_at nur über app.week_submit='1'),
+--   Funktion app_v49_week_submit(date).
+-- Hinweis: Der frühere Entwurf mit Trigger v50_guard_week_submission und
+-- Einstellung app.v50_week_submit wurde NICHT übernommen – er hätte die
+-- V49-Abgabe blockiert. Diesen Trigger nicht anlegen.
 
-alter table public.weekly_timesheets add column if not exists submitted_at timestamptz;
--- Bereits geprüfte bzw. zurückgestellte Altberichte bleiben im Prüfplatz sichtbar.
-update public.weekly_timesheets set submitted_at=coalesce(updated_at,now())
-where submitted_at is null and review_status in ('geprueft','spaeter');
-create index if not exists weekly_timesheets_submitted_idx on public.weekly_timesheets (submitted_at) where submitted_at is not null;
-create index if not exists montage_reports_polier_signed_idx on public.app_montage_reports (polier_signed_at) where polier_signed_at is not null;
-
--- Auch bei bereits vorhandenen erlaubenden SELECT-Policies bleiben fremde Entwürfe unsichtbar.
-drop policy if exists "v50_week_submitted_only" on public.weekly_timesheets;
-create policy "v50_week_submitted_only" on public.weekly_timesheets as restrictive
-for select to authenticated
-using (user_id = auth.uid() or submitted_at is not null);
-
-drop policy if exists "v50_blue_signed_only" on public.app_montage_reports;
-create policy "v50_blue_signed_only" on public.app_montage_reports as restrictive
-for select to authenticated
-using (owner_user_id = auth.uid() or (
-  nullif(document->'data'->>'sign_bauleitung','') is not null
-  and (document->'extraData' is null or document->'extraData' = 'null'::jsonb
-       or nullif(document->'extraData'->>'sign_bauleitung','') is not null)
-));
-
--- Direkte Manipulation des Abgabe-Zeitstempels verhindern.
-create or replace function public.v50_guard_week_submission() returns trigger
-language plpgsql security definer set search_path=public as $$
-begin
- if tg_op='INSERT' then
-   new.submitted_at=null;
- elsif new.submitted_at is distinct from old.submitted_at then
-   if coalesce(current_setting('app.v50_week_submit',true),'') <> 'yes' then
-      raise exception 'Abgabe nur über Stundenzettel abgeben möglich';
-   end if;
- end if;
- return new;
-end $$;
-drop trigger if exists v50_guard_week_submission on public.weekly_timesheets;
-create trigger v50_guard_week_submission
-before insert or update on public.weekly_timesheets
-for each row execute function public.v50_guard_week_submission();
-
+-- 1) Stundenzettel abgeben: V50-Name delegiert an die geprüfte V49-Funktion.
 create or replace function public.app_v50_submit_week(target_week date)
-returns timestamptz language plpgsql security definer set search_path=public as $$
-declare stamp timestamptz;
-begin
- if auth.uid() is null then raise exception 'Bitte anmelden'; end if;
- perform set_config('app.v50_week_submit','yes',true);
- update public.weekly_timesheets
- set submitted_at=coalesce(submitted_at,now())
- where user_id=auth.uid() and week_start=target_week
- returning submitted_at into stamp;
- if stamp is null then raise exception 'Stundenzettel nicht gefunden. Bitte zuerst speichern.'; end if;
- return stamp;
-end $$;
-revoke all on function public.app_v50_submit_week(date) from public;
+returns timestamptz language sql set search_path = '' as $$
+  select public.app_v49_week_submit(target_week);
+$$;
+revoke all on function public.app_v50_submit_week(date) from public, anon;
 grant execute on function public.app_v50_submit_week(date) to authenticated;
 
--- Der Monteur darf nur eigene, noch nicht vom Polier signierte Entwürfe löschen.
+-- 2) Blaue Zettel: E-Meister sieht fremde Berichte erst nach Polier-Unterschrift
+--    (bei zwei Blättern beide) oder wenn bereits geprüft.
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public'
+                 and tablename='app_montage_reports' and policyname='v50_blue_signed_only') then
+    create policy "v50_blue_signed_only" on public.app_montage_reports as restrictive
+    for select to authenticated
+    using (
+      owner_user_id = auth.uid()
+      or reviewed_at is not null
+      or (polier_signed_at is not null
+          and coalesce(document->'data'->>'sign_bauleitung','') <> ''
+          and (jsonb_typeof(document->'extraData') is distinct from 'object'
+               or coalesce(document->'extraData'->>'sign_bauleitung','') <> ''))
+    );
+  end if;
+end $$;
+
+-- 3) Eigene, noch nicht unterschriebene blaue Entwürfe löschen.
 create or replace function public.app_v50_delete_blue_draft(target_report text)
-returns boolean language plpgsql security definer set search_path=public as $$
+returns boolean language plpgsql security definer set search_path = public, pg_temp as $$
 declare deleted_count integer;
 begin
- if auth.uid() is null then raise exception 'Bitte anmelden'; end if;
+ if auth.uid() is null or not public.app_has_access(auth.uid()) then
+   raise exception 'Bitte anmelden';
+ end if;
  delete from public.app_montage_reports
  where report_id=target_report and owner_user_id=auth.uid()
    and polier_signed_at is null and reviewed_at is null
-   and nullif(document->'data'->>'sign_bauleitung','') is null
-   and nullif(document->'extraData'->>'sign_bauleitung','') is null;
+   and coalesce(document->'data'->>'sign_bauleitung','')=''
+   and coalesce(document->'extraData'->>'sign_bauleitung','')='';
  get diagnostics deleted_count = row_count;
- if deleted_count=0 then
-   if exists(select 1 from public.app_montage_reports where report_id=target_report) then
-     raise exception 'Nur eigene, noch nicht abgegebene Berichte sind löschbar';
-   end if;
- end if;
+ if deleted_count=0 and exists(select 1 from public.app_montage_reports where report_id=target_report)
+ then raise exception 'Nur eigene, noch nicht abgegebene Berichte sind löschbar'; end if;
  return deleted_count>0;
 end $$;
-revoke all on function public.app_v50_delete_blue_draft(text) from public;
+revoke all on function public.app_v50_delete_blue_draft(text) from public, anon;
 grant execute on function public.app_v50_delete_blue_draft(text) to authenticated;

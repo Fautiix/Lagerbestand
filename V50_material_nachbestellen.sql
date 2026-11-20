@@ -1,5 +1,7 @@
--- V50: Gemeinsame Material-Nachbestellliste
--- Einmalig im Supabase SQL Editor ausführen.
+-- V50: Gemeinsame Material-Nachbestellliste – REFERENZSTAND der Live-Datenbank (20.11.2026)
+-- ACHTUNG: In Supabase bereits aktiv. NICHT erneut ausführen, außer bei Neueinrichtung.
+-- Wiederholtes Ausführen legt nichts doppelt an und ersetzt keine bestehende Policy.
+
 create table if not exists public.material_reorders (
   id bigint generated always as identity primary key,
   material_id bigint not null references public.materials(id) on delete restrict,
@@ -14,19 +16,34 @@ create table if not exists public.material_reorders (
 );
 create index if not exists material_reorders_open_idx on public.material_reorders (status, created_at desc);
 alter table public.material_reorders enable row level security;
+
+-- Rechte: lesen, eintragen, abhaken. Löschen und Leeren gesperrt.
+revoke all on public.material_reorders from anon;
+revoke delete, truncate on public.material_reorders from authenticated;
 grant select, insert, update on public.material_reorders to authenticated;
 grant usage, select on sequence public.material_reorders_id_seq to authenticated;
-drop policy if exists "v50_reorders_select" on public.material_reorders;
-create policy "v50_reorders_select" on public.material_reorders for select to authenticated using (public.app_has_access());
-drop policy if exists "v50_reorders_insert" on public.material_reorders;
-create policy "v50_reorders_insert" on public.material_reorders for insert to authenticated
-with check (public.app_has_access() and employee_user_id=auth.uid() and status='offen' and ordered_at is null and ordered_by is null);
-drop policy if exists "v50_reorders_update" on public.material_reorders;
-create policy "v50_reorders_update" on public.material_reorders for update to authenticated
-using (public.app_is_reviewer() or public.app_is_admin(auth.uid()))
-with check (public.app_is_reviewer() or public.app_is_admin(auth.uid()));
--- Status- und Materialfelder werden zusätzlich serverseitig vor Manipulation geschützt.
-create or replace function public.v50_reorder_guard() returns trigger language plpgsql security definer set search_path=public,pg_temp as $$
+
+do $$ begin
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='material_reorders' and policyname='v50_reorders_select') then
+    create policy "v50_reorders_select" on public.material_reorders for select to authenticated
+      using (public.app_has_access());
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='material_reorders' and policyname='v50_reorders_insert') then
+    create policy "v50_reorders_insert" on public.material_reorders for insert to authenticated
+      with check (public.app_has_access() and employee_user_id=auth.uid() and status='offen'
+                  and ordered_at is null and ordered_by is null);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname='public' and tablename='material_reorders' and policyname='v50_reorders_update') then
+    create policy "v50_reorders_update" on public.material_reorders for update to authenticated
+      using (public.app_is_reviewer() or public.app_is_admin(auth.uid()))
+      with check (public.app_is_reviewer() or public.app_is_admin(auth.uid()));
+  end if;
+end $$;
+
+-- Serverseitiger Schutz: Name, M-Nummer und Mitarbeiter werden aus der DB übernommen,
+-- nur E-Meister/Admin dürfen den Status ändern.
+create or replace function public.v50_reorder_guard() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
 declare m record; p text;
 begin
   if TG_OP='INSERT' then
@@ -52,7 +69,12 @@ begin
   return new;
 end $$;
 revoke all on function public.v50_reorder_guard() from public, anon, authenticated;
-drop trigger if exists v50_reorder_guard on public.material_reorders;
-create trigger v50_reorder_guard before insert or update on public.material_reorders
-for each row execute function public.v50_reorder_guard();
--- Hinweis: Tabellen, RLS und Trigger werden erst mit Ausführung dieser Datei aktiv.
+
+-- Trigger nur anlegen, wenn er fehlt (kein drop/create im Livebetrieb).
+do $$ begin
+  if not exists (select 1 from pg_trigger where tgname='v50_reorder_guard'
+                 and tgrelid='public.material_reorders'::regclass) then
+    create trigger v50_reorder_guard before insert or update on public.material_reorders
+    for each row execute function public.v50_reorder_guard();
+  end if;
+end $$;

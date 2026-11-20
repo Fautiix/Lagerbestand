@@ -1,23 +1,33 @@
 # V50 – Einrichtung
 
-Die Oberflächen- und JavaScript-Dateien für V50 liegen bereits im Repository auf `main`.
+**Stand 20.11.2026: Die Datenbankteile von V50 sind in Supabase bereits aktiv.**
+Die SQL-Dateien im Repository geben jetzt genau diesen Live-Stand wieder (Referenz).
+Sie müssen **nicht** erneut ausgeführt werden.
 
-## Einmalige Datenbankeinrichtung
+## Was live aktiv ist
 
-Im **bestehenden Supabase-Projekt** unter **SQL Editor** die Dateien in dieser Reihenfolge ausführen:
+**Stundenzettel-Abgabe** (`V50_berichte_abgabe.sql`)
+- RPC `app_v50_submit_week(date)` → leitet an die geprüfte Funktion `app_v49_week_submit(date)` weiter. Nur für angemeldete Benutzer, nicht für `anon`.
+- Den Abgabe-Zeitstempel schützt der bestehende Trigger `app_v49_week_submit_guard`. Einen zweiten Abgabe-Trigger (`v50_guard_week_submission`) bitte **nicht** anlegen – er würde die Abgabe blockieren.
+- Der E-Meister sieht Stundenzettel nur nach Abgabe (Policy `v30_week_read`).
 
-1. `V50_material_nachbestellen.sql` – gemeinsame Nachbestellliste mit Materialreferenz, M-Nummer, Mitarbeitername, den Status *Offen*/*Bestellt* und Berechtigungen. Eine eingetragene Anforderung erscheint anschließend im E-Meister-Prüfplatz.
-2. `V50_berichte_abgabe.sql` – Stundenzettel erst nach bewusstem Klick auf *Stundenzettel abgeben* für den E-Meister sichtbar, blaue Zettel erst nach Polier-Unterschrift (bei zwei Blättern müssen beide unterschrieben sein). Das SQL enthält auch die serverseitige Löschregel für eigene Entwürfe.
+**Blaue Zettel**
+- Restrictive Policy `v50_blue_signed_only`: fremde Berichte erst sichtbar nach Polier-Unterschrift (bei zwei Blättern beide) oder wenn bereits geprüft.
+- RPC `app_v50_delete_blue_draft(text)`: Monteur löscht nur eigene, nicht unterschriebene Entwürfe.
 
-Die Skripte wurden in GitHub gespeichert, **aber nicht automatisch in der Supabase-Datenbank ausgeführt**. Vor dem Ausführen die bestehenden RLS-Policies, Funktionssignaturen und Tabellenspalten im Projekt prüfen.
+**Material nachbestellen** (`V50_material_nachbestellen.sql`)
+- Tabelle `material_reorders` mit RLS. Rechte: SELECT/INSERT/UPDATE erlaubt, DELETE/TRUNCATE gesperrt.
+- Trigger `v50_reorder_guard` übernimmt Materialname, M-Nummer und Mitarbeitername aus der Datenbank; nur E-Meister/Admin dürfen abhaken.
 
-## Schnelltest nach Einrichtung
+## Nur bei Neueinrichtung
 
-- Als Mitarbeiter die App in Version V50 öffnen, im Reiter *Material nachbestellen* einen Eintrag aus der Materialliste auswählen und speichern. M-Nummer und Name sollen automatisch erscheinen.
-- Als Schlottau den Prüfplatz öffnen und das Material als *Bestellt* abhaken. Es soll aus den offenen Anforderungen verschwinden und in der allgemeinen Tabelle stehen bleiben.
-- Einen neuen Stundenzettel anfangen und zwischenspeichern: beim E-Meister unsichtbar. Erst *Stundenzettel abgeben* öffnet ihn für die Prüfung.
-- Blauen Zettel ohne Polier-Unterschrift speichern: beim E-Meister unsichtbar. Nach Polier-Unterschrift und erfolgreicher Cloud-Synchronisierung für die Prüfung sichtbar.
-- Eigenen nicht abgegebenen blauen Zettel löschen: verschwunden aus lokaler und Cloud-Liste. Nach Polier-Unterschrift muss Löschen abgelehnt werden.
-- App auf Android und iPhone neu laden und die Bedienung sowie Rollen prüfen.
+Die beiden Skripte sind so geschrieben, dass sie nichts doppelt anlegen und keine vorhandene Policy oder Trigger ersetzen. Reihenfolge: zuerst `V50_material_nachbestellen.sql`, dann `V50_berichte_abgabe.sql`. Voraussetzung sind die Funktionen und Policies aus V30–V49.
 
-**Stand:** Syntax der JavaScript-Dateien geprüft, aber keine Live-Tests mit echter Supabase-Datenbank oder iPhone durchgeführt.
+## Noch offen: Funktionstest
+
+- Als Mitarbeiter: Material nachbestellen → Name und M-Nummer erscheinen automatisch.
+- Als Schlottau: Material im Prüfplatz abhaken → verschwindet aus „offen“, bleibt in der Liste als „Bestellt“.
+- Stundenzettel speichern → beim E-Meister unsichtbar. Erst *Stundenzettel abgeben* macht ihn sichtbar.
+- Blauen Zettel ohne Polier-Unterschrift → beim E-Meister unsichtbar; nach Unterschrift und Cloud-Sync sichtbar.
+- Eigenen nicht unterschriebenen blauen Zettel löschen → klappt; nach Polier-Unterschrift wird Löschen abgelehnt.
+- Android und iPhone neu laden, Rollen prüfen.
