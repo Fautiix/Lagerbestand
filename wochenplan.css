@@ -317,7 +317,7 @@ label.wp-navbtn{margin:0!important;font-size:inherit;letter-spacing:0}
 .wp-mob-tage .wp-mobdays{display:grid;gap:10px}
 .wp-mobday{border:1px solid var(--line,#1F2A3C);border-radius:14px;background:#0F1723;padding:10px;display:grid;gap:6px}
 .wp-mobday.wp-today{border-color:#3567E0}
-.wp-mobday header{display:flex;align-items:baseline;gap:8px;padding:2px 4px 4px}
+.wp-mobday header{background:transparent!important;border:0!important;position:static!important;box-shadow:none!important;display:flex;align-items:baseline;gap:8px;padding:2px 4px 4px}
 .wp-mobday header strong{font-size:15px}.wp-mobday header span{color:var(--muted,#9AA6B8);font-size:13px}
 .wp-mobday header em{margin-left:auto;font-style:normal;font-size:11.5px;font-weight:700;color:#fff;background:#3567E0;border-radius:8px;padding:2px 8px}
 .wp-mobevent{display:grid;gap:2px;text-align:left;width:100%;border:0;border-left:4px solid var(--wp-color);border-radius:10px;background:color-mix(in srgb,var(--wp-color) 18%,#131b28);color:#fff;padding:9px 11px;font:inherit;cursor:pointer}
