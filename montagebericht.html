@@ -1083,9 +1083,9 @@ async function v50DeleteBlueDraft(id){
      model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};
      defaults();buildEditor();updateSheetControls();queuePaint();
    }
-   if(!ez.hidden){step='start';render();}
    setStatus('✓ Entwurf gelöscht');
- }catch(e){setStatus('Löschen fehlgeschlagen: '+e.message,false);}
+   try{if(typeof window.v50EzRefresh==='function')window.v50EzRefresh();}catch(e){console.warn(e);}
+ }catch(e){setStatus('Löschen fehlgeschlagen: '+e.message,false);if(!$('ez').hidden)alert('Löschen fehlgeschlagen: '+e.message);}
 }
 $('remove').onclick=()=>v50DeleteBlueDraft(currentId);
 function utf8(v){return new TextEncoder().encode(v)}
@@ -1813,6 +1813,7 @@ const ez=$('ez'),openBtn=$('ezOpen');
 const MODE_KEY='mv_bz_mode_v41';
 const STEPS=['Baustelle','Fahrt','Zeit','Arbeiten','Fertig'];
 let numberTried='',step='start',saveTimer=0,matQuery='',siteQuery='',meisters=null,mail={send:true,meister:false,meisterEmail:'',to:''},result=null,busy=false;
+window.v50EzRefresh=()=>{if(!ez.hidden){step='start';render();}};
 const E=v=>esc(v);
 const fmtH=n=>(Math.round(n*4)/4).toFixed(2).replace('.',',');
 const numH=v=>{const n=Number(safe(v).replace(',','.'));return Number.isFinite(n)?n:0;};
