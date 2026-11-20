@@ -1483,7 +1483,7 @@ button.tz-miniday{cursor:pointer}
 .v38-rowlink{background:none!important;border:0!important;padding:0!important;color:var(--text)!important;font:inherit;font-weight:550;cursor:pointer;text-align:left}
 .v38-lagersearch{margin:0 0 14px}
 </style>
-<link rel="stylesheet" href="./wochenplan.css?v=2026-11-20-quer"/>
+<link rel="stylesheet" href="./wochenplan.css?v=2026-11-20-tage"/>
 </head>
 <body>
 <div id="accountGate" role="dialog" aria-modal="true" aria-labelledby="accountGateTitle">
@@ -4836,7 +4836,7 @@ async function v41EditPolierMail(siteId){
   try{await rpc('app_v41_set_site_contact_email',{p_site:Number(siteId),p_email:email});site.contact_email=email||null;renderSites();v38Toast(email?'Polier-E-Mail gespeichert.':'Polier-E-Mail entfernt.',{kind:'ok'});}
   catch(e){v38Toast('Speichern fehlgeschlagen: '+e.message,{kind:'err'});}
 }
-</script><script src="./wochenplan.js?v=2026-11-17-workspace-50"></script>
+</script><script src="./wochenplan.js?v=2026-11-20-tage"></script>
 <script src="./v50.js?v=2026-11-20-mobil"></script>
 <script src="./saison.js?v=3" defer></script>
 </body>

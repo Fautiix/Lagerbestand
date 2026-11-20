@@ -1,10 +1,10 @@
-const CACHE_NAME = 'lagerbestand-v20261120-55';
+const CACHE_NAME = 'lagerbestand-v20261120-56';
 
 const APP_FILES = [
   './',
   './index.html',
-  './wochenplan.css?v=2026-11-20-quer',
-  './wochenplan.js?v=2026-11-17-workspace-50',
+  './wochenplan.css?v=2026-11-20-tage',
+  './wochenplan.js?v=2026-11-20-tage',
   './v50.js?v=2026-11-20-mobil',
   './montagebericht.html?v=2026-11-17-workspace-50'
 ];
