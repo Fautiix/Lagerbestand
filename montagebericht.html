@@ -910,6 +910,21 @@ async function drawPage(canvas){const img=$('template');if(!img.complete||!img.n
 }
 function queuePaint(){const seq=++paintSeq;cancelAnimationFrame(raf);raf=requestAnimationFrame(async()=>{try{const temp=document.createElement('canvas');await drawPage(temp);if(seq!==paintSeq)return;const cv=$('page');cv.getContext('2d').clearRect(0,0,W,H);cv.getContext('2d').drawImage(temp,0,0);validate()}catch(e){console.error(e);setStatus('Vorschau: '+e.message,false)}})}
 function allReports(){try{const list=JSON.parse(localStorage.getItem(STORAGE)||'{}');return list&&typeof list==='object'&&!Array.isArray(list)?list:{}}catch{return {}}}
+/* V50: Nur die geänderten Berichte schreiben. Vorher wurde die ganze Liste überschrieben –
+   ein zweiter offener Tab (oder Handy-Ansicht) hat so Entwürfe gelöscht oder gelöschte zurückgeholt. */
+function v50SyncFromStorage(keep){
+ const cur=allReports();
+ for(const k of Object.keys(cur)) if(!(k in reports)) reports[k]=cur[k];
+ for(const k of Object.keys(reports)) if(!(k in cur)&&!foreignReportIds.has(k)&&k!==keep&&!cloudReportIds.has(k)) delete reports[k];
+ return cur;
+}
+function v50Persist(ids){
+ const cur=allReports();
+ for(const id of [].concat(ids||[])){ if(!id||foreignReportIds.has(id))continue; if(reports[id])cur[id]=reports[id]; else delete cur[id]; }
+ localStorage.setItem(STORAGE,JSON.stringify(cur));
+ for(const k of Object.keys(cur)) if(!(k in reports)) reports[k]=cur[k];
+}
+window.addEventListener('storage',e=>{if(e.key!==STORAGE||v32Review)return;v50SyncFromStorage(currentId);try{updateSaved();}catch(_){}try{if(typeof window.v50EzRefreshList==='function')window.v50EzRefreshList();}catch(_){}});
 function uid(){return `bericht_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`}
 function validReportNumber(n){return /^\d{7,}$/.test(safe(n))}
 async function reserveNumber(sheet){
@@ -991,7 +1006,7 @@ function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]
  $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')}${obj.extraData?' · Auftrag + Zusatz':''} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
 function saveCurrent(){if(v32Review)return v32Commit('offen');if(!currentId){setStatus('Bitte zuerst einen neuen Bericht anlegen.',false);return;}try{
  reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};
- if(!foreignReportIds.has(currentId)){localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);}
+ if(!foreignReportIds.has(currentId)){v50Persist(currentId);localStorage.setItem(ACTIVE,currentId);}
  changed=false;updateSaved();updateSheetControls();void syncCurrentCloudReport();setStatus(sheetModels.second?'✓ Beide Blätter auf diesem Gerät gespeichert':'✓ Auf diesem Gerät gespeichert');
  try{
   const payload=[];
@@ -1075,7 +1090,7 @@ async function v50DeleteBlueDraft(id){
    await apiRest('rpc/app_v50_delete_blue_draft',{method:'POST',body:JSON.stringify({target_report:id})});
    cloudReportIds.delete(id);cloudReportOwners.delete(id);
    delete reports[id];
-   localStorage.setItem(STORAGE,JSON.stringify(reports));
+   v50Persist(id);
    if(localStorage.getItem(ACTIVE)===id)localStorage.removeItem(ACTIVE);
    changed=false;updateSaved();
    if(currentId===id){
@@ -1296,7 +1311,7 @@ async function loadCloudReport(reportId){
  cloudReportIds.add(row.report_id);cloudReportOwners.set(row.report_id,row.owner_user_id);
  const me=JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id;
  if(row.owner_user_id!==me)foreignReportIds.add(row.report_id);
- else localStorage.setItem(STORAGE,JSON.stringify(reports));
+ else v50Persist(row.report_id);
  loadRecord(row.report_id);setStatus('Bericht aus Supabase geladen. Änderungen werden protokolliert.');
 }
 async function loadMyCloudReports(){
@@ -1309,7 +1324,7 @@ async function loadMyCloudReports(){
       reports[row.report_id]={data:row.document?.data||{},extraData:row.document?.extraData||null,updated:row.updated_at};
     }
   }
-  localStorage.setItem(STORAGE,JSON.stringify(reports));updateSaved();
+  v50Persist((rows||[]).map(r=>r.report_id));updateSaved();
  }catch(e){console.warn('Cloud-Berichte:',e.message);}
 }
 window.addEventListener('message',async event=>{
@@ -1814,6 +1829,7 @@ const MODE_KEY='mv_bz_mode_v41';
 const STEPS=['Baustelle','Fahrt','Zeit','Arbeiten','Fertig'];
 let numberTried='',step='start',saveTimer=0,matQuery='',siteQuery='',meisters=null,mail={send:true,meister:false,meisterEmail:'',to:''},result=null,busy=false;
 window.v50EzRefresh=()=>{if(!ez.hidden){step='start';render();}};
+window.v50EzRefreshList=()=>{if(!ez.hidden&&step==='start')render();};
 const E=v=>esc(v);
 const fmtH=n=>(Math.round(n*4)/4).toFixed(2).replace('.',',');
 const numH=v=>{const n=Number(safe(v).replace(',','.'));return Number.isFinite(n)?n:0;};
@@ -1834,7 +1850,7 @@ function touch(){
 }
 // Zwischendurch nur auf dem Gerät sichern. Cloud und Stundenzettel-Übernahme erst bei „Alles richtig?“ und beim Abschluss.
 function localSave(){
-  try{reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};localStorage.setItem(STORAGE,JSON.stringify(reports));localStorage.setItem(ACTIVE,currentId);}catch(e){console.warn('Lokal speichern:',e);}
+  try{reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};v50Persist(currentId);localStorage.setItem(ACTIVE,currentId);}catch(e){console.warn('Lokal speichern:',e);}
 }
 function flush(full){clearTimeout(saveTimer);if(!changed&&!full)return;if(full){try{saveCurrent();}catch(e){console.warn(e);}}else localSave();}
 function head(n,title){
