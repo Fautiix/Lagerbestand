@@ -303,3 +303,6 @@ label.wp-navbtn{margin:0!important;font-size:inherit;letter-spacing:0}
 .wp-palette-picking .wp-table td[data-drop]{cursor:copy}
 .wp-table th:first-child{width:156px}
 .wp-paltabs button{font-size:12px;gap:5px;padding:0 4px}
+
+/* Handy: Kacheln über dem Plan statt schmaler Spalte */
+@media(max-width:850px){.wp-layout.with-palette,.wp-layout.with-palette.pal-collapsed{grid-template-columns:minmax(0,1fr)!important}.wp-palette{position:static!important;grid-row:1;max-height:230px}}

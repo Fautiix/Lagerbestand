@@ -20,9 +20,9 @@ let v50Filter='offen',v50Term='';
 .v50-stat{background:var(--surface2,#162031);border:1px solid var(--line,#1F2A3C);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--muted,#9AA6B8)}
 .v50-stat b{display:block;font-size:20px;color:var(--text,#eef4fb);font-weight:700}
 .v50-search{position:relative}
-.v50-search input{width:100%;min-height:48px;box-sizing:border-box;padding:0 14px 0 42px;border-radius:12px;border:1px solid var(--line2,#2A3750);background:var(--surface2,#162031);color:inherit;font-size:16px}
+.v50-search input{width:100%;min-height:48px;box-sizing:border-box;padding:0 14px 0 42px!important;border-radius:12px;border:1px solid var(--line2,#2A3750);background:var(--surface2,#162031);color:inherit;font-size:16px}
 .v50-search input:focus{outline:none;border-color:var(--accent,#6E9BFF);box-shadow:0 0 0 3px var(--accent-soft,rgba(110,155,255,.13))}
-.v50-search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted,#9AA6B8)}
+.v50-search svg{position:absolute;z-index:1;pointer-events:none;left:14px;top:50%;transform:translateY(-50%);color:var(--muted,#9AA6B8)}
 .v50-results{display:grid;gap:6px;margin-top:10px}
 .v50-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line,#1F2A3C);border-radius:12px;background:var(--surface,#111926)}
 .v50-item-main{flex:1;min-width:0}
