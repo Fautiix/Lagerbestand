@@ -92,30 +92,14 @@ async function v50MarkOrdered(id){
  if(!await v38Confirm('„'+row.material_name+'“ als bestellt markieren?',{ok:'Als bestellt markieren'}))return;
  try{
   await supabase('material_reorders?id=eq.'+encodeURIComponent(id)+'&status=eq.offen',{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status:'bestellt'})});
-  await v50LoadOrders();if(currentAppPage==='nachbestellen')v50RenderOrders();if(currentAppPage==='pruefbereich')v50ReviewPanel();
+  await v50LoadOrders();if(currentAppPage==='nachbestellen')v50RenderOrders();
   v38Toast('Als bestellt abgehakt.',{kind:'ok'});
  }catch(e){v38Toast('Abhaken fehlgeschlagen: '+e.message,{kind:'err'});}
 }
-async function v50ReviewPanel(){
- if(!(isMeister||isAdmin))return;
- const main=document.querySelector('#pruefbereich .v33workspace');if(!main)return;
- let panel=document.getElementById('v50ReviewPanel');
- if(!panel){panel=document.createElement('section');panel.id='v50ReviewPanel';panel.className='card v50-review';main.before(panel);}
- panel.innerHTML='<div class="v50-listhead"><h3>Material nachbestellen <span class="v50-pill" id="v50ReviewCount">…</span></h3><button type="button" class="btn small" id="v50ReviewRefresh">Aktualisieren</button></div><p class="muted">Neue Anforderungen werden sofort als offen angezeigt. Nur E-Meister und Admin können abhaken.</p><div id="v50ReviewBody">Lade Anforderungen …</div>';
- panel.querySelector('#v50ReviewRefresh').onclick=()=>v50ReviewPanel();
- await v50LoadOrders();if(!panel.isConnected)return;
- if(v50OrdersError){panel.querySelector('#v50ReviewBody').innerHTML='<p class="muted">Nachbestellungen nicht verfügbar. Bitte später erneut laden.</p>';return;}
- const open=v50Reorders.filter(x=>x.status==='offen');
- panel.querySelector('#v50ReviewCount').textContent=open.length;
- panel.querySelector('#v50ReviewBody').innerHTML=open.length?'<div class="v50-results">'+open.map(o=>v50OrderItem(o,true)).join('')+'</div>':'<p class="muted">Keine offenen Nachbestellungen.</p>';
- panel.querySelectorAll('[data-v50-order]').forEach(b=>b.onclick=()=>v50MarkOrdered(b.dataset.v50Order));
-}
-
 /* Offene Anforderungen werden bei Rückkehr in die App und während des Prüfens neu geladen. */
 function v50RefreshVisible(){
  if(document.visibilityState!=='visible'||!currentUserProfile)return;
- if(currentAppPage==='pruefbereich'&&(isMeister||isAdmin))void v50ReviewPanel();
- else if(currentAppPage==='nachbestellen')void v50OpenOrders();
+ if(currentAppPage==='nachbestellen')void v50OpenOrders();
  else if(currentAppPage==='startseite'&&!v34Editing)void v50LoadOrders().then(()=>{if(currentAppPage==='startseite'&&!v34Editing)renderStartseite();});
 }
 document.addEventListener('visibilitychange',v50RefreshVisible);
