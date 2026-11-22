@@ -391,7 +391,8 @@ function v52AbsenceDialog(){
   let pnr='';try{pnr=(await supabase('app_user_profiles?select=personnel_number&user_id=eq.'+encodeURIComponent(uid)))?.[0]?.personnel_number||'';}catch(_){}
   try{await rpc('app_v52_set_week_status',{target_user:uid,target_week:w,p_days:sel,p_status:el.querySelector('#v52AbsType').value,p_name:name,p_pnr:pnr});
    el.remove();if(typeof v38Toast==='function')v38Toast('✓ Eingetragen für '+name+' ('+tsWeekLabel(w)+')',{kind:'ok'});v52TeamRows=null;
-   if(typeof v34ChangeWeek==='function'&&w!==v34Week)v34ChangeWeek(w);else if(typeof renderReviewCenter==='function')renderReviewCenter();
+   try{v34Week=w;v33Type='week';v32ReviewFilter='all';}catch(_){}
+   if(typeof renderReviewCenter==='function')await renderReviewCenter();
   }catch(e){alert('Speichern fehlgeschlagen: '+e.message);}
  };
 }
