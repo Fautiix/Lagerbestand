@@ -85,8 +85,7 @@ function v52Paint(){
  let box=root.querySelector('.v52-today');
  if(!box){box=document.createElement('section');box.className='v52-today';const head=root.querySelector('.v34homehead');head?head.after(box):root.prepend(box);}
  box.innerHTML=v52Html();
- let sb=root.querySelector('.v52-statbox');if(!sb){sb=document.createElement('section');sb.className='v52-today v52-statbox';box.after(sb);}
- sb.innerHTML=`<div class="v52-head"><h3>📈 Meine Statistik</h3><button type="button" class="v52-more" onclick="navigateApp('statistik')">Alle Details ›</button></div>${!v52Cache?'<p class="muted">Wird geladen …</p>':v52Cache.sheetError?'<p class="muted">Stundenzettel derzeit nicht erreichbar.</p>':v52MiniStats()}`;
+ root.querySelector('.v52-statbox')?.remove();
  box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else navigateApp('stundenzettel');});
 }
 
