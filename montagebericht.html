@@ -2231,6 +2231,46 @@ ez.addEventListener('click',async e=>{
   if(d.act==='share'){try{const f=new File([result.blob],'Montagebericht.pdf',{type:'application/pdf'});if(navigator.canShare?.({files:[f]}))await navigator.share({files:[f],title:'Montagebericht'});else triggerDownload(result.blob,'Montagebericht.pdf');}catch(_){}return;}
 });
 ez.addEventListener('change',e=>{const c=e.target.closest('[data-mail]');if(!c)return;mail[c.dataset.mail]=c.checked;render();});
+/* V52: Fotos von der Arbeit – Monteur fügt hinzu, Polier sieht sie unter dem Bericht */
+const PH_MAX=8,phUrls=new Map();
+function phUser(){try{return JSON.parse(localStorage.getItem('materialverwaltung_auth')||'null')?.user?.id||'';}catch(_){return '';}}
+async function phShrink(file){
+  const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file);});
+  const k=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');
+  c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);
+  return await new Promise(ok=>c.toBlob(ok,'image/jpeg',0.72));
+}
+async function phUpload(files){
+  const uid=phUser();if(!uid)return alert('Bitte zuerst anmelden.');if(!navigator.onLine)return alert('Fotos können nur mit Internet hochgeladen werden.');
+  model.photos=Array.isArray(model.photos)?model.photos:[];
+  const list=[...files].slice(0,PH_MAX-model.photos.length);if(!list.length)return alert('Maximal '+PH_MAX+' Fotos pro Bericht.');
+  const box=ez.querySelector('.v52-ph');if(box)box.querySelector('.v52-ph-msg').textContent='Lade '+list.length+' Foto(s) hoch …';
+  for(const f of list){try{
+    const blob=await phShrink(f),path=`${uid}/${currentId||'ohne'}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`,token=await getSiteToken();
+    const r=await fetch(SITE_SUPABASE_URL+'/storage/v1/object/fotos/'+path,{method:'POST',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'image/jpeg'},body:blob});
+    if(!r.ok)throw new Error('HTTP '+r.status+' '+(await r.text()).slice(0,100));
+    model.photos.push({path,at:new Date().toISOString()});phUrls.set(path,URL.createObjectURL(blob));
+  }catch(e){alert('Foto konnte nicht hochgeladen werden: '+e.message);}}
+  touch();render();
+}
+async function phUrl(path){if(phUrls.has(path))return phUrls.get(path);
+  try{const token=await getSiteToken();const r=await fetch(SITE_SUPABASE_URL+'/storage/v1/object/sign/fotos/'+path,{method:'POST',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:3600})});
+   const j=await r.json();if(!r.ok||!j.signedURL)return '';const u=SITE_SUPABASE_URL+'/storage/v1'+j.signedURL;phUrls.set(path,u);return u;}catch(_){return '';}}
+function phHtml(edit){
+  const ph=Array.isArray(model.photos)?model.photos:[];if(!edit&&!ph.length)return '';
+  return `<div class="ez-card v52-ph"><h2 style="margin:0">📷 Fotos von der Arbeit${ph.length?' ('+ph.length+')':''}</h2>
+   ${edit?'<p class="ez-hint" style="margin:0">Optional. Werden verkleinert und unter dem Bericht angezeigt.</p>':''}
+   <div class="v52-ph-grid">${ph.map((p,i)=>`<div class="v52-ph-it"><img data-ph="${E(p.path)}" alt="Foto ${i+1}">${edit?`<button type="button" class="v52-ph-del" data-phdel="${i}" aria-label="Foto entfernen">×</button>`:''}</div>`).join('')}
+   ${edit&&ph.length<PH_MAX?`<label class="v52-ph-add"><input type="file" accept="image/*" multiple hidden data-phin><b>+</b><span>Foto</span></label>`:''}</div><small class="v52-ph-msg ez-hint"></small></div>`;
+}
+function phWire(){
+  ez.querySelectorAll('img[data-ph]').forEach(async im=>{im.src=await phUrl(im.dataset.ph);im.onclick=()=>{const z=document.createElement('div');z.className='ez-zoom';z.innerHTML=`<img alt="Foto" src="${im.src}"><button type="button" aria-label="Schließen">✕</button>`;z.onclick=()=>z.remove();document.body.append(z);};});
+  ez.querySelectorAll('[data-phin]').forEach(i=>i.onchange=()=>{if(i.files.length)phUpload(i.files);});
+  ez.querySelectorAll('[data-phdel]').forEach(b=>b.onclick=async ev=>{ev.stopPropagation();if(!confirm('Foto entfernen?'))return;const p=model.photos.splice(+b.dataset.phdel,1)[0];touch();render();
+    try{const token=await getSiteToken();await fetch(SITE_SUPABASE_URL+'/storage/v1/object/fotos/'+p.path,{method:'DELETE',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token}});}catch(_){}});
+}
+for(const [k,edit] of [['check',true],['polier',false]]){const orig=R[k];R[k]=(...a)=>{const r=orig(...a);try{const html=phHtml(edit);if(html){const inner=ez.querySelector('.ez-inner'),anchor=edit?inner?.querySelector('.ez-card'):inner?.querySelector('.ez-preview');if(anchor)anchor.insertAdjacentHTML('afterend',html);else inner?.insertAdjacentHTML('beforeend',html);phWire();}}catch(e){console.warn('Fotos:',e);}return r;};}
+{const st=document.createElement('style');st.textContent=`.v52-ph{gap:10px}.v52-ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}.v52-ph-it{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#162031}.v52-ph-it img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}.v52-ph-del{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:28px;cursor:pointer}.v52-ph-add{aspect-ratio:1;border-radius:12px;border:2px dashed #2A3750;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#9AA6B8;cursor:pointer}.v52-ph-add b{font-size:28px;color:#6E9BFF}`;document.head.append(st);}
 if(localStorage.getItem(MODE_KEY)==='classic'){openBtn.hidden=false;}else{render();}
 })();
 </script>
