@@ -318,3 +318,35 @@ function v52ActHtml(days,title){const a=v52Activity(days);if(!a.total)return '';
 (function(){const st=document.createElement('style');st.textContent=`.v52-pie{display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:var(--text,#eef4fb)}.v52-pie svg{flex:none}.v52-pie ul{list-style:none;margin:0;padding:0;flex:1;min-width:180px}
 .v52-pie li{display:grid;grid-template-columns:14px 1fr auto auto;gap:8px;align-items:center;padding:5px 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,.05)}.v52-pie li i{width:12px;height:12px;border-radius:4px}.v52-pie li small{color:var(--muted,#9AA6B8);min-width:52px;text-align:right}
 .v52-pct{display:inline-block;width:60px;height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin-right:8px;vertical-align:middle;overflow:hidden}.v52-pct i{display:block;height:100%;background:linear-gradient(90deg,#ec4899,#8b5cf6)}`;document.head.append(st);})();
+
+/* V52: Startcode (Admin) und Pflicht zum eigenen Passwort beim ersten Login */
+async function v52SetStartcode(uid){
+ const pnr=prompt('Personalnummer (leer lassen = unverändert):','');if(pnr===null)return;
+ const code=prompt('Neuer Startcode (mindestens 4 Zeichen). Der Mitarbeiter muss danach ein eigenes Passwort festlegen:','');if(code===null)return;
+ if(code.length<4)return alert('Der Startcode braucht mindestens 4 Zeichen.');
+ try{await manageAccountRequest({action:'startcode',user_id:uid,code,pnr:pnr.trim()});alert('✓ Startcode gesetzt.');loadEmployeeAccounts();}catch(e){alert('Fehler: '+e.message);}
+}
+let v52PwShown=false;
+async function v52CheckMustChange(){
+ if(v52PwShown||typeof currentUserProfile==='undefined'||!currentUserProfile||!navigator.onLine)return;
+ let must=false;try{must=await rpc('app_v52_must_change',{});}catch(_){return;}
+ if(!must)return;v52PwShown=true;
+ const o=document.createElement('div');o.id='v52PwGate';o.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(5,9,16,.92);display:grid;place-items:center;padding:18px';
+ o.innerHTML=`<div class="account-card" style="max-width:420px;width:100%"><div class="account-logo">🔑</div><h2>Eigenes Passwort festlegen</h2>
+ <p>Du hast dich mit dem Startcode angemeldet. Bitte lege jetzt dein eigenes Passwort fest (mindestens 8 Zeichen).</p>
+ <label for="v52Pw1">Neues Passwort</label><input id="v52Pw1" type="password" autocomplete="new-password">
+ <label for="v52Pw2">Passwort wiederholen</label><input id="v52Pw2" type="password" autocomplete="new-password">
+ <button class="btn primary full" id="v52PwSave" type="button">Passwort speichern</button><p id="v52PwMsg" class="muted" role="alert"></p></div>`;
+ document.body.append(o);
+ const msg=o.querySelector('#v52PwMsg');
+ o.querySelector('#v52PwSave').onclick=async()=>{
+  const a=o.querySelector('#v52Pw1').value,b=o.querySelector('#v52Pw2').value;
+  if(a.length<8)return msg.textContent='Mindestens 8 Zeichen.';if(a!==b)return msg.textContent='Die Passwörter stimmen nicht überein.';
+  msg.textContent='Wird gespeichert …';
+  try{const token=await getAuthToken();const r=await fetch(SUPABASE_URL+'/auth/v1/user',{method:'PUT',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({password:a})});
+   if(!r.ok){const t=await r.json().catch(()=>({}));throw new Error(t.msg||t.error_description||t.message||('HTTP '+r.status));}
+   await rpc('app_v52_pw_changed',{});o.remove();if(typeof v38Toast==='function')v38Toast('✓ Dein Passwort ist gespeichert.',{kind:'ok'});
+  }catch(e){msg.textContent='Fehler: '+(/weak|short|length|characters/i.test(e.message)?'Passwort zu kurz oder zu einfach – bitte länger wählen.':e.message);}
+ };
+}
+setInterval(v52CheckMustChange,2000);
