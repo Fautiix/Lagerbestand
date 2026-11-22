@@ -191,7 +191,7 @@ function v52StatsHtml(){
  <div class="v52-kpi"><div><b>${f(total)}</b><small>Stunden gesamt</small></div><div><b style="color:${otc}">${ot>0?'+':''}${f(ot)}</b><small>Überstunden</small></div><div><b>${f(avgDay)}</b><small>Ø h / Tag</small></div><div><b>${f(weeks?total/weeks:0)}</b><small>Ø h / Woche</small></div></div>
  <div class="v52-rings">${v52Ring(soll?arb.reduce((a,d)=>a+d.h,0)/soll*100:0,'Soll erfüllt',f(soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(avgDay/8.5*100,'Ø Tag',f(avgDay)+' von 8,5 h','#3b82f6','#22d3ee')}${v52Ring(sollDays?sick/sollDays*100:0,'Krank',sick+' Tage'+(v52Period!=='woche'?' · Ø '+f(sick/months)+'/Mon.':''),'#f97316','#facc15')}${v52Ring(sollDays?vac/sollDays*100:0,'Urlaub',vac+' Tage','#84cc16','#22d3ee')}</div>
  <h4 class="v52-sub">${v52Period==='woche'?'Stunden pro Tag':v52Period==='monat'||v52Period==='m3'?'Stunden pro Woche':'Stunden pro Monat'}</h4>${v52Bars(bars)}
- ${top.length?`<h4 class="v52-sub">Wo du gearbeitet hast</h4>${v52HBars(top)}`:''}`;
+ ${v52ActHtml(days,'Was du am meisten machst')}`;
 }
 (function(){const st=document.createElement('style');st.textContent=`
 .v52-statbox{background:radial-gradient(120% 80% at 100% 0,rgba(139,92,246,.18),transparent 60%),radial-gradient(90% 70% at 0 100%,rgba(236,72,153,.12),transparent 60%),var(--surface,#111926)}
@@ -243,7 +243,7 @@ function v52DrawTeam(){
  const body=document.getElementById('v52TeamBody');if(!body)return;v52GradN=0;
  const from=v52Range(v52TeamPeriod),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  const people=new Map();for(const r of v52TeamRows||[]){if(!people.has(r.user_id))people.set(r.user_id,{uid:r.user_id,name:r.name||'Mitarbeiter',entry:r.entry_date,carry:r.carryover,sheets:[]});if(r.week_start)people.get(r.user_id).sheets.push({week_start:r.week_start,data:r.data});}
- const list=[...people.values()].map(p=>{const all=v52DaysOf(p.sheets);return {uid:p.uid,name:p.name,entry:p.entry,carryRaw:p.carry,vacx:v52Vac(p.entry,p.carry,all),...v52Calc(all.filter(d=>d.iso>=from))};});
+ const list=[...people.values()].map(p=>{const all=v52DaysOf(p.sheets),act=v52Activity(all.filter(d=>d.iso>=from));return {main:act.groups[0]?act.groups[0][0]+' ('+Math.round(act.groups[0][1]/act.total*100)+'%)':'–',uid:p.uid,name:p.name,entry:p.entry,carryRaw:p.carry,vacx:v52Vac(p.entry,p.carry,all),...v52Calc(all.filter(d=>d.iso>=from))};});
  const T=v52Calc([]);for(const k of ['total','workDays','soll','ot','sick','vac','hol','sollDays'])T[k]=list.reduce((a,p)=>a+p[k],0);
  const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52t="${k}" class="${k===v52TeamPeriod?'on':''}">${l}</button>`).join('');
  const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52TeamPeriod]);
@@ -252,9 +252,9 @@ function v52DrawTeam(){
  <div class="v52-kpi"><div><b>${f(T.total)}</b><small>Team-Stunden</small></div><div><b style="color:${oc(T.ot)}">${T.ot>0?'+':''}${f(T.ot)}</b><small>Überstunden gesamt</small></div><div><b>${T.sick}</b><small>Krankentage</small></div><div><b>${T.vac}</b><small>Urlaubstage</small></div></div>
  <div class="v52-rings">${v52Ring(T.soll?(T.ot+T.soll)/T.soll*100:0,'Soll erfüllt',f(T.soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(T.workDays?T.total/T.workDays/8.5*100:0,'Ø Tag',f(T.workDays?T.total/T.workDays:0)+' h','#3b82f6','#22d3ee')}${v52Ring(T.sollDays?T.sick/T.sollDays*100:0,'Krankquote',f(T.sick/months)+' Tage/Mon.','#f97316','#facc15')}${v52Ring(T.sollDays?T.vac/T.sollDays*100:0,'Urlaub',T.vac+' Tage','#84cc16','#22d3ee')}</div>
  <h4 class="v52-sub">Stunden pro Mitarbeiter</h4>${v52HBars(list.filter(p=>p.total).sort((a,b)=>b.total-a.total).slice(0,10).map(p=>({l:p.name,v:p.total})))||'<p class="muted">Noch keine Stunden in diesem Zeitraum.</p>'}
- <h4 class="v52-sub">Alle Mitarbeiter</h4>
- <div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>Mitarbeiter</th><th>Stunden</th><th>Ø/Tag</th><th>Ø/Woche</th><th>Überst.</th><th>🤒 Krank</th><th>Ø Krank/Mon.</th><th>🌴 Urlaub</th><th>🎉 Feiert.</th><th>Urlaub verdient</th><th>Urlaub rest</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
- ${list.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(p=>`<tr><td>${v52Esc(p.name)}</td><td>${f(p.total)}</td><td>${f(p.avg)}</td><td>${f(p.weeks?p.total/p.weeks:0)}</td><td style="color:${oc(p.ot)};font-weight:700">${p.ot>0?'+':''}${f(p.ot)}</td><td>${p.sick}</td><td>${f(p.sick/months)}</td><td>${p.vac}</td><td>${p.hol}</td><td>${p.vacx.earned} / ${p.vacx.year}</td><td style="font-weight:700;color:${p.vacx.rest<0?'#f87171':'#4ade80'}">${String(p.vacx.rest).replace('.',',')}</td>${isAdmin?`<td><button type="button" class="v33btn" data-v52vac="${p.uid}" title="Eintritt / Resturlaub">✎</button></td>`:''}</tr>`).join('')}
+ ${v52ActHtml([...people.values()].flatMap(p=>v52DaysOf(p.sheets).filter(d=>d.iso>=from)),'Tätigkeiten im Team')}<h4 class="v52-sub">Alle Mitarbeiter</h4>
+ <div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>Mitarbeiter</th><th>Meiste Tätigkeit</th><th>Stunden</th><th>Ø/Tag</th><th>Ø/Woche</th><th>Überst.</th><th>🤒 Krank</th><th>Ø Krank/Mon.</th><th>🌴 Urlaub</th><th>🎉 Feiert.</th><th>Urlaub verdient</th><th>Urlaub rest</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
+ ${list.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(p=>`<tr><td>${v52Esc(p.name)}</td><td>${v52Esc(p.main)}</td><td>${f(p.total)}</td><td>${f(p.avg)}</td><td>${f(p.weeks?p.total/p.weeks:0)}</td><td style="color:${oc(p.ot)};font-weight:700">${p.ot>0?'+':''}${f(p.ot)}</td><td>${p.sick}</td><td>${f(p.sick/months)}</td><td>${p.vac}</td><td>${p.hol}</td><td>${p.vacx.earned} / ${p.vacx.year}</td><td style="font-weight:700;color:${p.vacx.rest<0?'#f87171':'#4ade80'}">${String(p.vacx.rest).replace('.',',')}</td>${isAdmin?`<td><button type="button" class="v33btn" data-v52vac="${p.uid}" title="Eintritt / Resturlaub">✎</button></td>`:''}</tr>`).join('')}
  </tbody></table></div>`;
  body.querySelectorAll('[data-v52vac]').forEach(b=>b.onclick=()=>{const p=list.find(x=>x.uid===b.dataset.v52vac);if(p)v52EditVac(p.uid,p.name,p.entry,p.carryRaw);});
  body.querySelectorAll('[data-v52t]').forEach(b=>b.onclick=()=>{v52TeamPeriod=b.dataset.v52t;v52DrawTeam();});
@@ -292,3 +292,29 @@ async function v52EditVac(uid,name,entry,carry){
  const c=prompt('Resturlaub aus dem Vorjahr für '+name+' (Tage):',String(carry||0).replace('.',','));if(c===null)return;
  try{await rpc('app_v52_vacation_set',{p_user:uid,p_entry:iso,p_carry:Number(c.replace(',','.'))||0});v52TeamRows=null;v52OpenTeamStats();}catch(err){alert('Speichern fehlgeschlagen: '+err.message);}
 }
+
+/* V52: Tätigkeiten – Kreisdiagramm (Baustelle / Magazin / E-Verteiler …) und Ranking-Tabelle */
+const V52_PIE=['#ec4899','#8b5cf6','#3b82f6','#22d3ee','#84cc16','#facc15','#f97316','#94a3b8'];
+function v52Activity(days){
+ const groups=new Map(),rows=new Map(),num=x=>typeof tsNum==='function'?tsNum(x):Number(String(x||0).replace(',','.'))||0;
+ for(const d of days)for(const e of d.entries||[]){const h=num(e.hours);if(!h)continue;
+  let g,label;
+  if(e.kind==='site'||e.siteId){g='Baustelle';label=(typeof sites!=='undefined'&&sites.find(s=>String(s.id)===String(e.siteId)))?.name||e.work||'Baustelle';}
+  else if(e.kind==='template'||e.templateId){label=(typeof tsTemplates!=='undefined'&&tsTemplates.find(t=>String(t.id)===String(e.templateId)))?.name||e.work||'Vorlage';g=label;}
+  else{label=String(e.work||'').trim()||'Sonstiges';g='Sonstiges';}
+  groups.set(g,(groups.get(g)||0)+h);const k=g+'|'+label;const r=rows.get(k)||{label,group:g,h:0,days:new Set()};r.h+=h;r.days.add(d.iso);rows.set(k,r);}
+ const total=[...groups.values()].reduce((a,b)=>a+b,0);
+ return {total,groups:[...groups].sort((a,b)=>b[1]-a[1]),rows:[...rows.values()].sort((a,b)=>b.h-a.h)};
+}
+function v52Pie(groups,total){if(!total)return '';const R=70,C=2*Math.PI*R;let off=0;const top=groups.slice(0,7),rest=groups.slice(7).reduce((a,g)=>a+g[1],0);const g=rest?[...top,['Weitere',rest]]:top;
+ const f=n=>String(Math.round(n*10)/10).replace('.',',');
+ return `<div class="v52-pie"><svg viewBox="0 0 180 180" width="180" height="180"><circle cx="90" cy="90" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="30"/>
+ ${g.map(([n,v],i)=>{const len=v/total*C,s=`<circle cx="90" cy="90" r="${R}" fill="none" stroke="${V52_PIE[i%8]}" stroke-width="30" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"/>`;off+=len;return s;}).join('')}
+ <text x="90" y="86" text-anchor="middle" font-size="22" font-weight="800" fill="currentColor">${f(total)}</text><text x="90" y="104" text-anchor="middle" font-size="11" fill="currentColor" opacity=".6">Stunden</text></svg>
+ <ul>${g.map(([n,v],i)=>`<li><i style="background:${V52_PIE[i%8]}"></i><span>${v52Esc(n)}</span><b>${Math.round(v/total*100)}%</b><small>${f(v)} h</small></li>`).join('')}</ul></div>`;}
+function v52ActTable(rows,total){if(!rows.length)return '';const f=n=>String(Math.round(n*10)/10).replace('.',',');
+ return `<div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>#</th><th>Tätigkeit</th><th>Art</th><th>Stunden</th><th>Tage</th><th>Anteil</th></tr></thead><tbody>${rows.slice(0,15).map((r,i)=>`<tr><td>${i+1}</td><td>${v52Esc(r.label)}</td><td>${v52Esc(r.group===r.label?'Vorlage':r.group)}</td><td>${f(r.h)}</td><td>${r.days.size}</td><td><span class="v52-pct"><i style="width:${r.h/total*100}%"></i></span>${Math.round(r.h/total*100)}%</td></tr>`).join('')}</tbody></table></div>`;}
+function v52ActHtml(days,title){const a=v52Activity(days);if(!a.total)return '';return `<h4 class="v52-sub">${title||'Tätigkeiten'}</h4>${v52Pie(a.groups,a.total)}<h4 class="v52-sub">Ranking Tätigkeiten</h4>${v52ActTable(a.rows,a.total)}`;}
+(function(){const st=document.createElement('style');st.textContent=`.v52-pie{display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:var(--text,#eef4fb)}.v52-pie svg{flex:none}.v52-pie ul{list-style:none;margin:0;padding:0;flex:1;min-width:180px}
+.v52-pie li{display:grid;grid-template-columns:14px 1fr auto auto;gap:8px;align-items:center;padding:5px 0;font-size:14px;border-bottom:1px solid rgba(255,255,255,.05)}.v52-pie li i{width:12px;height:12px;border-radius:4px}.v52-pie li small{color:var(--muted,#9AA6B8);min-width:52px;text-align:right}
+.v52-pct{display:inline-block;width:60px;height:6px;border-radius:9px;background:rgba(255,255,255,.08);margin-right:8px;vertical-align:middle;overflow:hidden}.v52-pct i{display:block;height:100%;background:linear-gradient(90deg,#ec4899,#8b5cf6)}`;document.head.append(st);})();
