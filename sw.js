@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lagerbestand-v20261122-101';
+const CACHE_NAME = 'lagerbestand-v20261122-102';
 
 const APP_FILES = [
   './',
