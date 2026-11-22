@@ -350,3 +350,8 @@ async function v52CheckMustChange(){
  };
 }
 setInterval(()=>{if(typeof currentUserProfile!=='undefined'&&!currentUserProfile)v52PwShown=false;v52CheckMustChange();},2000);
+
+/* V52: Obere Suchleiste am PC nur im Lager; sonst mehr Platz (z. B. ganzer blauer Zettel im Prüfplatz) */
+(function(){const st=document.createElement('style');st.textContent=`@media(min-width:1100px){html:not(.v52-onlager) header.v38-top{display:none!important}html:not(.v52-onlager) .v33document iframe{height:calc(100dvh - 120px)!important}}`;document.head.append(st);
+ const sync=()=>{const p=typeof currentAppPage!=='undefined'?currentAppPage:'';document.documentElement.classList.toggle('v52-onlager',p==='lager'||p==='');};
+ setInterval(sync,400);sync();})();

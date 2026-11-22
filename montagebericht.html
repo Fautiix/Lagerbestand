@@ -2,63 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"><style id="v51-nozoom">html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}@media(max-width:900px){input,select,textarea{font-size:16px!important}}</style><script id="v51-nozoom-js">["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
-/* V52: Fotos – im Prüfplatz/Geübten-Ansicht anzeigen und hinten ans PDF anhängen */
-const v52PhCache=new Map(),v52PhUrl=new Map();
-async function v52PhSigned(path){if(v52PhUrl.has(path))return v52PhUrl.get(path);
- try{const token=await getSiteToken();const r=await fetch(SITE_SUPABASE_URL+'/storage/v1/object/sign/fotos/'+path,{method:'POST',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:3600})});
-  const j=await r.json();if(!r.ok||!j.signedURL)return '';const u=SITE_SUPABASE_URL+'/storage/v1'+j.signedURL;v52PhUrl.set(path,u);return u;}catch(_){return '';}}
-function v52AllPhotos(){const out=[];for(const m of [sheetModels?.first,sheetModels?.second])if(m&&Array.isArray(m.photos))out.push(...m.photos);return out;}
-async function v52PhPrepare(){
- for(const p of v52AllPhotos()){if(v52PhCache.has(p.path))continue;v52PhCache.set(p.path,null);
-  try{const u=await v52PhSigned(p.path);if(!u){v52PhCache.delete(p.path);continue;}const blob=await (await fetch(u)).blob();
-   const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(blob);});
-   const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0);
-   const bin=atob(c.toDataURL('image/jpeg',.85).split(',')[1]),bytes=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)bytes[k]=bin.charCodeAt(k);
-   v52PhCache.set(p.path,{jpeg:bytes,w:c.width,h:c.height});}catch(e){v52PhCache.delete(p.path);}}
-}
-function v52PdfPages(pages){
- const all=[...pages];for(const p of v52AllPhotos()){const x=v52PhCache.get(p.path);if(x)all.push({...x,photo:true});}
- const parts=[],offsets=[0];let count=0;const append=b=>{parts.push(b);count+=b.length};
- const object=(n,body)=>{offsets[n]=count;append(utf8(n+' 0 obj\n'));append(typeof body==='string'?utf8(body):body);append(utf8('\nendobj\n'))};
- append(utf8('%PDF-1.4\n'));const kids=all.map((_,i)=>(3+i*3)+' 0 R').join(' ');
- object(1,'<< /Type /Catalog /Pages 2 0 R >>');object(2,`<< /Type /Pages /Count ${all.length} /Kids [${kids}] >>`);
- all.forEach((p,i)=>{const pg=3+i*3;let cm='595.28 0 0 841.89 0 0 cm';
-  if(p.photo){const mw=535.28,mh=781.89,k=Math.min(mw/p.w,mh/p.h),w=p.w*k,h=p.h*k;cm=`${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${((595.28-w)/2).toFixed(2)} ${((841.89-h)/2).toFixed(2)} cm`;}
-  object(pg,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${pg+2} 0 R >> >> /Contents ${pg+1} 0 R >>`);
-  const cmds=utf8('q\n'+cm+'\n/Im0 Do\nQ\n');object(pg+1,bytesJoin([utf8('<< /Length '+cmds.length+' >>\nstream\n'),cmds,utf8('endstream')]));
-  object(pg+2,bytesJoin([utf8('<< /Type /XObject /Subtype /Image /Width '+p.w+' /Height '+p.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+p.jpeg.length+' >>\nstream\n'),p.jpeg,utf8('\nendstream')]));});
- const n=3+all.length*3,start=count;append(utf8('xref\n0 '+n+'\n0000000000 65535 f \n'));for(let i=1;i<n;i++)append(utf8(safe(offsets[i]).padStart(10,'0')+' 00000 n \n'));
- append(utf8('trailer\n<< /Size '+n+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));return new Blob(parts,{type:'application/pdf'});
-}
-makePdf=function(jpeg,w,h){return v52PdfPages([{jpeg,w,h}]);};
-makeTwoPagePdf=function(jpegs){return v52PdfPages(jpegs.map(j=>({jpeg:j,w:W,h:H})));};
-let v52PhSig='';
-function v52PhPanel(){
- const ph=v52AllPhotos(),sig=ph.map(p=>p.path).join('|');if(sig===v52PhSig)return;v52PhSig=sig;void v52PhPrepare();
- let box=document.getElementById('v52Photos');const host=document.getElementById('reportPreview');if(!host)return;
- if(!ph.length){box?.remove();return;}
- if(!box){box=document.createElement('section');box.id='v52Photos';box.className='panel';box.style.cssText='margin-top:14px';host.after(box);}
- box.innerHTML=`<h2>📷 Fotos von der Arbeit (${ph.length})</h2><p class="tiny">Antippen zum Vergrößern. Die Fotos werden auch hinten an die PDF angehängt.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${ph.map((p,i)=>`<a target="_blank" rel="noopener" data-v52a="${esc(p.path)}"><img data-v52i="${esc(p.path)}" alt="Foto ${i+1}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#162031;display:block"></a>`).join('')}</div>`;
- box.querySelectorAll('[data-v52i]').forEach(async im=>{const u=await v52PhSigned(im.dataset.v52i);if(u){im.src=u;im.parentElement.href=u;}});
-}
-setInterval(()=>{try{v52PhPanel();}catch(_){}},1500);
 
-/* V52: Prüfplatz – Mausrad scrollt immer die ganze Seite */
-document.addEventListener('wheel',e=>{if(document.body.dataset.review!=='yes'||e.ctrlKey)return;const el=document.scrollingElement||document.documentElement;const before=el.scrollTop;
- requestAnimationFrame(()=>{if(el.scrollTop===before&&!e.defaultPrevented){let n=e.target;while(n&&n!==document.body){if(n.scrollHeight>n.clientHeight+2&&/(auto|scroll)/.test(getComputedStyle(n).overflowY))return;n=n.parentElement;}el.scrollTop+=e.deltaY*(e.deltaMode===1?16:1);}});},{passive:true});
-
-/* V52: Monteur-/Kollegen-Namen aus den App-Accounts vorschlagen */
-let v52Mates=null;
-async function v52LoadMates(){if(v52Mates)return;v52Mates=[];try{const r=await apiRest('rpc/app_v52_colleagues',{method:'POST',body:'{}'});v52Mates=(r||[]).map(x=>x.name).filter(Boolean);}catch(e){try{v52Mates=JSON.parse(localStorage.getItem('mv_v52_mates')||'[]');}catch(_){}}
- try{localStorage.setItem('mv_v52_mates',JSON.stringify(v52Mates));}catch(_){}
- let dl=document.getElementById('v52MateList');if(!dl){dl=document.createElement('datalist');dl.id='v52MateList';document.body.append(dl);}
- dl.innerHTML=v52Mates.map(n=>`<option value="${esc(n)}"></option>`).join('');}
-setInterval(()=>{void v52LoadMates();
- document.querySelectorAll('input[data-name],input[data-field^="monteur"],#directInput').forEach(inp=>{
-  const isMate=inp.id!=='directInput'||/^monteur[1-4]$/.test(typeof editing!=='undefined'&&editing?.key||'');
-  if(isMate&&inp.getAttribute('list')!=='v52MateList'){inp.setAttribute('list','v52MateList');inp.setAttribute('autocomplete','off');}
-  else if(!isMate&&inp.getAttribute('list')==='v52MateList')inp.removeAttribute('list');});
-},700);
 </script>
 <meta name="theme-color" content="#0b0d10"><meta name="montagebericht-version" content="NEU-2026-10-18-12">
 <title>Blauer Montagebericht · Materialverwaltung</title>
@@ -1813,6 +1757,71 @@ if(v32Review){
  $('reportPreview').style.display='block';
  $('v33Sign').onclick=()=>requestSignature('sign_meister');$('v32First').onclick=()=>selectSheet('first');$('v32Second').onclick=()=>selectSheet('second');$('v32Draft').onclick=()=>v32Commit('offen');$('v32Later').onclick=()=>v32Commit('spaeter');$('v32Approve').onclick=()=>v32Commit('geprueft');v32Buttons();
  window.addEventListener('message',e=>{if(e.source===parent&&e.origin===parent.location.origin&&e.data?.type==='mv_v32_open')v32Load(e.data.id);});
+}
+
+/* V52: Fotos – im Prüfplatz/Geübten-Ansicht anzeigen und hinten ans PDF anhängen */
+const v52PhCache=new Map(),v52PhUrl=new Map();
+async function v52PhSigned(path){if(v52PhUrl.has(path))return v52PhUrl.get(path);
+ try{const token=await getSiteToken();const r=await fetch(SITE_SUPABASE_URL+'/storage/v1/object/sign/fotos/'+path,{method:'POST',headers:{apikey:SITE_SUPABASE_KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:3600})});
+  const j=await r.json();if(!r.ok||!j.signedURL)return '';const u=SITE_SUPABASE_URL+'/storage/v1'+j.signedURL;v52PhUrl.set(path,u);return u;}catch(_){return '';}}
+function v52AllPhotos(){const out=[];for(const m of [sheetModels?.first,sheetModels?.second])if(m&&Array.isArray(m.photos))out.push(...m.photos);return out;}
+async function v52PhPrepare(){
+ for(const p of v52AllPhotos()){if(v52PhCache.has(p.path))continue;v52PhCache.set(p.path,null);
+  try{const u=await v52PhSigned(p.path);if(!u){v52PhCache.delete(p.path);continue;}const blob=await (await fetch(u)).blob();
+   const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(blob);});
+   const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0);
+   const bin=atob(c.toDataURL('image/jpeg',.85).split(',')[1]),bytes=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)bytes[k]=bin.charCodeAt(k);
+   v52PhCache.set(p.path,{jpeg:bytes,w:c.width,h:c.height});}catch(e){v52PhCache.delete(p.path);}}
+}
+function v52PdfPages(pages){
+ const all=[...pages];for(const p of v52AllPhotos()){const x=v52PhCache.get(p.path);if(x)all.push({...x,photo:true});}
+ const parts=[],offsets=[0];let count=0;const append=b=>{parts.push(b);count+=b.length};
+ const object=(n,body)=>{offsets[n]=count;append(utf8(n+' 0 obj\n'));append(typeof body==='string'?utf8(body):body);append(utf8('\nendobj\n'))};
+ append(utf8('%PDF-1.4\n'));const kids=all.map((_,i)=>(3+i*3)+' 0 R').join(' ');
+ object(1,'<< /Type /Catalog /Pages 2 0 R >>');object(2,`<< /Type /Pages /Count ${all.length} /Kids [${kids}] >>`);
+ all.forEach((p,i)=>{const pg=3+i*3;let cm='595.28 0 0 841.89 0 0 cm';
+  if(p.photo){const mw=535.28,mh=781.89,k=Math.min(mw/p.w,mh/p.h),w=p.w*k,h=p.h*k;cm=`${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${((595.28-w)/2).toFixed(2)} ${((841.89-h)/2).toFixed(2)} cm`;}
+  object(pg,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${pg+2} 0 R >> >> /Contents ${pg+1} 0 R >>`);
+  const cmds=utf8('q\n'+cm+'\n/Im0 Do\nQ\n');object(pg+1,bytesJoin([utf8('<< /Length '+cmds.length+' >>\nstream\n'),cmds,utf8('endstream')]));
+  object(pg+2,bytesJoin([utf8('<< /Type /XObject /Subtype /Image /Width '+p.w+' /Height '+p.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+p.jpeg.length+' >>\nstream\n'),p.jpeg,utf8('\nendstream')]));});
+ const n=3+all.length*3,start=count;append(utf8('xref\n0 '+n+'\n0000000000 65535 f \n'));for(let i=1;i<n;i++)append(utf8(safe(offsets[i]).padStart(10,'0')+' 00000 n \n'));
+ append(utf8('trailer\n<< /Size '+n+' /Root 1 0 R >>\nstartxref\n'+start+'\n%%EOF'));return new Blob(parts,{type:'application/pdf'});
+}
+makePdf=function(jpeg,w,h){return v52PdfPages([{jpeg,w,h}]);};
+makeTwoPagePdf=function(jpegs){return v52PdfPages(jpegs.map(j=>({jpeg:j,w:W,h:H})));};
+let v52PhSig='';
+function v52PhPanel(){
+ const ph=v52AllPhotos(),sig=ph.map(p=>p.path).join('|');if(sig===v52PhSig)return;v52PhSig=sig;void v52PhPrepare();
+ let box=document.getElementById('v52Photos');const host=document.getElementById('reportPreview');if(!host)return;
+ if(!ph.length){box?.remove();return;}
+ if(!box){box=document.createElement('section');box.id='v52Photos';box.className='panel';box.style.cssText='margin-top:14px';host.after(box);}
+ box.innerHTML=`<h2>📷 Fotos von der Arbeit (${ph.length})</h2><p class="tiny">Antippen zum Vergrößern. Die Fotos werden auch hinten an die PDF angehängt.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${ph.map((p,i)=>`<a target="_blank" rel="noopener" data-v52a="${esc(p.path)}"><img data-v52i="${esc(p.path)}" alt="Foto ${i+1}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#162031;display:block"></a>`).join('')}</div>`;
+ box.querySelectorAll('[data-v52i]').forEach(async im=>{const u=await v52PhSigned(im.dataset.v52i);if(u){im.src=u;im.parentElement.href=u;}});
+}
+setInterval(()=>{try{v52PhPanel();}catch(_){}},1500);
+
+/* V52: Prüfplatz – Mausrad scrollt immer die ganze Seite */
+document.addEventListener('wheel',e=>{if(document.body.dataset.review!=='yes'||e.ctrlKey)return;const el=document.scrollingElement||document.documentElement;const before=el.scrollTop;
+ requestAnimationFrame(()=>{if(el.scrollTop===before&&!e.defaultPrevented){let n=e.target;while(n&&n!==document.body){if(n.scrollHeight>n.clientHeight+2&&/(auto|scroll)/.test(getComputedStyle(n).overflowY))return;n=n.parentElement;}el.scrollTop+=e.deltaY*(e.deltaMode===1?16:1);}});},{passive:true});
+
+/* V52: Monteur-/Kollegen-Namen aus den App-Accounts vorschlagen */
+let v52Mates=null;
+async function v52LoadMates(){if(v52Mates)return;v52Mates=[];try{const r=await apiRest('rpc/app_v52_colleagues',{method:'POST',body:'{}'});v52Mates=(r||[]).map(x=>x.name).filter(Boolean);}catch(e){try{v52Mates=JSON.parse(localStorage.getItem('mv_v52_mates')||'[]');}catch(_){}}
+ try{localStorage.setItem('mv_v52_mates',JSON.stringify(v52Mates));}catch(_){}
+ let dl=document.getElementById('v52MateList');if(!dl){dl=document.createElement('datalist');dl.id='v52MateList';document.body.append(dl);}
+ dl.innerHTML=v52Mates.map(n=>`<option value="${esc(n)}"></option>`).join('');}
+setInterval(()=>{void v52LoadMates();
+ document.querySelectorAll('input[data-name],input[data-field^="monteur"],#directInput').forEach(inp=>{
+  const isMate=inp.id!=='directInput'||/^monteur[1-4]$/.test(typeof editing!=='undefined'&&editing?.key||'');
+  if(isMate&&inp.getAttribute('list')!=='v52MateList'){inp.setAttribute('list','v52MateList');inp.setAttribute('autocomplete','off');}
+  else if(!isMate&&inp.getAttribute('list')==='v52MateList')inp.removeAttribute('list');});
+},700);
+
+/* V52: Im Prüfplatz den ganzen blauen Zettel auf einen Blick zeigen */
+if(document.body.dataset.review==='yes'){
+ const v52FitW=fitPage;
+ fitPage=function(){const bar=(document.getElementById('v32Bar')?.offsetHeight||0)+(document.querySelector('.zoomBar')?.offsetHeight||0)+40;return Math.min(v52FitW(),Math.max(.2,(window.innerHeight-bar)/H));};
+ window.addEventListener('load',()=>setTimeout(()=>setPageZoom(fitPage(),true),300));
 }
 </script>
 <style id="ez-style">
