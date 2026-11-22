@@ -1,11 +1,11 @@
-const CACHE_NAME = 'lagerbestand-v20261122-61';
+const CACHE_NAME = 'lagerbestand-v20261122-62';
 
 const APP_FILES = [
   './',
   './index.html',
   './wochenplan.css?v=2026-11-20-tage2',
   './wochenplan.js?v=2026-11-20-tage',
-  './v50.js?v=2026-11-20-mobil',
+  './v50.js?v=2026-11-22-seite',
   './montagebericht.html?v=2026-11-22-nozoom'
 ];
 

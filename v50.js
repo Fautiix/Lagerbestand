@@ -105,3 +105,25 @@ function v50RefreshVisible(){
 document.addEventListener('visibilitychange',v50RefreshVisible);
 window.addEventListener('focus',v50RefreshVisible);
 setInterval(v50RefreshVisible,60000);
+
+/* V51: Nach dem Aktualisieren auf derselben Seite bleiben (gilt nur für diesen Tab, nicht für einen Neustart der App). */
+window.addEventListener('load',()=>{
+ const KEY='mv_v51_page';
+ const navOrig=window.navigateApp,openOrig=window.openMontagebericht,closeOrig=window.closeMontagebericht,renderOrig=window.renderAll;
+ if(typeof navOrig!=='function'||typeof renderOrig!=='function')return;
+ const save=(k,v)=>{try{sessionStorage.setItem(k,v);}catch(_){}} ,read=k=>{try{return sessionStorage.getItem(k);}catch(_){return null;}};
+ window.navigateApp=function(tab,...rest){const r=navOrig.call(this,tab,...rest);if(window.currentAppPage===tab||typeof currentAppPage!=='undefined'&&currentAppPage===tab)save(KEY,tab);return r;};
+ if(typeof openOrig==='function')window.openMontagebericht=async function(...a){const r=await openOrig.apply(this,a);save(KEY+'_bericht','1');return r;};
+ if(typeof closeOrig==='function')window.closeMontagebericht=function(...a){save(KEY+'_bericht','');return closeOrig.apply(this,a);};
+ let restored=false;
+ window.renderAll=function(...a){const r=renderOrig.apply(this,a);
+  if(!restored&&typeof currentUserProfile!=='undefined'&&currentUserProfile){restored=true;
+   const page=read(KEY),bericht=read(KEY+'_bericht')==='1';
+   setTimeout(()=>{try{
+    if(page&&page!=='startseite'&&document.getElementById(page)&&!(page==='pruefbereich'&&!(isMeister||isAdmin)))window.navigateApp(page);
+    if(bericht)window.openMontagebericht();
+   }catch(e){console.warn('Seite wiederherstellen:',e);}},0);
+  }
+  return r;};
+ if(typeof currentUserProfile!=='undefined'&&currentUserProfile&&typeof currentAppPage!=='undefined'&&currentAppPage==='startseite')window.renderAll();
+});
