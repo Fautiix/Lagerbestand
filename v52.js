@@ -409,3 +409,6 @@ window.addEventListener('load',()=>{const d=window.v33DrawReports;if(typeof d!==
 
 /* V52: Prüfplatz – linke und mittlere Liste wachsen nicht mit dem geöffneten Zettel mit */
 (function(){const st=document.createElement('style');st.textContent=`@media(min-width:900px){#pruefbereich .v33grid{align-items:start}#pruefbereich .v33staff,#pruefbereich .v33reports{position:sticky;top:12px;max-height:calc(100dvh - 140px)}#pruefbereich .v33staff .v33scroll,#pruefbereich .v33reports .v33scroll{flex:1 1 auto;min-height:0}}`;document.head.append(st);})();
+
+/* V52: Feinschliff Statistik – Diagramm nicht riesig am PC, Zeitraum-Leiste ohne Scrollbalken */
+(function(){const st=document.createElement('style');st.textContent=`.v52-chart{max-height:240px;max-width:640px;display:block;margin:0 auto}.v52-tabs{scrollbar-width:none}.v52-tabs::-webkit-scrollbar{display:none}`;document.head.append(st);})();
