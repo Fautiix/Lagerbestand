@@ -170,7 +170,7 @@ function v52StatsHtml(){
  const from=v52Range(v52Period),days=v52Days().filter(d=>d.iso>=from);
  const f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0);
- const arb=days.filter(d=>d.status==='arbeit'),soll=arb.reduce((a,d)=>a+d.soll,0);
+ const arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
  const ot=arb.reduce((a,d)=>a+d.h,0)-soll;
  const weeks=new Set(days.map(d=>d.week)).size;
  const sick=days.filter(d=>d.status==='krank').length,vac=days.filter(d=>d.status==='urlaub').length,sollDays=days.filter(d=>d.soll>0).length;
@@ -220,7 +220,7 @@ window.addEventListener('load',()=>{const rt=window.renderTimesheet;if(typeof rt
 /* V52: Dokumente → Statistik (alle Mitarbeiter, für Admin / E-Meister) */
 function v52DaysOf(sheets){const keep=v52Cache;v52Cache={sheets};try{return v52Days();}finally{v52Cache=keep;}}
 function v52Calc(days){
- const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0),arb=days.filter(d=>d.status==='arbeit'),soll=arb.reduce((a,d)=>a+d.soll,0);
+ const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0),arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
  return {total,workDays:work.length,avg:work.length?total/work.length:0,weeks:new Set(days.map(d=>d.week)).size,soll,ot:arb.reduce((a,d)=>a+d.h,0)-soll,
   sick:days.filter(d=>d.status==='krank').length,vac:days.filter(d=>d.status==='urlaub').length,hol:days.filter(d=>d.status==='feiertag').length,sollDays:days.filter(d=>d.soll>0).length};
 }
