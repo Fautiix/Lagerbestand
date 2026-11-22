@@ -131,3 +131,11 @@ window.addEventListener('load',()=>{
   if(typeof v38Toast==='function')v38Toast('Wieder online – Daten abgeglichen.',{kind:'ok'});
  },1500);});
 })();
+
+/* V52: „Zuletzt online“ – Lebenszeichen alle 5 Minuten, solange die App offen ist */
+(function(){
+ let last=0;
+ const ping=()=>{if(document.visibilityState!=='visible'||!navigator.onLine||typeof currentUserProfile==='undefined'||!currentUserProfile)return;
+  if(Date.now()-last<240000)return;last=Date.now();rpc('app_v52_touch',{}).catch(()=>{last=0;});};
+ setInterval(ping,60000);document.addEventListener('visibilitychange',ping);window.addEventListener('online',ping);setTimeout(ping,5000);
+})();

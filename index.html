@@ -2410,12 +2410,15 @@ async function createEmployeeAccount(){
   await loadEmployeeAccounts();
  }catch(error){message.textContent='Fehler: '+error.message;}finally{btn.disabled=false;}
 }
+function v52SeenText(p){const t=p.last_seen_at||p.last_sign_in_at;if(!t)return '⚪ noch nie online';const d=new Date(t),min=Math.round((Date.now()-d)/60000);
+ const rel=min<5?'gerade online':min<60?'vor '+min+' Min.':min<1440?'vor '+Math.round(min/60)+' Std.':'vor '+Math.round(min/1440)+' Tagen';
+ return (min<5?'🟢 ':min<1440?'🟡 ':'⚪ ')+'Zuletzt online: '+rel+' ('+d.toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+')';}
 async function loadEmployeeAccounts(){
  if(!isAdmin)return;
  const list=document.getElementById('accountList');list.textContent='Lade Accounts …';
  try{
-  const profiles=await supabase('app_user_profiles?select=user_id,name,email,is_active&order=name.asc');
-  list.innerHTML=profiles.map(p=>`<div class="account-list-row"><div><strong>${escapeHtml(p.name)}</strong><br><span class="muted">${escapeHtml(p.email||'')} · ${p.is_active?'Aktiv':'Deaktiviert'}</span></div><div class="account-row-actions"><button type="button" class="btn small" onclick="renameEmployeeAccount('${p.user_id}')">✎ Name</button><button type="button" class="btn small" onclick="editPersonnelNumber('${p.user_id}')">Personalnr.</button><button type="button" class="btn small" onclick="toggleMeister('${p.user_id}')">E-Meister</button>${p.is_active&&p.user_id!==currentUserProfile?.user_id?`<button type="button" class="btn small" onclick="deactivateEmployeeAccount('${p.user_id}')">Sperren</button>`:''}</div></div>`).join('') || '<p>Noch keine Accounts vorhanden.</p>';
+  let profiles;try{profiles=await rpc('app_v52_last_seen',{});}catch(_){profiles=await supabase('app_user_profiles?select=user_id,name,email,is_active&order=name.asc');}
+  list.innerHTML=profiles.map(p=>`<div class="account-list-row"><div><strong>${escapeHtml(p.name)}</strong><br><span class="muted">${escapeHtml(p.email||'')} · ${p.is_active?'Aktiv':'Deaktiviert'}</span><br><span class="muted">${v52SeenText(p)}</span></div><div class="account-row-actions"><button type="button" class="btn small" onclick="renameEmployeeAccount('${p.user_id}')">✎ Name</button><button type="button" class="btn small" onclick="editPersonnelNumber('${p.user_id}')">Personalnr.</button><button type="button" class="btn small" onclick="toggleMeister('${p.user_id}')">E-Meister</button>${p.is_active&&p.user_id!==currentUserProfile?.user_id?`<button type="button" class="btn small" onclick="deactivateEmployeeAccount('${p.user_id}')">Sperren</button>`:''}</div></div>`).join('') || '<p>Noch keine Accounts vorhanden.</p>';
  }catch(e){list.textContent='Accountliste nicht verfügbar: '+e.message;}
 }
 async function renameEmployeeAccount(userId){
@@ -4860,7 +4863,7 @@ async function v41EditPolierMail(siteId){
   catch(e){v38Toast('Speichern fehlgeschlagen: '+e.message,{kind:'err'});}
 }
 </script><script src="./wochenplan.js?v=2026-11-20-tage"></script>
-<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=7"></script>
+<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=8"></script>
 <script src="./saison.js?v=3" defer></script>
 </body>
 </html>
