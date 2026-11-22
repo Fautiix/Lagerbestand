@@ -43,9 +43,10 @@ async function v52Load(force){
 }
 
 function v52Hours(){
- const out={week:0,month:0,last:0};if(!v52Cache)return out;
+ const out={week:0,month:0,last:0,hasWeek:false,hasLast:false};if(!v52Cache)return out;
  const now=new Date(),week=v52Monday(now),lastWeek=v52Monday(new Date(now.getTime()-7*864e5)),mon=v52Iso(now).slice(0,7);
  for(const s of v52Cache.sheets){
+  if(s.week_start===week)out.hasWeek=true;if(s.week_start===lastWeek)out.hasLast=true;
   (s.data?.days||[]).forEach((d,i)=>{
    const h=(d.entries||[]).reduce((v,e)=>v+(typeof tsNum==='function'?tsNum(e.hours):Number(String(e.hours||0).replace(',','.'))||0),0);
    if(!h)return;const day=new Date(s.week_start+'T12:00:00');day.setDate(day.getDate()+i);
@@ -82,7 +83,7 @@ function v52Html(){
  let gross=false;try{gross=localStorage.getItem('mv_v52_gross')==='1';}catch(_){}
  return `<div class="v52-head"><h3>${title}</h3><small>${v52Esc(sub)}</small></div>${body}
  <div class="v52-quick"><button type="button" data-v52="bericht">📄 Montagebericht</button><button type="button" data-v52="stunden">🕒 Stunden</button><button type="button" data-v52="material">＋ Material melden</button></div>
- ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div><div class="v52-hours"><div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div><div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div></div>`:''}
+ ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div>${h.hasWeek||h.hasLast?`<div class="v52-hours">${h.hasWeek?`<div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div>`:''}${h.hasLast?`<div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div>`:''}</div>`:''}`:''}
  <label class="v52-big"><input type="checkbox" data-v52-gross ${gross?'checked':''}> Große Schrift &amp; Tasten (für Handschuhe)</label>`;
 }
 
