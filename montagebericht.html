@@ -1004,7 +1004,11 @@ $('addSecond').onclick=makeSecondSheet;
 $('removeSecond').onclick=removeSecondSheet;
 function updateSaved(){const items=Object.entries(reports).sort((a,b)=>safe(b[1]?.updated).localeCompare(safe(a[1]?.updated)));
  $('saved').innerHTML='<option value="">Bericht auswählen …</option>'+items.map(([id,obj])=>`<option value="${esc(id)}">${esc(obj.data?.standort||obj.data?.kunde||'Ohne Bezeichnung')}${obj.extraData?' · Auftrag + Zusatz':''} · ${new Date(obj.updated).toLocaleDateString('de-DE')}</option>`).join('');$('saved').value=reports[currentId]?currentId:'';}
-function saveCurrent(){if(v32Review)return v32Commit('offen');if(!currentId){setStatus('Bitte zuerst einen neuen Bericht anlegen.',false);return;}try{
+function reportHasContent(m){if(!m)return false;if(m.siteId||safe(m.kunde).trim()||safe(m.arbeiten).trim()||safe(m.polier).trim()||safe(m.auftragsnummer).trim())return true;if(Array.isArray(m.workTasks)&&m.workTasks.some(t=>t&&Object.values(t).some(v=>safe(v).trim())))return true;return Object.keys(m).some(k=>/^(date_|sign_|mat\d+_name)/.test(k)&&safe(m[k]).trim());}
+function saveCurrent(){if(v32Review)return v32Commit('offen');if(!currentId){setStatus('Bitte zuerst einen neuen Bericht anlegen.',false);return;}
+ /* V52: leere Berichte nicht speichern (weder lokal noch in Supabase) */
+ if(!reports[currentId]&&!cloudReportIds.has(currentId)&&!reportHasContent(sheetModels.first)&&!reportHasContent(sheetModels.second)){changed=false;return;}
+ try{
  reports[currentId]={data:structuredClone(sheetModels.first),extraData:sheetModels.second?structuredClone(sheetModels.second):null,updated:new Date().toISOString()};
  if(!foreignReportIds.has(currentId)){v50Persist(currentId);localStorage.setItem(ACTIVE,currentId);}
  changed=false;updateSaved();updateSheetControls();void syncCurrentCloudReport();setStatus(sheetModels.second?'✓ Beide Blätter auf diesem Gerät gespeichert':'✓ Auf diesem Gerät gespeichert');
@@ -1356,7 +1360,7 @@ window.addEventListener('message',async event=>{
  try{await loadCloudReport(event.data.reportId);}catch(e){alert('Bericht konnte nicht geöffnet werden: '+e.message);}
 });
 
-if(!v32Review){reports=allReports();setTimeout(loadMyCloudReports,800);const old=localStorage.getItem(ACTIVE);if(old&&reports[old]){loadRecord(old);setStatus('Gespeicherten Bericht geladen')}else fresh(false);Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadAvailableMaterials(),loadHourTemplates(),checkReportAdmin()]);}
+if(!v32Review){reports=allReports();setTimeout(loadMyCloudReports,800);const old=localStorage.getItem(ACTIVE);if(old&&reports[old]){loadRecord(old);setStatus('Gespeicherten Bericht geladen')}else{/* V52: beim Öffnen keinen Bericht anlegen, erst bei „Neuer Bericht“ */currentId='';activeSheet='first';model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};sheetModels={first:model,second:null};try{defaults();buildEditor();updateSaved();updateSheetControls();queuePaint();}catch(e){console.warn(e);}}Promise.allSettled([loadAvailableSites(),loadAvailableVehicles(),loadAvailableMaterials(),loadHourTemplates(),checkReportAdmin()]);}
 
 // V13: direkte Eingabe direkt auf der Original-PDF-Vorschau.
 // Bestehende Eingabelogik bleibt für alle Spezialfelder erhalten.
