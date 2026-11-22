@@ -426,7 +426,7 @@ function v52MiniStats(){
 (function(){
  const st=document.createElement('style');st.textContent=`
 @keyframes v52wig{0%{transform:rotate(-.6deg)}50%{transform:rotate(.6deg)}100%{transform:rotate(-.6deg)}}
-.v52-editing .v34widgets .v34widget{animation:v52wig .32s ease-in-out infinite;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.v52-editing .v34widgets .v34widget{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;outline:2px dashed rgba(110,155,255,.55);outline-offset:2px}
 .v52-editing .v34widgets .v34widget:nth-child(2n){animation-delay:-.16s}
 .v34widget.v52-lift{animation:none!important;opacity:.35}
 .v52-ghost{position:fixed;z-index:9999;pointer-events:none;transform:scale(1.05);box-shadow:0 18px 40px rgba(0,0,0,.55);border-radius:16px;opacity:.95;transition:none}
