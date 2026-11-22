@@ -769,12 +769,7 @@ async function deleteHourTemplate(){
 async function loadAvailableSites(){
  sitesState='loading';
  try{
-  const token=await getSiteToken();
-  const response=await fetch(SITE_SUPABASE_URL+'/rest/v1/sites?select=id,name,active,order_number,extra_order_number,distance_km,contact_person,contact_email,sort_order&order=sort_order.asc.nullslast,name.asc',{
-   headers:{'apikey':SITE_SUPABASE_KEY,'Authorization':'Bearer '+token}
-  });
-  if(!response.ok)throw new Error('HTTP '+response.status);
-  availableSites=await response.json();sitesState='ready';
+  availableSites=await apiRest('sites?select=id,name,active,order_number,extra_order_number,distance_km,contact_person,contact_email,sort_order&order=sort_order.asc.nullslast,name.asc')||[];sitesState='ready';
   const selected=availableSites.find(s=>String(s.id)===String(model.siteId));
   if(selected && !model.kunde && !v32Review)applySiteSelection();
  }catch(e){sitesState='error';console.warn('Baustellen laden:',e);setStatus('Baustellen nicht verfügbar: '+e.message,false)}
