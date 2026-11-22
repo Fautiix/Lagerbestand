@@ -1078,6 +1078,30 @@ $('add').onclick=()=>fresh();$('save').onclick=saveCurrent;
 // Bestehende lokale Berichte werden nur auf ausdrücklichen Wunsch hochgeladen.
 const cloudImportBtn=document.createElement('button');cloudImportBtn.textContent='☁ Alte lokale Berichte synchronisieren';cloudImportBtn.type='button';cloudImportBtn.onclick=async()=>{if(!confirm('Eigene lokale Berichte in Supabase übernehmen? Bitte nur Berichte hochladen, die du selbst erstellt hast.'))return;let ok=0,bad=0;for(const [id,entry] of Object.entries(reports)){try{await cloudStoreReport(id,entry);ok++;}catch(e){console.warn(id,e);bad++;}}alert(ok+' Berichte synchronisiert, '+bad+' fehlgeschlagen.');};$('save').parentElement.append(cloudImportBtn);
 let v50CloudSyncs=new Map();
+/* V51: Leeren Entwurf ohne Rückfrage entfernen (lokal und, falls vorhanden, in Supabase). */
+async function v50RemoveDraftQuiet(id){
+ if(!reports[id]||foreignReportIds.has(id)||id===currentId&&!$('ez').hidden&&$('ez').dataset.step!=='start')return false;
+ const d=reports[id].data||{};if(d.sign_bauleitung||reports[id].extraData?.sign_bauleitung)return false;
+ if(cloudReportIds.has(id)){try{await apiRest('rpc/app_v50_delete_blue_draft',{method:'POST',body:JSON.stringify({target_report:id})});}catch(e){console.warn('Leerer Entwurf (Cloud):',e.message);return false;}}
+ cloudReportIds.delete(id);cloudReportOwners.delete(id);delete reports[id];v50Persist(id);
+ if(localStorage.getItem(ACTIVE)===id)localStorage.removeItem(ACTIVE);
+ if(currentId===id){currentId='';}
+ return true;
+}
+/* V51: Angefangene Zettel zusätzlich in Supabase sichern – beim Schrittwechsel und beim Verlassen der App.
+   Nur eigene, nicht leere Entwürfe; nur wenn sich seit der letzten Sicherung etwas geändert hat. */
+const v51BackupState=new Map();
+async function v51BackupDraft(){
+ const id=currentId,entry=reports[id];
+ if(!id||!entry||v32Review||foreignReportIds.has(id))return;
+ if(typeof window.v51IsEmptyDraft==='function'&&window.v51IsEmptyDraft(entry))return;
+ const sig=entry.updated+'|'+JSON.stringify(entry.data).length+'|'+JSON.stringify(entry.extraData||null).length;
+ if(v51BackupState.get(id)===sig||v50CloudSyncs.has(id))return;
+ const task=cloudStoreReport(id,entry);v50CloudSyncs.set(id,task);
+ try{await task;v51BackupState.set(id,sig);}catch(e){console.warn('Entwurf-Sicherung:',e.message);}
+ finally{if(v50CloudSyncs.get(id)===task)v50CloudSyncs.delete(id);}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{if(typeof window.v50EzFlush==='function')window.v50EzFlush();}catch(_){}void v51BackupDraft();}});
 async function v50DeleteBlueDraft(id){
  const row=reports[id];
  if(!row)return;
@@ -1830,6 +1854,21 @@ const STEPS=['Baustelle','Fahrt','Zeit','Arbeiten','Fertig'];
 let numberTried='',step='start',saveTimer=0,matQuery='',siteQuery='',meisters=null,mail={send:true,meister:false,meisterEmail:'',to:''},result=null,busy=false;
 window.v50EzRefresh=()=>{if(!ez.hidden){step='start';render();}};
 window.v50EzRefreshList=()=>{if(!ez.hidden&&step==='start')render();};
+window.v50EzFlush=()=>{if(!ez.hidden&&changed)localSave();};
+function v51IsEmptyDraft(r){
+  const d=r?.data||{};if(r?.extraData)return false;
+  if(lastStepFor(d)!=='site'||safe(d.kunde).trim())return false;
+  if((d.workTasks||[]).some(t=>safe(t).trim()))return false;
+  return !Object.keys(d).some(k=>/^m\d+_/.test(k)&&safe(d[k]).trim());
+}
+window.v51IsEmptyDraft=v51IsEmptyDraft;
+let v51Cleaned=false;
+async function v51AutoClean(){
+  if(v51Cleaned)return;v51Cleaned=true;
+  const old=Date.now()-24*3600*1000;let n=0;
+  for(const [id,r] of Object.entries(reports)){if(id!==currentId&&v51IsEmptyDraft(r)&&new Date(r.updated||0).getTime()<old&&await v50RemoveDraftQuiet(id))n++;}
+  if(n&&!ez.hidden&&step==='start')render();
+}
 const E=v=>esc(v);
 const fmtH=n=>(Math.round(n*4)/4).toFixed(2).replace('.',',');
 const numH=v=>{const n=Number(safe(v).replace(',','.'));return Number.isFinite(n)?n:0;};
@@ -1878,6 +1917,7 @@ R.start=()=>{
   shell(`<div class="ez-top"><button type="button" class="ez-x" data-act="home" aria-label="Zurück zur Materialverwaltung">←</button><div class="ez-toptxt"><span>Montagebericht</span><strong>Blauer Zettel</strong></div></div>
    <button type="button" class="ez-big" data-act="new"><b>+</b><span><strong>Neuen Zettel anfangen</strong><small>Schritt für Schritt</small></span></button>
    ${list.length?`<h2 style="font-size:15px;color:#9AA6B8;font-weight:600">Angefangen, noch nicht fertig</h2>${list.map(([id,r])=>{const d=r.data;const when=new Date(r.updated);return `<div class="v50-draft-row"><button type="button" class="ez-pick" data-open="${E(id)}"><span><strong>${E(d.kunde||'Ohne Baustelle')}</strong><small>${when.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'})}${d.reportNumber?' · Nr. '+E(d.reportNumber):''}</small></span>${d.sign_monteur?'<span class="ez-tag">Polier fehlt</span>':'<span style="color:#8794A8;font-size:22px">›</span>'}</button><button type="button" class="v50-delete-draft" data-v50-delete="${E(id)}" aria-label="Entwurf löschen">Löschen</button></div>`;}).join('')}`:''}
+   ${(()=>{const n=Object.entries(reports).filter(([id,r])=>!foreignReportIds.has(id)&&v51IsEmptyDraft(r)).length;return n>1?`<button type="button" class="ez-link" data-act="v51clean">🧹 ${n} leere Entwürfe löschen</button>`:'';})()}
    <button type="button" class="ez-link" data-act="classic">Alle Felder auf einmal (für Geübte)</button>`);
 };
 R.site=()=>{
@@ -2090,7 +2130,9 @@ R.done=()=>{
 let anchor=null;
 function render(){
   const old=ez.querySelector('.ez-scroll'),same=ez.dataset.step===step,top=same&&old?old.scrollTop:0;
+  if(!same&&ez.dataset.step&&ez.dataset.step!=='start'){try{if(changed)localSave();}catch(_){}void v51BackupDraft();}
   ez.hidden=false;openBtn.hidden=true;(R[step]||R.start)();ez.dataset.step=step;
+  if(step==='start')setTimeout(()=>void v51AutoClean(),1500);
   const sc=ez.querySelector('.ez-scroll');
   if(sc&&same){
     sc.scrollTop=top;
@@ -2124,6 +2166,7 @@ ez.addEventListener('click',async e=>{
   if(d.act==='home'){flush(true);try{parent.closeMontagebericht();}catch(_){}return;}
   if(d.act==='new'){startNew();return;}
   if(d.v50Delete){await v50DeleteBlueDraft(d.v50Delete);return;}
+  if(d.act==='v51clean'){const ids=Object.entries(reports).filter(([id,r])=>!foreignReportIds.has(id)&&v51IsEmptyDraft(r)).map(([id])=>id);if(!ids.length||!confirm(ids.length+' leere Entwürfe (ohne Baustelle, ohne Eintragungen) löschen?'))return;let n=0;for(const id of ids)if(await v50RemoveDraftQuiet(id))n++;render();setStatus('✓ '+n+' leere Entwürfe gelöscht');return;}
   if(d.act==='classic'){toClassic();return;}
   if(d.open){openReport(d.open);return;}
   if(d.site!==undefined){model.siteId=d.site;applySiteSelection();if(model.vehicle1Id||model.kfz1){if(model.kmMode1!=='custom')setSiteKm(1);}mail.to='';touch();render();return;}
