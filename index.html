@@ -2718,6 +2718,7 @@ function tsHoursOptions(v){const n=String(v??'').replace(',','.');return `<optio
 function tsSiteData(e){return sites.find(s=>String(s.id)===String(e.siteId));}
 function tsDistanceWE(site){if(!site||site.distance_km===null||site.distance_km===undefined||site.distance_km==='')return '';const km=Number(String(site.distance_km).replace(',','.'));if(!Number.isFinite(km)||km<0)return '';return km<=50?'a':km<=75?'b':'c';}
 function tsSyncEntry(e){
+ if(typeof e.kind==='string'&&e.kind.startsWith('tpl:')){e.templateId=e.kind.slice(4);e.kind='template';}
  if(e.kind==='site'){
   const site=tsSiteData(e);
   if(site){e.work=site.name||'';e.order=String((e.orderType==='zusatz'?site.extra_order_number:site.order_number)||'');e.we=tsDistanceWE(site);}
@@ -2732,9 +2733,9 @@ function tsEntryFields(e,i,j){
  const p=`ts-${i}-${j}`;
  const isSite=e.kind==='site',isTpl=e.kind==='template';
  return `<div class="ts-row">
- <div class="ts-field ts-entry-kind"><label for="${p}-kind">Art</label><select id="${p}-kind" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="kind" onchange="tsEntryChanged(${i},${j})"><option value="site" ${isSite?'selected':''}>Baustelle</option><option value="template" ${isTpl?'selected':''}>Gespeicherte Tätigkeit</option><option value="custom" ${!isSite&&!isTpl?'selected':''}>Eigene Tätigkeit</option></select></div>
+ <div class="ts-field ts-entry-kind"><label for="${p}-kind">Art</label><select id="${p}-kind" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="kind" onchange="tsEntryChanged(${i},${j})"><option value="site" ${isSite?'selected':''}>Baustelle</option>${tsTemplates.filter(t=>t.active!==false||String(t.id)===String(e.templateId)).map(t=>`<option value="tpl:${tsSafe(t.id)}" ${isTpl&&String(t.id)===String(e.templateId)?'selected':''}>${tsSafe(t.name)}</option>`).join('')}<option value="custom" ${!isSite&&!isTpl?'selected':''}>Eigene Tätigkeit</option></select></div>
  ${isSite?`<div class="ts-field"><label>Baustelle</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="siteId" onchange="tsEntryChanged(${i},${j})">${tsSiteOptions(e.siteId)}</select></div><div class="ts-field"><label>Auftrag oder Zusatz</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="orderType" onchange="tsEntryChanged(${i},${j})"><option value="auftrag" ${e.orderType!=='zusatz'?'selected':''}>Auftrag</option><option value="zusatz" ${e.orderType==='zusatz'?'selected':''}>Zusatz</option></select></div>`:''}
- ${isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Gespeicherte Arbeit</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="templateId" onchange="tsEntryChanged(${i},${j})">${tsTemplateOptions(e.templateId)}</select></div>`:''}
+ 
  ${!isSite&&!isTpl?`<div class="ts-field" style="grid-column:1/-1"><label>Ausgeführte Arbeiten</label><textarea rows="2" data-ts-day="${i}" data-ts-row="${j}" data-ts-field="work">${tsSafe(e.work)}</textarea></div>`:''}
  <div class="ts-field"><label>Auftragsnummer ${isSite?'(automatisch)':'(optional)'}</label><input data-ts-day="${i}" data-ts-row="${j}" data-ts-field="order" ${isSite||isTpl?'readonly':''} value="${tsSafe(e.order)}"></div>
  <div class="ts-field"><label>Stunden</label><select data-ts-day="${i}" data-ts-row="${j}" data-ts-field="hours" onchange="tsCapture();tsRefreshTotals()">${tsHoursOptions(e.hours)}</select></div>
