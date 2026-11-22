@@ -15,15 +15,10 @@
 .v52-hours{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .v52-hours div{flex:1;min-width:90px;padding:8px 12px;border-radius:12px;background:var(--surface2,#162031);border:1px solid var(--line,#1F2A3C);font-size:12.5px;color:var(--muted,#9AA6B8)}
 .v52-hours b{display:block;font-size:19px;color:var(--text,#eef4fb)}
-.v52-big{margin-top:10px;font-size:13px;color:var(--muted,#9AA6B8);display:flex;align-items:center;gap:8px}
-.v52-big input{width:20px;height:20px}
 .v52-copy{margin:8px 0}
-html.v52-gross body{font-size:17px}
-html.v52-gross button,html.v52-gross .btn,html.v52-gross select,html.v52-gross input:not([type=checkbox]):not([type=radio]),html.v52-gross textarea{min-height:52px;font-size:17px!important}
-html.v52-gross input[type=checkbox],html.v52-gross input[type=radio]{width:24px;height:24px}
 @media(max-width:560px){.v52-quick{grid-template-columns:1fr 1fr}}
 `;document.head.append(st);
- try{if(localStorage.getItem('mv_v52_gross')==='1')document.documentElement.classList.add('v52-gross');}catch(_){}
+ try{localStorage.removeItem('mv_v52_gross');}catch(_){}
 })();
 
 const v52Esc=x=>typeof escapeHtml==='function'?escapeHtml(String(x??'')):String(x??'');
@@ -80,11 +75,9 @@ function v52Html(){
   }
  }
  const h=v52Hours(),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
- let gross=false;try{gross=localStorage.getItem('mv_v52_gross')==='1';}catch(_){}
  return `<div class="v52-head"><h3>${title}</h3><small>${v52Esc(sub)}</small></div>${body}
  <div class="v52-quick"><button type="button" data-v52="bericht">📄 Montagebericht</button><button type="button" data-v52="stunden">🕒 Stunden</button></div>
- ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div>${h.hasWeek||h.hasLast?`<div class="v52-hours">${h.hasWeek?`<div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div>`:''}${h.hasLast?`<div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div>`:''}</div>`:''}`:''}
- <label class="v52-big"><input type="checkbox" data-v52-gross ${gross?'checked':''}> Große Schrift &amp; Tasten (für Handschuhe)</label>`;
+ ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div>${h.hasWeek||h.hasLast?`<div class="v52-hours">${h.hasWeek?`<div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div>`:''}${h.hasLast?`<div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div>`:''}</div>`:''}`:''}`;
 }
 
 function v52Paint(){
@@ -93,7 +86,6 @@ function v52Paint(){
  if(!box){box=document.createElement('section');box.className='v52-today';const head=root.querySelector('.v34homehead');head?head.after(box):root.prepend(box);}
  box.innerHTML=v52Html();
  box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else navigateApp('stundenzettel');});
- const g=box.querySelector('[data-v52-gross]');if(g)g.onchange=()=>{document.documentElement.classList.toggle('v52-gross',g.checked);try{localStorage.setItem('mv_v52_gross',g.checked?'1':'0');}catch(_){}};
 }
 
 /* „Wie Vortag“: Zeiten und Tätigkeiten des letzten ausgefüllten Tages übernehmen */
