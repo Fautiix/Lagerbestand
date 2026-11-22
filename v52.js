@@ -242,8 +242,8 @@ document.addEventListener('click',e=>{if(e.target.closest('#statistik [data-v52p
 function v52DrawTeam(){
  const body=document.getElementById('v52TeamBody');if(!body)return;v52GradN=0;
  const from=v52Range(v52TeamPeriod),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
- const people=new Map();for(const r of v52TeamRows||[]){if(!people.has(r.user_id))people.set(r.user_id,{name:r.name||'Mitarbeiter',sheets:[]});if(r.week_start)people.get(r.user_id).sheets.push({week_start:r.week_start,data:r.data});}
- const list=[...people.values()].map(p=>({name:p.name,...v52Calc(v52DaysOf(p.sheets).filter(d=>d.iso>=from))}));
+ const people=new Map();for(const r of v52TeamRows||[]){if(!people.has(r.user_id))people.set(r.user_id,{uid:r.user_id,name:r.name||'Mitarbeiter',entry:r.entry_date,carry:r.carryover,sheets:[]});if(r.week_start)people.get(r.user_id).sheets.push({week_start:r.week_start,data:r.data});}
+ const list=[...people.values()].map(p=>{const all=v52DaysOf(p.sheets);return {uid:p.uid,name:p.name,entry:p.entry,carryRaw:p.carry,vacx:v52Vac(p.entry,p.carry,all),...v52Calc(all.filter(d=>d.iso>=from))};});
  const T=v52Calc([]);for(const k of ['total','workDays','soll','ot','sick','vac','hol','sollDays'])T[k]=list.reduce((a,p)=>a+p[k],0);
  const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52t="${k}" class="${k===v52TeamPeriod?'on':''}">${l}</button>`).join('');
  const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52TeamPeriod]);
@@ -253,9 +253,10 @@ function v52DrawTeam(){
  <div class="v52-rings">${v52Ring(T.soll?(T.ot+T.soll)/T.soll*100:0,'Soll erfüllt',f(T.soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(T.workDays?T.total/T.workDays/8.5*100:0,'Ø Tag',f(T.workDays?T.total/T.workDays:0)+' h','#3b82f6','#22d3ee')}${v52Ring(T.sollDays?T.sick/T.sollDays*100:0,'Krankquote',f(T.sick/months)+' Tage/Mon.','#f97316','#facc15')}${v52Ring(T.sollDays?T.vac/T.sollDays*100:0,'Urlaub',T.vac+' Tage','#84cc16','#22d3ee')}</div>
  <h4 class="v52-sub">Stunden pro Mitarbeiter</h4>${v52HBars(list.filter(p=>p.total).sort((a,b)=>b.total-a.total).slice(0,10).map(p=>({l:p.name,v:p.total})))||'<p class="muted">Noch keine Stunden in diesem Zeitraum.</p>'}
  <h4 class="v52-sub">Alle Mitarbeiter</h4>
- <div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>Mitarbeiter</th><th>Stunden</th><th>Ø/Tag</th><th>Ø/Woche</th><th>Überst.</th><th>🤒 Krank</th><th>Ø Krank/Mon.</th><th>🌴 Urlaub</th><th>🎉 Feiert.</th></tr></thead><tbody>
- ${list.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(p=>`<tr><td>${v52Esc(p.name)}</td><td>${f(p.total)}</td><td>${f(p.avg)}</td><td>${f(p.weeks?p.total/p.weeks:0)}</td><td style="color:${oc(p.ot)};font-weight:700">${p.ot>0?'+':''}${f(p.ot)}</td><td>${p.sick}</td><td>${f(p.sick/months)}</td><td>${p.vac}</td><td>${p.hol}</td></tr>`).join('')}
+ <div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>Mitarbeiter</th><th>Stunden</th><th>Ø/Tag</th><th>Ø/Woche</th><th>Überst.</th><th>🤒 Krank</th><th>Ø Krank/Mon.</th><th>🌴 Urlaub</th><th>🎉 Feiert.</th><th>Urlaub verdient</th><th>Urlaub rest</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
+ ${list.sort((a,b)=>a.name.localeCompare(b.name,'de')).map(p=>`<tr><td>${v52Esc(p.name)}</td><td>${f(p.total)}</td><td>${f(p.avg)}</td><td>${f(p.weeks?p.total/p.weeks:0)}</td><td style="color:${oc(p.ot)};font-weight:700">${p.ot>0?'+':''}${f(p.ot)}</td><td>${p.sick}</td><td>${f(p.sick/months)}</td><td>${p.vac}</td><td>${p.hol}</td><td>${p.vacx.earned} / ${p.vacx.year}</td><td style="font-weight:700;color:${p.vacx.rest<0?'#f87171':'#4ade80'}">${String(p.vacx.rest).replace('.',',')}</td>${isAdmin?`<td><button type="button" class="v33btn" data-v52vac="${p.uid}" title="Eintritt / Resturlaub">✎</button></td>`:''}</tr>`).join('')}
  </tbody></table></div>`;
+ body.querySelectorAll('[data-v52vac]').forEach(b=>b.onclick=()=>{const p=list.find(x=>x.uid===b.dataset.v52vac);if(p)v52EditVac(p.uid,p.name,p.entry,p.carryRaw);});
  body.querySelectorAll('[data-v52t]').forEach(b=>b.onclick=()=>{v52TeamPeriod=b.dataset.v52t;v52DrawTeam();});
 }
 (function(){const st=document.createElement('style');st.textContent=`.v52-team{padding:18px;max-width:1100px;margin:0 auto}.v52-team .v52-head{margin-bottom:4px}.v52-switch{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}.v52-switch input{width:20px;height:20px}#v52TeamBody.v52-today{margin-top:12px}
@@ -264,3 +265,30 @@ function v52DrawTeam(){
 .v52-table td{padding:10px 12px;border-top:1px solid var(--line,#1F2A3C)}.v52-table td:first-child{font-weight:700}.v52-table tr:hover td{background:rgba(139,92,246,.08)}`;document.head.append(st);})();
 /* Menüpunkt „Statistik“ für alle */
 setTimeout(()=>{for(const id of ['v52DeskStats','v52MoreStats']){const el=document.getElementById(id);if(el)el.hidden=false;}},0);
+
+/* V52: Urlaub nach BRTV Bau – je 12 Beschäftigungstage 1 Urlaubstag (volle Monate = 30 Tage) */
+let v52VacInfo=null;
+function v52Vac(entry,carry,days){
+ const now=new Date(),y=now.getFullYear(),jan=new Date(y,0,1);
+ let start=entry?new Date(entry+'T12:00:00'):jan;if(start<jan)start=jan;
+ let bt=0;
+ if(start<=now)for(let m=start.getMonth();m<=now.getMonth();m++){
+  const first=m===start.getMonth()?start.getDate():1,last=m===now.getMonth()?now.getDate():new Date(y,m+1,0).getDate(),dim=new Date(y,m+1,0).getDate();
+  bt+=(first===1&&last===dim)?30:Math.min(30,last-first+1);}
+ let full=0;for(let m=start.getMonth();m<12;m++){const first=m===start.getMonth()?start.getDate():1,dim=new Date(y,m+1,0).getDate();full+=first===1?30:Math.min(30,dim-first+1);}
+ const earned=Math.floor(bt/12),year=Math.min(30,Math.round(full/12)),taken=(days||[]).filter(d=>d.status==='urlaub'&&d.iso.startsWith(String(y))).length;
+ const c=Number(carry)||0;return {bt,earned,year,taken,carry:c,rest:c+earned-taken};
+}
+function v52VacHtml(x){const f=n=>String(Math.round(n*10)/10).replace('.',',');
+ return `<h4 class="v52-sub">Urlaub ${new Date().getFullYear()} · BRTV Bau</h4>
+ <div class="v52-kpi"><div><b>${f(x.earned)}</b><small>verdient bisher</small></div><div><b>${f(x.taken)}</b><small>genommen</small></div><div><b style="color:${x.rest<0?'#f87171':'#4ade80'}">${f(x.rest)}</b><small>verfügbar${x.carry?' (inkl. '+f(x.carry)+' Rest)':''}</small></div><div><b>${f(x.year)}</b><small>Anspruch im Jahr</small></div></div>
+ <div class="v52-hb"><div><span class="n">🌴</span><div class="t"><i style="width:${Math.min(100,x.earned/Math.max(1,x.year)*100)}%;background:linear-gradient(90deg,#84cc16,#22d3ee)"></i><em>${f(x.bt)} Beschäftigungstage → ${f(x.earned)} von ${f(x.year)} Tagen verdient</em></div></div></div>`;}
+const v52StatsBase=v52StatsHtml;
+v52StatsHtml=function(){let h=v52StatsBase();try{if(v52Cache&&!v52Cache.sheetError){if(!v52VacInfo){v52VacInfo={};rpc('app_v52_vacation_get',{}).then(r=>{v52VacInfo=r||{};v52Paint();v52DrawOwnPage();}).catch(()=>{});}
+ h+=v52VacHtml(v52Vac(v52VacInfo.entry_date,v52VacInfo.carryover,v52Days()));}}catch(e){console.warn(e);}return h;};
+async function v52EditVac(uid,name,entry,carry){
+ const e=prompt('Eintrittsdatum von '+name+' (TT.MM.JJJJ, leer = schon länger dabei):',entry?entry.split('-').reverse().join('.'):'');if(e===null)return;
+ let iso=null;if(e.trim()){const m=e.trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);if(!m)return alert('Datum bitte als TT.MM.JJJJ');iso=`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;}
+ const c=prompt('Resturlaub aus dem Vorjahr für '+name+' (Tage):',String(carry||0).replace('.',','));if(c===null)return;
+ try{await rpc('app_v52_vacation_set',{p_user:uid,p_entry:iso,p_carry:Number(c.replace(',','.'))||0});v52TeamRows=null;v52OpenTeamStats();}catch(err){alert('Speichern fehlgeschlagen: '+err.message);}
+}
