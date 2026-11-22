@@ -52,7 +52,7 @@ function v52Hours(){
    if(s.week_start===week)out.week+=h;if(s.week_start===lastWeek)out.last+=h;if(v52Iso(day).slice(0,7)===mon)out.month+=h;
   });
  }
- const wd=Math.min(5,(now.getDay()+6)%7+1);out.weekSoll=wd*8;out.weekDiff=out.week-out.weekSoll;out.lastDiff=out.last-40;
+ const wd=Math.min(5,(now.getDay()+6)%7+1);out.weekSoll=[8.5,8.5,8.5,8.5,6].slice(0,wd).reduce((a,b)=>a+b,0);out.weekDiff=out.week-out.weekSoll;out.lastDiff=out.last-40;
  return out;
 }
 
