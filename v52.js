@@ -139,3 +139,22 @@ window.addEventListener('load',()=>{
   if(Date.now()-last<240000)return;last=Date.now();rpc('app_v52_touch',{}).catch(()=>{last=0;});};
  setInterval(ping,60000);document.addEventListener('visibilitychange',ping);window.addEventListener('online',ping);setTimeout(ping,5000);
 })();
+
+/* V52: Team-Statistik auf dem Dashboard (nur Admin) */
+let v52Stats=null,v52StatsAt=0;
+async function v52LoadStats(){
+ if(typeof isAdmin==='undefined'||!isAdmin||Date.now()-v52StatsAt<60000)return;v52StatsAt=Date.now();
+ try{v52Stats=await rpc('app_v52_stats',{});v52PaintStats();}catch(e){console.warn('V52 Statistik:',e);}
+}
+function v52PaintStats(){
+ const root=document.getElementById('startseite');if(!root||!v52Stats||!isAdmin)return;
+ let box=root.querySelector('.v52-stats');
+ if(!box){box=document.createElement('section');box.className='v52-today v52-stats';const t=root.querySelector('.v52-today');t?t.after(box):root.prepend(box);}
+ const s=v52Stats,f=n=>typeof tsNumFormat==='function'?tsNumFormat(Number(n)||0):String(n);
+ const ago=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return m<5?'🟢 jetzt':m<60?'vor '+m+' Min.':m<1440?'vor '+Math.round(m/60)+' Std.':'vor '+Math.round(m/1440)+' T.';};
+ box.innerHTML=`<div class="v52-head"><h3>📊 Team-Statistik</h3><small>nur für Admin</small></div>
+ <div class="v52-hours"><div><b>${s.online_now}</b>gerade online</div><div><b>${s.online_today} / ${s.accounts}</b>heute aktiv</div><div><b>${s.sheets_week}</b>Stundenzettel diese Woche</div></div>
+ <div class="v52-hours"><div><b>${f(s.hours_week)} h</b>Team-Stunden diese Woche</div><div><b>${s.reports_week}</b>Berichte diese Woche</div><div><b>${s.reports_total}</b>Berichte gesamt</div></div>
+ ${(s.top||[]).length?`<div class="v52-job" style="margin-top:12px"><b style="font-size:14px">Zuletzt online</b>${s.top.map(p=>`<p>${v52Esc(p.name)} · ${ago(p.last_seen_at)}</p>`).join('')}</div>`:''}`;
+}
+window.addEventListener('load',()=>{const rs=window.renderStartseite;if(typeof rs==='function')window.renderStartseite=function(...a){const r=rs.apply(this,a);try{v52PaintStats();void v52LoadStats();}catch(e){console.warn(e);}return r;};setTimeout(()=>{if(typeof currentAppPage!=='undefined'&&currentAppPage==='startseite')void v52LoadStats();},4000);});
