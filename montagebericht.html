@@ -1448,6 +1448,7 @@ function initHits(){
   SUMS.forEach((s,i)=>hit(SUM_EDGES[i],y1,SUM_EDGES[i+1],y2,`m${r}_sum${i}`,`Monteur ${r} · ${s}`,'hours'));
  }
  [['gewaltJa',429,759],['gewaltNein',493,759],['inspektionJa',646,759],['inspektionNein',710,759]].forEach(([k,x,y])=>hit(x-13,y-14,x+13,y+14,k,k,'check'));
+ [['kfz1_bis15',512,361,'Fahrzeug 1 · bis 1,5 t'],['kfz1_ueber15',599,361,'Fahrzeug 1 · über 1,5 t'],['kfz2_bis15',512,402,'Fahrzeug 2 · bis 1,5 t'],['kfz2_ueber15',599,402,'Fahrzeug 2 · über 1,5 t']].forEach(([k,x,y,t])=>hit(x-30,y-18,x+30,y+18,k,t,'check'));
  for(let i=0;i<WORK_EDGES.length-1;i++)hit(48,WORK_EDGES[i],1005,WORK_EDGES[i+1],'arbeiten','Ausgeführte Arbeiten','textarea');
  for(let i=1;i<DEFECT_EDGES.length-1;i++)hit(48,DEFECT_EDGES[i],1005,DEFECT_EDGES[i+1],'maengel','Weitere Mängel','textarea');
  for(let i=0;i<Math.min(7,MAT_EDGES.length-1);i++){
@@ -1472,7 +1473,7 @@ function openDirect(h){
  if(h.mode==='check'){
   model[key]=!model[key];
   if(model[key]){
-   const opposite={gewaltJa:'gewaltNein',gewaltNein:'gewaltJa',inspektionJa:'inspektionNein',inspektionNein:'inspektionJa'}[key];model[opposite]=false;
+   const opposite={gewaltJa:'gewaltNein',gewaltNein:'gewaltJa',inspektionJa:'inspektionNein',inspektionNein:'inspektionJa',kfz1_bis15:'kfz1_ueber15',kfz1_ueber15:'kfz1_bis15',kfz2_bis15:'kfz2_ueber15',kfz2_ueber15:'kfz2_bis15'}[key];model[opposite]=false;
   }syncEditor();dirty();return;
  }
  editing=h;
