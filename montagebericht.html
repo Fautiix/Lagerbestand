@@ -672,6 +672,12 @@ function refreshSelectContainer(id,html){
  parent.replaceWith(wrap.firstElementChild);
 }
 async function apiRest(path,options={}){
+ const isGet=!options.method||String(options.method).toUpperCase()==='GET';
+ const key='mv_v52_mb_'+path;
+ try{const r=await v52ApiRestOnline(path,options);if(isGet){try{localStorage.setItem(key,JSON.stringify(r));}catch(_){}}return r;}
+ catch(e){if(isGet&&(!navigator.onLine||e instanceof TypeError||/anmelden|fetch|Network/i.test(e.message))){const t=localStorage.getItem(key);if(t!=null)return JSON.parse(t);}throw e;}
+}
+async function v52ApiRestOnline(path,options={}){
  const token=await getSiteToken();
  const response=await fetch(SITE_SUPABASE_URL+'/rest/v1/'+path,{
   ...options,headers:{'apikey':SITE_SUPABASE_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json',...(options.headers||{})}
@@ -1059,8 +1065,9 @@ async function fresh(ask=true){
  catch(e){console.error(e);setStatus('Kein neuer Bericht angelegt: '+e.message+' Bitte die SQL-Einrichtung prüfen.',false);
    // Nur beim allerersten Start ein nicht exportierbares Formular zeigen, damit
    // nach der Einrichtung die Nummer über „Nummer vergeben“ ergänzt werden kann.
-   if(!sheetModels.first){currentId=uid();activeSheet='first';model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};
-     sheetModels={first:model,second:null};defaults();buildEditor();updateSaved();updateSheetControls();queuePaint()}
+   if(!sheetModels.first||!navigator.onLine||e instanceof TypeError){currentId=uid();activeSheet='first';model={employeeCount:1,jahr:String(new Date().getFullYear()),standort:DEFAULT_STANDORT,orderType:'auftrag'};
+     sheetModels={first:model,second:null};defaults();changed=false;buildEditor();updateSaved();updateSheetControls();queuePaint();
+     if(!navigator.onLine||e instanceof TypeError)setStatus('📴 Offline: Bericht ohne Nummer angelegt. Die Nummer wird automatisch vergeben, sobald wieder Internet da ist.',true);}
    setNumberBusy(false);return;}
  currentId=uid();activeSheet='first';
  model={reportNumber:newNumber,employeeCount:1,jahr:String(new Date().getFullYear()),arbeiten_font:16,material_font:16,standort:DEFAULT_STANDORT,orderType:'auftrag'};
@@ -1324,12 +1331,28 @@ async function cloudStoreReport(id,entry){
   cloudReportIds.add(id);cloudReportOwners.set(id,user);
  }
 }
+const V52_PEND='mv_v52_mb_pending';
+function v52Pending(id,on){let l=[];try{l=JSON.parse(localStorage.getItem(V52_PEND)||'[]');}catch(_){}l=l.filter(x=>x!==id);if(on)l.push(id);try{localStorage.setItem(V52_PEND,JSON.stringify(l));}catch(_){}}
+let v52SyncBusy=false;
+async function v52SyncPending(){
+ if(v52SyncBusy||!navigator.onLine||v32Review)return;v52SyncBusy=true;
+ try{
+  if(currentId&&!validReportNumber(model.reportNumber)&&reportHasContent(sheetModels.first)){try{await assignMissingNumber();}catch(e){console.warn(e);}}
+  let l=[];try{l=JSON.parse(localStorage.getItem(V52_PEND)||'[]');}catch(_){}
+  let ok=0;
+  for(const id of l){const entry=reports[id];if(!entry){v52Pending(id,false);continue;}
+   try{await cloudStoreReport(id,entry);v52Pending(id,false);ok++;}catch(e){console.warn('Nachsync',id,e);}}
+  if(ok)setStatus('✓ '+ok+(ok===1?' Bericht':' Berichte')+' nachträglich hochgeladen');
+ }finally{v52SyncBusy=false;}
+}
+window.addEventListener('online',()=>setTimeout(v52SyncPending,1500));
+setTimeout(v52SyncPending,3000);
 async function syncCurrentCloudReport(){
  const id=currentId,entry=reports[id];
  if(!entry)return;
  const task=cloudStoreReport(id,entry);v50CloudSyncs.set(id,task);
- try{await task;setStatus('✓ Auf dem Gerät und in Supabase gespeichert');}
- catch(error){setStatus('⚠ Nur auf diesem Gerät gespeichert! Cloud: '+error.message,false);console.warn('Cloud-Monteurbericht:',error);}
+ try{await task;v52Pending(id,false);setStatus('✓ Auf dem Gerät und in Supabase gespeichert');}
+ catch(error){v52Pending(id,true);setStatus(navigator.onLine?'⚠ Nur auf diesem Gerät gespeichert! Cloud: '+error.message:'📴 Offline gespeichert – wird automatisch hochgeladen, sobald wieder Internet da ist.',!navigator.onLine);console.warn('Cloud-Monteurbericht:',error);}
  finally{if(v50CloudSyncs.get(id)===task)v50CloudSyncs.delete(id);}
 }
 async function loadCloudReport(reportId){

@@ -7,7 +7,7 @@
 <title>Materialverwaltung V45 · Wochenplan</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta name="app-version" content="2026-11-22-v52leer"/>
+<meta name="app-version" content="2026-11-22-v52offline"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -2130,15 +2130,15 @@ async function refreshAuthSession() {
       body: JSON.stringify({ refresh_token: authSession.refresh_token })
     });
     if (!response.ok) {
-      clearAuthSession();
+      if (response.status >= 400 && response.status < 500) clearAuthSession();
       return false;
     }
     const session = await response.json();
     saveAuthSession(session);
     return true;
   } catch (error) {
-    console.error("Session Refresh Fehler:", error);
-    clearAuthSession();
+    /* V52: Offline – Anmeldung behalten, später erneut versuchen */
+    console.warn("Session Refresh offline:", error);
     return false;
   }
 }
@@ -2172,7 +2172,17 @@ async function authFetch(path, options = {}) {
   });
 }
 
+const V52_OFF='mv_v52_off_';
+function v52OffKey(k){return V52_OFF+(authSession?.user?.id||'x')+'_'+k;}
+function v52OffPut(k,v){try{localStorage.setItem(v52OffKey(k),JSON.stringify(v));}catch(_){}}
+function v52OffGet(k){try{const t=localStorage.getItem(v52OffKey(k));return t==null?undefined:JSON.parse(t);}catch(_){return undefined;}}
+function v52IsNetErr(e){return !navigator.onLine||e instanceof TypeError||/Sitzung abgelaufen|Failed to fetch|NetworkError|Load failed/i.test(String(e?.message||e));}
 async function supabase(path, options = {}) {
+  const isGet=!options.method||String(options.method).toUpperCase()==='GET';
+  try{const r=await v52SupabaseOnline(path,options);if(isGet)v52OffPut('rest_'+path,r);return r;}
+  catch(e){if(isGet&&v52IsNetErr(e)){const c=v52OffGet('rest_'+path);if(c!==undefined)return c;}throw e;}
+}
+async function v52SupabaseOnline(path, options = {}) {
   const token = await getAuthToken();
   const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
     ...options,
@@ -2194,7 +2204,13 @@ async function supabase(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+const V52_RPC_READ=['app_v45_plan_get','app_v47_colors_get','app_is_reviewer','is_admin'];
 async function rpc(functionName, body) {
+  const read=V52_RPC_READ.includes(functionName),k='rpc_'+functionName+'_'+JSON.stringify(body||{});
+  try{const r=await v52RpcOnline(functionName,body);if(read)v52OffPut(k,r);return r;}
+  catch(e){if(read&&v52IsNetErr(e)){const c=v52OffGet(k);if(c!==undefined)return c;}throw e;}
+}
+async function v52RpcOnline(functionName, body) {
   const token = await getAuthToken();
   const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
     method: "POST",
@@ -2314,6 +2330,10 @@ function closeAdminModal() {
 // Personal accounts (Supabase Auth). No service_role key ever enters this HTML.
 function setAccountMessage(message){document.getElementById('accountMessage').textContent=message;}
 async function fetchProfile(){
+ try{const p=await v52FetchProfileOnline();if(p)v52OffPut('profile',p);return p;}
+ catch(e){if(v52IsNetErr(e)){const c=v52OffGet('profile');if(c)return c;}throw e;}
+}
+async function v52FetchProfileOnline(){
  const token=await getAuthToken();
  const resp=await fetch(SUPABASE_URL+'/rest/v1/app_user_profiles?select=user_id,name,email,is_active,personnel_number&user_id=eq.'+encodeURIComponent(authSession.user.id),{
   headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+token}
@@ -4837,7 +4857,7 @@ async function v41EditPolierMail(siteId){
   catch(e){v38Toast('Speichern fehlgeschlagen: '+e.message,{kind:'err'});}
 }
 </script><script src="./wochenplan.js?v=2026-11-20-tage"></script>
-<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=6"></script>
+<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=7"></script>
 <script src="./saison.js?v=3" defer></script>
 </body>
 </html>

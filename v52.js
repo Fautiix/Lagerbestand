@@ -112,3 +112,22 @@ window.addEventListener('load',()=>{
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&typeof currentAppPage!=='undefined'&&currentAppPage==='startseite')void v52Load(true);});
  if(typeof currentUserProfile!=='undefined'&&currentUserProfile&&currentAppPage==='startseite'){v52Paint();void v52Load();}
 });
+
+/* V52 Offline: Hinweisleiste und automatisches Nachladen/Hochladen, sobald wieder Internet da ist */
+(function(){
+ const bar=document.createElement('div');bar.id='v52Offline';bar.hidden=true;
+ bar.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 6px);z-index:9999;background:#7a4b12;color:#fff;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.35);max-width:92vw;text-align:center';
+ bar.textContent='📴 Offline – Eingaben werden gespeichert und später übertragen';
+ const set=()=>{bar.hidden=navigator.onLine;};
+ document.addEventListener('DOMContentLoaded',()=>{document.body.append(bar);set();});
+ if(document.body){document.body.append(bar);set();}
+ window.addEventListener('offline',set);
+ window.addEventListener('online',()=>{set();setTimeout(async()=>{
+  if(typeof currentUserProfile==='undefined'||!currentUserProfile)return;
+  try{if(typeof tsData!=='undefined'&&tsData&&typeof tsSave==='function')await tsSave(true);}catch(e){console.warn('V52 Nachsync Stunden:',e);}
+  try{if(typeof loadAll==='function')await loadAll();}catch(e){console.warn(e);}
+  try{void v52Load(true);}catch(_){}
+  try{const f=document.getElementById('reportFrame')?.contentWindow;if(f&&typeof f.v52SyncPending==='function')f.v52SyncPending();}catch(_){}
+  if(typeof v38Toast==='function')v38Toast('Wieder online – Daten abgeglichen.',{kind:'ok'});
+ },1500);});
+})();
