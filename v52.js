@@ -171,7 +171,7 @@ function v52StatsHtml(){
  const f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0);
  const arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
- const ot=arb.reduce((a,d)=>a+d.h,0)-soll;
+ const ot=arb.reduce((a,d)=>a+Math.max(0,d.h-d.soll),0);
  const weeks=new Set(days.map(d=>d.week)).size;
  const sick=days.filter(d=>d.status==='krank').length,vac=days.filter(d=>d.status==='urlaub').length,sollDays=days.filter(d=>d.soll>0).length;
  const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52Period]);
@@ -221,7 +221,7 @@ window.addEventListener('load',()=>{const rt=window.renderTimesheet;if(typeof rt
 function v52DaysOf(sheets){const keep=v52Cache;v52Cache={sheets};try{return v52Days();}finally{v52Cache=keep;}}
 function v52Calc(days){
  const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0),arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
- return {total,workDays:work.length,avg:work.length?total/work.length:0,weeks:new Set(days.map(d=>d.week)).size,soll,ot:arb.reduce((a,d)=>a+d.h,0)-soll,
+ return {ist:arb.reduce((a,d)=>a+d.h,0),total,workDays:work.length,avg:work.length?total/work.length:0,weeks:new Set(days.map(d=>d.week)).size,soll,ot:arb.reduce((a,d)=>a+Math.max(0,d.h-d.soll),0),
   sick:days.filter(d=>d.status==='krank').length,vac:days.filter(d=>d.status==='urlaub').length,hol:days.filter(d=>d.status==='feiertag').length,sollDays:days.filter(d=>d.soll>0).length};
 }
 let v52TeamPeriod='monat',v52TeamRows=null,v52TeamFrom='';
@@ -244,13 +244,13 @@ function v52DrawTeam(){
  const from=v52Range(v52TeamPeriod),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  const people=new Map();for(const r of v52TeamRows||[]){if(!people.has(r.user_id))people.set(r.user_id,{uid:r.user_id,name:r.name||'Mitarbeiter',entry:r.entry_date,carry:r.carryover,sheets:[]});if(r.week_start)people.get(r.user_id).sheets.push({week_start:r.week_start,data:r.data});}
  const list=[...people.values()].map(p=>{const all=v52DaysOf(p.sheets),act=v52Activity(all.filter(d=>d.iso>=from));return {main:act.groups[0]?act.groups[0][0]+' ('+Math.round(act.groups[0][1]/act.total*100)+'%)':'–',uid:p.uid,name:p.name,entry:p.entry,carryRaw:p.carry,vacx:v52Vac(p.entry,p.carry,all),...v52Calc(all.filter(d=>d.iso>=from))};});
- const T=v52Calc([]);for(const k of ['total','workDays','soll','ot','sick','vac','hol','sollDays'])T[k]=list.reduce((a,p)=>a+p[k],0);
+ const T=v52Calc([]);for(const k of ['ist','total','workDays','soll','ot','sick','vac','hol','sollDays'])T[k]=list.reduce((a,p)=>a+p[k],0);
  const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52t="${k}" class="${k===v52TeamPeriod?'on':''}">${l}</button>`).join('');
  const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52TeamPeriod]);
  const oc=v=>v<-0.01?'#f87171':v>0.01?'#4ade80':'inherit';
  body.innerHTML=`<div class="v52-tabs">${tabs}</div>
  <div class="v52-kpi"><div><b>${f(T.total)}</b><small>Team-Stunden</small></div><div><b style="color:${oc(T.ot)}">${T.ot>0?'+':''}${f(T.ot)}</b><small>Überstunden gesamt</small></div><div><b>${T.sick}</b><small>Krankentage</small></div><div><b>${T.vac}</b><small>Urlaubstage</small></div></div>
- <div class="v52-rings">${v52Ring(T.soll?(T.ot+T.soll)/T.soll*100:0,'Soll erfüllt',f(T.soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(T.workDays?T.total/T.workDays/8.5*100:0,'Ø Tag',f(T.workDays?T.total/T.workDays:0)+' h','#3b82f6','#22d3ee')}${v52Ring(T.sollDays?T.sick/T.sollDays*100:0,'Krankquote',f(T.sick/months)+' Tage/Mon.','#f97316','#facc15')}${v52Ring(T.sollDays?T.vac/T.sollDays*100:0,'Urlaub',T.vac+' Tage','#84cc16','#22d3ee')}</div>
+ <div class="v52-rings">${v52Ring(T.soll?T.ist/T.soll*100:0,'Soll erfüllt',f(T.soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(T.workDays?T.total/T.workDays/8.5*100:0,'Ø Tag',f(T.workDays?T.total/T.workDays:0)+' h','#3b82f6','#22d3ee')}${v52Ring(T.sollDays?T.sick/T.sollDays*100:0,'Krankquote',f(T.sick/months)+' Tage/Mon.','#f97316','#facc15')}${v52Ring(T.sollDays?T.vac/T.sollDays*100:0,'Urlaub',T.vac+' Tage','#84cc16','#22d3ee')}</div>
  <h4 class="v52-sub">Stunden pro Mitarbeiter</h4>${v52HBars(list.filter(p=>p.total).sort((a,b)=>b.total-a.total).slice(0,10).map(p=>({l:p.name,v:p.total})))||'<p class="muted">Noch keine Stunden in diesem Zeitraum.</p>'}
  ${v52ActHtml([...people.values()].flatMap(p=>v52DaysOf(p.sheets).filter(d=>d.iso>=from)),'Tätigkeiten im Team')}<h4 class="v52-sub">Alle Mitarbeiter</h4>
  <div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>Mitarbeiter</th><th>Meiste Tätigkeit</th><th>Stunden</th><th>Ø/Tag</th><th>Ø/Woche</th><th>Überst.</th><th>🤒 Krank</th><th>Ø Krank/Mon.</th><th>🌴 Urlaub</th><th>🎉 Feiert.</th><th>Urlaub verdient</th><th>Urlaub rest</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
