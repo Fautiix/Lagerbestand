@@ -372,3 +372,27 @@ async function v52ReviewPrint(){
  }catch(e){alert('Drucken nicht möglich: '+e.message);}finally{if(b){b.disabled=false;b.textContent='🖨 Drucken';}}
 }
 window.addEventListener('load',()=>{const h=window.v33Header;if(typeof h!=='function')return;window.v33Header=function(...a){const r=h.apply(this,a);try{const box=document.getElementById('v33DocActions');if(box&&!document.getElementById('v52PrintBtn')){const b=document.createElement('button');b.className='v33btn';b.id='v52PrintBtn';b.textContent='🖨 Drucken';b.onclick=v52ReviewPrint;box.append(b);}}catch(e){console.warn(e);}return r;};});
+
+/* V52: E-Meister/Admin trägt Krank/Urlaub/Feiertag für Mitarbeiter ein (legt Stundenzettel bei Bedarf an) */
+function v52AbsenceDialog(){
+ const uid=typeof v32SelectedOwner!=='undefined'?v32SelectedOwner:'';if(!uid)return alert('Bitte zuerst links einen Mitarbeiter auswählen.');
+ const name=typeof v33Name==='function'?v33Name(uid):'Mitarbeiter';const wk=(typeof v34Week!=='undefined'&&/^\d{4}-\d{2}-\d{2}$/.test(v34Week))?v34Week:v52Monday(new Date());
+ const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+ const el=typeof v34Modal==='function'?v34Modal('Abwesenheit eintragen · '+name,`
+  <label>Woche (Montag)</label><input type="date" id="v52AbsWeek" value="${wk}">
+  <label style="margin-top:10px">Art</label><select id="v52AbsType"><option value="krank">🤒 Krank</option><option value="urlaub">🌴 Urlaub</option><option value="feiertag">🎉 Feiertag</option><option value="arbeit">Zurücksetzen (Arbeit)</option></select>
+  <label style="margin-top:10px">Tage</label><div style="display:flex;gap:6px;flex-wrap:wrap">${days.map((d,i)=>`<label style="display:flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid var(--line2,#2A3750);border-radius:10px"><input type="checkbox" data-absday="${i}" ${i<5?'checked':''}> ${d}</label>`).join('')}</div>
+  <p class="muted" style="font-size:13px">Gibt es für die Woche noch keinen Stundenzettel, wird er angelegt. Krank/Urlaub zählen in der Statistik nicht als Minus.</p>
+  <div class="v34modalactions"><button class="btn primary" data-v52abs>Eintragen</button></div>`):null;
+ if(!el)return;
+ el.querySelector('[data-v52abs]').onclick=async()=>{
+  let w=el.querySelector('#v52AbsWeek').value;if(!w)return;w=v52Monday(new Date(w+'T12:00:00'));
+  const sel=[...el.querySelectorAll('[data-absday]')].filter(x=>x.checked).map(x=>+x.dataset.absday);if(!sel.length)return alert('Bitte mindestens einen Tag wählen.');
+  let pnr='';try{pnr=(await supabase('app_user_profiles?select=personnel_number&user_id=eq.'+encodeURIComponent(uid)))?.[0]?.personnel_number||'';}catch(_){}
+  try{await rpc('app_v52_set_week_status',{target_user:uid,target_week:w,p_days:sel,p_status:el.querySelector('#v52AbsType').value,p_name:name,p_pnr:pnr});
+   el.remove();if(typeof v38Toast==='function')v38Toast('✓ Eingetragen für '+name+' ('+tsWeekLabel(w)+')',{kind:'ok'});v52TeamRows=null;
+   if(typeof v34ChangeWeek==='function'&&w!==v34Week)v34ChangeWeek(w);else if(typeof renderReviewCenter==='function')renderReviewCenter();
+  }catch(e){alert('Speichern fehlgeschlagen: '+e.message);}
+ };
+}
+window.addEventListener('load',()=>{const d=window.v33DrawReports;if(typeof d!=='function')return;window.v33DrawReports=function(...a){const r=d.apply(this,a);try{const head=document.querySelector('#pruefbereich .v33reports .v33panehead');if(head&&!head.querySelector('#v52AbsBtn')){const b=document.createElement('button');b.className='v33btn';b.id='v52AbsBtn';b.textContent='🤒/🌴 Krank oder Urlaub eintragen';b.style.marginTop='8px';b.onclick=v52AbsenceDialog;head.append(b);}}catch(e){console.warn(e);}return r;};});
