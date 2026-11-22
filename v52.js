@@ -330,7 +330,7 @@ let v52PwShown=false;
 async function v52CheckMustChange(){
  if(v52PwShown||typeof currentUserProfile==='undefined'||!currentUserProfile||!navigator.onLine)return;
  let must=false;try{must=await rpc('app_v52_must_change',{});}catch(_){return;}
- if(!must)return;v52PwShown=true;
+ v52PwShown=true;if(!must)return;
  const o=document.createElement('div');o.id='v52PwGate';o.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(5,9,16,.92);display:grid;place-items:center;padding:18px';
  o.innerHTML=`<div class="account-card" style="max-width:420px;width:100%"><div class="account-logo">🔑</div><h2>Eigenes Passwort festlegen</h2>
  <p>Du hast dich mit dem Startcode angemeldet. Bitte lege jetzt dein eigenes Passwort fest (mindestens 8 Zeichen).</p>
@@ -349,4 +349,4 @@ async function v52CheckMustChange(){
   }catch(e){msg.textContent='Fehler: '+(/weak|short|length|characters/i.test(e.message)?'Passwort zu kurz oder zu einfach – bitte länger wählen.':e.message);}
  };
 }
-setInterval(v52CheckMustChange,2000);
+setInterval(()=>{if(typeof currentUserProfile!=='undefined'&&!currentUserProfile)v52PwShown=false;v52CheckMustChange();},2000);
