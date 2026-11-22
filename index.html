@@ -7,7 +7,7 @@
 <title>Materialverwaltung V45 · Wochenplan</title>
 <link href="./manifest.json" rel="manifest"/>
 <meta content="#0b1423" name="theme-color"/>
-<meta name="app-version" content="2026-11-22-v52offline"/>
+<meta name="app-version" content="2026-11-22-v52offline2"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Material" name="apple-mobile-web-app-title"/>
@@ -2260,14 +2260,17 @@ async function verifyAdminSession() {
     });
 
     if (!response.ok) {
-      clearAuthSession();
+      if (response.status === 401) clearAuthSession();
       return;
     }
     const result = await response.json();
     isAdmin = (result === true);
+    v52OffPut('isadmin', isAdmin);
     adminViewEnabled = false;
     updateAdminUI();
   } catch (error) {
+    /* V52: offline nicht abmelden, letzten bekannten Stand nutzen */
+    if (v52IsNetErr(error)) { isAdmin = v52OffGet('isadmin') === true; adminViewEnabled = false; updateAdminUI(); return; }
     console.error("Admin-Prüfung fehlgeschlagen:", error);
     clearAuthSession();
   }
