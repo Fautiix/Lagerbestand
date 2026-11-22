@@ -396,3 +396,12 @@ function v52AbsenceDialog(){
  };
 }
 window.addEventListener('load',()=>{const d=window.v33DrawReports;if(typeof d!=='function')return;window.v33DrawReports=function(...a){const r=d.apply(this,a);try{const head=document.querySelector('#pruefbereich .v33reports .v33panehead');if(head&&!head.querySelector('#v52AbsBtn')){const b=document.createElement('button');b.className='v33btn';b.id='v52AbsBtn';b.textContent='🤒/🌴 Krank oder Urlaub eintragen';b.style.marginTop='8px';b.onclick=v52AbsenceDialog;head.append(b);}}catch(e){console.warn(e);}return r;};});
+
+/* V52: Online-/Versionsstatus am PC immer unten links in der Seitenleiste */
+(function(){const st=document.createElement('style');st.textContent=`.v52-sidefoot{margin-top:auto;padding:12px 10px 6px}.v52-sidefoot .version-box{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.v52-sidefoot .version-status{width:100%;justify-content:flex-start}`;document.head.append(st);
+ let home=null;
+ const place=()=>{const box=document.querySelector('.version-box'),side=document.querySelector('aside.desk31-sidebar');if(!box||!side)return;
+  if(!home)home=box.parentElement;
+  if(innerWidth>=1100){let f=side.querySelector('.v52-sidefoot');if(!f){f=document.createElement('div');f.className='v52-sidefoot';side.append(f);}if(box.parentElement!==f)f.append(box);}
+  else if(box.parentElement!==home)home.prepend(box);};
+ window.addEventListener('resize',place);setInterval(place,1500);document.addEventListener('DOMContentLoaded',place);place();})();
