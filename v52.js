@@ -226,10 +226,9 @@ function v52Calc(days){
 }
 let v52TeamPeriod='monat',v52TeamRows=null,v52TeamFrom='';
 async function v52OpenTeamStats(){
- const root=document.getElementById('pruefbereich');if(!root)return;
+ const root=document.getElementById('statistik');if(!root)return;
  const from=v52Range('m12');
- root.innerHTML=`<div class="v52-team"><div class="v52-head"><h2 style="margin:0">📊 Statistik</h2><button type="button" class="v33btn" id="v52TeamBack">‹ Zurück zum Prüfplatz</button></div><div id="v52TeamBody"><p class="muted">Wird geladen …</p></div></div>`;
- document.getElementById('v52TeamBack').onclick=()=>renderReviewCenter();
+ root.innerHTML=`<div class="v52-team"><div class="v52-head"><h2 style="margin:0">📊 Statistik</h2><small>Alle Mitarbeiter · nur für Admin</small></div><div id="v52TeamBody"><p class="muted">Wird geladen …</p></div></div>`;
  try{if(!v52TeamRows||v52TeamFrom!==from){v52TeamRows=await rpc('app_v52_team_sheets',{p_from:from});v52TeamFrom=from;}v52DrawTeam();}
  catch(e){document.getElementById('v52TeamBody').innerHTML='<p class="muted">Statistik nicht verfügbar: '+v52Esc(e.message)+'</p>';}
 }
@@ -256,5 +255,5 @@ function v52DrawTeam(){
 .v52-tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line,#1F2A3C)}.v52-table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
 .v52-table th{text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#9AA6B8);background:rgba(255,255,255,.04)}
 .v52-table td{padding:10px 12px;border-top:1px solid var(--line,#1F2A3C)}.v52-table td:first-child{font-weight:700}.v52-table tr:hover td{background:rgba(139,92,246,.08)}`;document.head.append(st);})();
-window.addEventListener('load',()=>{const dr=window.drawReviewRows;if(typeof dr!=='function')return;
- window.drawReviewRows=function(...a){const r=dr.apply(this,a);try{const top=document.querySelector('#pruefbereich .v33top');if(top&&typeof isAdmin!=='undefined'&&isAdmin&&!top.querySelector('#v52StatBtn')){const b=document.createElement('button');b.className='v33btn';b.id='v52StatBtn';b.textContent='📊 Statistik';b.onclick=()=>{if(typeof v32CanLeaveReview!=='function'||v32CanLeaveReview())v52OpenTeamStats();};top.append(b);}}catch(e){console.warn(e);}return r;};});
+/* Menüpunkt „Statistik“ nur für Admin einblenden */
+setInterval(()=>{const a=typeof isAdmin!=='undefined'&&isAdmin;for(const id of ['v52DeskStats','v52MoreStats']){const el=document.getElementById(id);if(el&&el.hidden===a)el.hidden=!a;}},1500);
