@@ -355,3 +355,20 @@ setInterval(()=>{if(typeof currentUserProfile!=='undefined'&&!currentUserProfile
 (function(){const st=document.createElement('style');st.textContent=`@media(min-width:1100px){html:not(.v52-onlager) header.v38-top{display:none!important}html:not(.v52-onlager) .v33document iframe{height:calc(100dvh - 120px)!important}}`;document.head.append(st);
  const sync=()=>{const p=typeof currentAppPage!=='undefined'?currentAppPage:'';document.documentElement.classList.toggle('v52-onlager',p==='lager'||p==='');};
  setInterval(sync,400);sync();})();
+
+/* V52: Drucken im Prüfplatz (Monteurbericht und Stundenzettel) */
+function v52PrintBlob(blob,name){
+ const url=URL.createObjectURL(blob);
+ if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){window.open(url,'_blank');if(typeof v38Toast==='function')v38Toast('PDF geöffnet – dort über ⋮ oder Teilen → Drucken.',{kind:'ok'});}
+ else{const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';f.src=url;f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){window.open(url,'_blank');}},300);document.body.append(f);setTimeout(()=>f.remove(),600000);}
+ setTimeout(()=>URL.revokeObjectURL(url),600000);
+}
+async function v52ReviewPrint(){
+ const r=typeof v33Current==='function'?v33Current():null;if(!r)return;const b=document.getElementById('v52PrintBtn');if(b){b.disabled=true;b.textContent='Wird vorbereitet …';}
+ try{let blob;
+  if(r.type==='week'){if(!v34WeekDraft)return;const copy=structuredClone(v34WeekDraft);if(v34WeekDirty||v33Status(r)!=='geprueft')delete copy.checkedBy;blob=await tsPDF('blob',{data:copy,week:r.id,signature:!v34WeekDirty&&v33Status(r)==='geprueft'?v34Signature:''});}
+  else{const w=document.getElementById('v32ReviewFrame')?.contentWindow;if(!w?.v52ReviewPdf)throw new Error('Bericht ist noch nicht geladen.');blob=await w.v52ReviewPdf();}
+  if(blob)v52PrintBlob(blob);
+ }catch(e){alert('Drucken nicht möglich: '+e.message);}finally{if(b){b.disabled=false;b.textContent='🖨 Drucken';}}
+}
+window.addEventListener('load',()=>{const h=window.v33Header;if(typeof h!=='function')return;window.v33Header=function(...a){const r=h.apply(this,a);try{const box=document.getElementById('v33DocActions');if(box&&!document.getElementById('v52PrintBtn')){const b=document.createElement('button');b.className='v33btn';b.id='v52PrintBtn';b.textContent='🖨 Drucken';b.onclick=v52ReviewPrint;box.append(b);}}catch(e){console.warn(e);}return r;};});

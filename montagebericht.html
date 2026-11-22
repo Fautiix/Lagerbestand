@@ -1800,6 +1800,11 @@ function v52PhPanel(){
 }
 setInterval(()=>{try{v52PhPanel();}catch(_){}},1500);
 
+/* V52: PDF für den Prüfplatz (Drucken) – alle Blätter + Fotos */
+window.v52ReviewPdf=async function(){const orig={sheet:activeSheet,current:model},pages=[];
+ try{await v52PhPrepare();for(const which of (sheetModels.second?['first','second']:['first'])){model=sheetModels[which];const c=document.createElement('canvas');await drawPage(c);pages.push(jpegBytes(c));}}
+ finally{model=orig.current;activeSheet=orig.sheet;}
+ return pages.length>1?makeTwoPagePdf(pages):makePdf(pages[0],W,H);};
 /* V52: Prüfplatz – Mausrad scrollt immer die ganze Seite */
 document.addEventListener('wheel',e=>{if(document.body.dataset.review!=='yes'||e.ctrlKey)return;const el=document.scrollingElement||document.documentElement;const before=el.scrollTop;
  requestAnimationFrame(()=>{if(el.scrollTop===before&&!e.defaultPrevented){let n=e.target;while(n&&n!==document.body){if(n.scrollHeight>n.clientHeight+2&&/(auto|scroll)/.test(getComputedStyle(n).overflowY))return;n=n.parentElement;}el.scrollTop+=e.deltaY*(e.deltaMode===1?16:1);}});},{passive:true});
