@@ -81,9 +81,9 @@ function v52Html(){
 }
 
 function v52Paint(){
- const root=document.getElementById('startseite');if(!root||!currentUserProfile||(typeof v34Editing!=='undefined'&&v34Editing))return;
- let box=root.querySelector('.v52-today');
- if(!box){box=document.createElement('section');box.className='v52-today';const head=root.querySelector('.v34homehead');head?head.after(box):root.prepend(box);}
+ const root=document.getElementById('startseite');if(!root||!currentUserProfile)return;
+ root.querySelectorAll('section.v52-today').forEach(x=>x.remove());
+ let box=root.querySelector('[data-v52-today]');if(!box)return;
  box.innerHTML=v52Html();
  root.querySelector('.v52-statbox')?.remove();
  box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else navigateApp('stundenzettel');});
@@ -419,3 +419,5 @@ function v52MiniStats(){
  return `<div class="v52-mini"><div><b>${f(c.total)}</b><small>Std. im ${new Date().toLocaleDateString('de-DE',{month:'long'})}</small></div><div><b style="color:${c.ot>0.01?'#4ade80':'inherit'}">${c.ot>0?'+':''}${f(c.ot)}</b><small>Überstunden</small></div><div><b>${c.sick}</b><small>Krankentage</small></div><div><b>${vac?String(vac.rest).replace('.',','):'–'}</b><small>Urlaub übrig</small></div></div>`;
 }
 (function(){const st=document.createElement('style');st.textContent=`.v52-statbox{padding:14px 16px}.v52-more{border:0;background:transparent;color:var(--accent,#6E9BFF);font-weight:700;font-size:13px;cursor:pointer;padding:4px 0}.v52-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.v52-mini div{text-align:center;padding:8px 2px;border-radius:12px;background:rgba(255,255,255,.04)}.v52-mini b{display:block;font-size:18px;font-weight:800}.v52-mini small{font-size:11px;color:var(--muted,#9AA6B8)}@media(max-width:420px){.v52-mini b{font-size:16px}}`;document.head.append(st);})();
+
+(function(){const st=document.createElement('style');st.textContent=`.v34w-meintag{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}.v34w-meintag .v52-today{margin:0}`;document.head.append(st);})();
