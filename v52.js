@@ -10,7 +10,7 @@
 .v52-job ul{margin:6px 0 0;padding-left:18px;font-size:14px}
 .v52-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .v52-links a,.v52-links button{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid var(--line2,#2A3750);background:var(--surface,#111926);color:var(--text,#eef4fb);font-weight:600;font-size:14px;text-decoration:none;cursor:pointer}
-.v52-quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.v52-quick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .v52-quick button{min-height:56px;border-radius:12px;border:1px solid var(--accent-strong,#3567E0);background:var(--accent-strong,#3567E0);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
 .v52-hours{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .v52-hours div{flex:1;min-width:90px;padding:8px 12px;border-radius:12px;background:var(--surface2,#162031);border:1px solid var(--line,#1F2A3C);font-size:12.5px;color:var(--muted,#9AA6B8)}
@@ -82,7 +82,7 @@ function v52Html(){
  const h=v52Hours(),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  let gross=false;try{gross=localStorage.getItem('mv_v52_gross')==='1';}catch(_){}
  return `<div class="v52-head"><h3>${title}</h3><small>${v52Esc(sub)}</small></div>${body}
- <div class="v52-quick"><button type="button" data-v52="bericht">📄 Montagebericht</button><button type="button" data-v52="stunden">🕒 Stunden</button><button type="button" data-v52="material">＋ Material melden</button></div>
+ <div class="v52-quick"><button type="button" data-v52="bericht">📄 Montagebericht</button><button type="button" data-v52="stunden">🕒 Stunden</button></div>
  ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div>${h.hasWeek||h.hasLast?`<div class="v52-hours">${h.hasWeek?`<div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div>`:''}${h.hasLast?`<div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div>`:''}</div>`:''}`:''}
  <label class="v52-big"><input type="checkbox" data-v52-gross ${gross?'checked':''}> Große Schrift &amp; Tasten (für Handschuhe)</label>`;
 }
@@ -92,7 +92,7 @@ function v52Paint(){
  let box=root.querySelector('.v52-today');
  if(!box){box=document.createElement('section');box.className='v52-today';const head=root.querySelector('.v34homehead');head?head.after(box):root.prepend(box);}
  box.innerHTML=v52Html();
- box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else if(k==='stunden')navigateApp('stundenzettel');else navigateApp('nachbestellen');});
+ box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else navigateApp('stundenzettel');});
  const g=box.querySelector('[data-v52-gross]');if(g)g.onchange=()=>{document.documentElement.classList.toggle('v52-gross',g.checked);try{localStorage.setItem('mv_v52_gross',g.checked?'1':'0');}catch(_){}};
 }
 
