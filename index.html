@@ -2835,7 +2835,7 @@ async function tsPDF(mode,review=null){
  if(!review)tsCapture();
  const pdfData=structuredClone(review?.data||tsData),pdfWeek=review?.week||tsWeek;
  /* V52: Krank/Urlaub/Feiertag auf dem Zettel ausweisen */
- for(const d of pdfData.days||[]){const lbl={krank:'KRANK',urlaub:'URLAUB',feiertag:'FEIERTAG'}[d.status];if(!lbl)continue;const ent=(d.entries||[]).filter(e=>e.work||e.hours||e.siteId||e.templateId);d.entries=[{kind:'custom',work:lbl,order:'',hours:'',we:'',hr:'',process:'',labor:''},...ent];}
+ for(const d of pdfData.days||[]){const lbl={krank:'KRANK',urlaub:'URLAUB',feiertag:'FEIERTAG'}[d.status];if(!lbl)continue;const ent=(d.entries||[]).filter(e=>e.work||e.hours||e.siteId||e.templateId);if(!ent.some(e=>e.work===lbl))d.entries=[{kind:'custom',work:lbl,order:'',hours:'',we:'',hr:'',process:'',labor:''},...ent];}
  const pdfDate=i=>{const d=new Date(pdfWeek+"T12:00:00");d.setDate(d.getDate()+i);return d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"});};
  const pdfTotal=i=>(pdfData.days[i]?.entries||[]).reduce((sum,e)=>sum+tsNum(e.hours),0);
  try{
@@ -4887,7 +4887,7 @@ async function v41EditPolierMail(siteId){
   catch(e){v38Toast('Speichern fehlgeschlagen: '+e.message,{kind:'err'});}
 }
 </script><script src="./wochenplan.js?v=2026-11-20-tage"></script>
-<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=27"></script>
+<script src="./v50.js?v=2026-11-22-seite"></script><script src="./v52.js?v=28"></script>
 <script src="./saison.js?v=3" defer></script>
 </body>
 </html>

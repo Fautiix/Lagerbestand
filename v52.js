@@ -169,7 +169,7 @@ function v52StatsHtml(){
  v52GradN=0;
  const from=v52Range(v52Period),days=v52Days().filter(d=>d.iso>=from);
  const f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
- const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0);
+ const work=days.filter(d=>d.h>0&&d.status==='arbeit'),total=work.reduce((a,d)=>a+d.h,0);
  const arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
  const ot=arb.reduce((a,d)=>a+Math.max(0,d.h-d.soll),0);
  const weeks=new Set(days.map(d=>d.week)).size;
@@ -220,7 +220,7 @@ window.addEventListener('load',()=>{const rt=window.renderTimesheet;if(typeof rt
 /* V52: Dokumente → Statistik (alle Mitarbeiter, für Admin / E-Meister) */
 function v52DaysOf(sheets){const keep=v52Cache;v52Cache={sheets};try{return v52Days();}finally{v52Cache=keep;}}
 function v52Calc(days){
- const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0),arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
+ const work=days.filter(d=>d.h>0&&d.status==='arbeit'),total=work.reduce((a,d)=>a+d.h,0),arb=days.filter(d=>d.status==='arbeit'&&d.h>0),soll=arb.reduce((a,d)=>a+d.soll,0);
  return {ist:arb.reduce((a,d)=>a+d.h,0),total,workDays:work.length,avg:work.length?total/work.length:0,weeks:new Set(days.map(d=>d.week)).size,soll,ot:arb.reduce((a,d)=>a+Math.max(0,d.h-d.soll),0),
   sick:days.filter(d=>d.status==='krank').length,vac:days.filter(d=>d.status==='urlaub').length,hol:days.filter(d=>d.status==='feiertag').length,sollDays:days.filter(d=>d.soll>0).length};
 }
@@ -297,12 +297,12 @@ async function v52EditVac(uid,name,entry,carry){
 const V52_PIE=['#ec4899','#8b5cf6','#3b82f6','#22d3ee','#84cc16','#facc15','#f97316','#94a3b8'];
 function v52Activity(days){
  const groups=new Map(),rows=new Map(),num=x=>typeof tsNum==='function'?tsNum(x):Number(String(x||0).replace(',','.'))||0;
- for(const d of days)for(const e of d.entries||[]){const h=num(e.hours);if(!h)continue;
+ for(const d of days){if(d.status&&d.status!=='arbeit')continue;for(const e of d.entries||[]){const h=num(e.hours);if(!h)continue;
   let g,label;
   if(e.kind==='site'||e.siteId){g='Baustelle';label=(typeof sites!=='undefined'&&sites.find(s=>String(s.id)===String(e.siteId)))?.name||e.work||'Baustelle';}
   else if(e.kind==='template'||e.templateId){label=(typeof tsTemplates!=='undefined'&&tsTemplates.find(t=>String(t.id)===String(e.templateId)))?.name||e.work||'Vorlage';g=label;}
   else{label=String(e.work||'').trim()||'Sonstiges';g='Sonstiges';}
-  groups.set(g,(groups.get(g)||0)+h);const k=g+'|'+label;const r=rows.get(k)||{label,group:g,h:0,days:new Set()};r.h+=h;r.days.add(d.iso);rows.set(k,r);}
+  groups.set(g,(groups.get(g)||0)+h);const k=g+'|'+label;const r=rows.get(k)||{label,group:g,h:0,days:new Set()};r.h+=h;r.days.add(d.iso);rows.set(k,r);}}
  const total=[...groups.values()].reduce((a,b)=>a+b,0);
  return {total,groups:[...groups].sort((a,b)=>b[1]-a[1]),rows:[...rows.values()].sort((a,b)=>b.h-a.h)};
 }
