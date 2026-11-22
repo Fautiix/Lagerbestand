@@ -1463,7 +1463,6 @@ function openDirect(h){
  if(v32Review&&(!v32Ready||v32Busy))return;
  const key=h.key;if(v32Review&&h.mode==='signature'&&key!=='sign_meister'){setStatus('Unterschriften anderer Personen bleiben unverändert.',false);return;}
  if(/^kfz2|^km2|^abfahrt2|^rueckkehr2/.test(key)&&!model.vehicle2Enabled){
-  if(!confirm('Zweites Fahrzeug für diesen Bericht aktivieren?'))return;
   model.vehicle2Enabled=true;buildEditor();dirty();
  }
  if(/^monteur[2-4]$|^m[2-4]_/.test(key)&&Number(model.employeeCount)<Number(key.match(/[2-4]/)[0])){
