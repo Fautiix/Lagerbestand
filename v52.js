@@ -86,7 +86,7 @@ function v52Paint(){
  if(!box){box=document.createElement('section');box.className='v52-today';const head=root.querySelector('.v34homehead');head?head.after(box):root.prepend(box);}
  box.innerHTML=v52Html();
  let sb=root.querySelector('.v52-statbox');if(!sb){sb=document.createElement('section');sb.className='v52-today v52-statbox';box.after(sb);}
- sb.innerHTML=`<div class="v52-head"><h3>📈 Meine Statistik</h3><small>Arbeitszeit · Überstunden · Fehltage</small></div>${!v52Cache?'<p class="muted">Wird geladen …</p>':v52Cache.sheetError?'<p class="muted">Stundenzettel derzeit nicht erreichbar.</p>':v52StatsHtml()}`;
+ sb.innerHTML=`<div class="v52-head"><h3>📈 Meine Statistik</h3><button type="button" class="v52-more" onclick="navigateApp('statistik')">Alle Details ›</button></div>${!v52Cache?'<p class="muted">Wird geladen …</p>':v52Cache.sheetError?'<p class="muted">Stundenzettel derzeit nicht erreichbar.</p>':v52MiniStats()}`;
  box.querySelectorAll('[data-v52]').forEach(b=>b.onclick=()=>{const k=b.dataset.v52;if(k==='bericht')openMontagebericht();else navigateApp('stundenzettel');});
 }
 
@@ -412,3 +412,11 @@ window.addEventListener('load',()=>{const d=window.v33DrawReports;if(typeof d!==
 
 /* V52: Feinschliff Statistik – Diagramm nicht riesig am PC, Zeitraum-Leiste ohne Scrollbalken */
 (function(){const st=document.createElement('style');st.textContent=`.v52-chart{max-height:240px;max-width:640px;display:block;margin:0 auto}.v52-tabs{scrollbar-width:none}.v52-tabs::-webkit-scrollbar{display:none}`;document.head.append(st);})();
+
+/* V52: Kleines Statistik-Widget auf der Startseite (Monat) */
+function v52MiniStats(){
+ const from=v52Range('monat'),days=v52Days().filter(d=>d.iso>=from),c=v52Calc(days),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
+ let vac=null;try{vac=v52VacInfo?v52Vac(v52VacInfo.entry_date,v52VacInfo.carryover,v52Days()):null;if(!v52VacInfo){v52VacInfo={};rpc('app_v52_vacation_get',{}).then(r=>{v52VacInfo=r||{};v52Paint();}).catch(()=>{});}}catch(_){}
+ return `<div class="v52-mini"><div><b>${f(c.total)}</b><small>Std. im ${new Date().toLocaleDateString('de-DE',{month:'long'})}</small></div><div><b style="color:${c.ot>0.01?'#4ade80':'inherit'}">${c.ot>0?'+':''}${f(c.ot)}</b><small>Überstunden</small></div><div><b>${c.sick}</b><small>Krankentage</small></div><div><b>${vac?String(vac.rest).replace('.',','):'–'}</b><small>Urlaub übrig</small></div></div>`;
+}
+(function(){const st=document.createElement('style');st.textContent=`.v52-statbox{padding:14px 16px}.v52-more{border:0;background:transparent;color:var(--accent,#6E9BFF);font-weight:700;font-size:13px;cursor:pointer;padding:4px 0}.v52-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.v52-mini div{text-align:center;padding:8px 2px;border-radius:12px;background:rgba(255,255,255,.04)}.v52-mini b{display:block;font-size:18px;font-weight:800}.v52-mini small{font-size:11px;color:var(--muted,#9AA6B8)}@media(max-width:420px){.v52-mini b{font-size:16px}}`;document.head.append(st);})();
