@@ -33,7 +33,7 @@ async function v52Load(force){
  const now=new Date(),week=v52Monday(now),next=v52Monday(new Date(now.getTime()+7*864e5));
  const res={u,at:Date.now(),plans:[],sheets:[],planError:false,sheetError:false};
  try{res.plans=(await Promise.all([rpc('app_v45_plan_get',{p_week:week}),rpc('app_v45_plan_get',{p_week:next})])).flatMap(p=>p?.published||[]);}catch(e){res.planError=true;}
- try{res.sheets=await supabase('weekly_timesheets?select=week_start,data&user_id=eq.'+encodeURIComponent(u)+'&order=week_start.desc&limit=8')||[];}catch(e){res.sheetError=true;}
+ try{res.sheets=await supabase('weekly_timesheets?select=week_start,data&user_id=eq.'+encodeURIComponent(u)+'&order=week_start.desc&limit=56')||[];}catch(e){res.sheetError=true;}
  v52Cache=res;v52Busy=false;v52Paint();
 }
 
@@ -77,7 +77,7 @@ function v52Html(){
  const h=v52Hours(),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  return `<div class="v52-head"><h3>${title}</h3><small>${v52Esc(sub)}</small></div>${body}
  <div class="v52-quick"><button type="button" data-v52="bericht">📄 Montagebericht</button><button type="button" data-v52="stunden">🕒 Stunden</button></div>
- ${v52Cache&&!v52Cache.sheetError?`<div class="v52-hours"><div><b>${f(h.week)} h</b>diese Woche</div><div><b>${f(h.last)} h</b>letzte Woche</div><div><b>${f(h.month)} h</b>dieser Monat</div></div>${h.hasWeek||h.hasLast?`<div class="v52-hours">${h.hasWeek?`<div><b style="color:${h.weekDiff<0?'var(--muted,#9AA6B8)':'var(--ok,#4CC994)'}">${h.weekDiff>0?'+':''}${f(h.weekDiff)} h</b>Überstunden diese Woche (Soll bis heute ${f(h.weekSoll)} h)</div>`:''}${h.hasLast?`<div><b style="color:${h.lastDiff<0?'#e47f7f':'var(--ok,#4CC994)'}">${h.lastDiff>0?'+':''}${f(h.lastDiff)} h</b>Überstunden letzte Woche (Soll 40 h)</div>`:''}</div>`:''}`:''}`;
+ ${v52Cache&&!v52Cache.sheetError?v52StatsHtml():''}`;
 }
 
 function v52Paint(){
@@ -140,21 +140,42 @@ window.addEventListener('load',()=>{
  setInterval(ping,60000);document.addEventListener('visibilitychange',ping);window.addEventListener('online',ping);setTimeout(ping,5000);
 })();
 
-/* V52: Team-Statistik auf dem Dashboard (nur Admin) */
-let v52Stats=null,v52StatsAt=0;
-async function v52LoadStats(){
- if(typeof isAdmin==='undefined'||!isAdmin||Date.now()-v52StatsAt<60000)return;v52StatsAt=Date.now();
- try{v52Stats=await rpc('app_v52_stats',{});v52PaintStats();}catch(e){console.warn('V52 Statistik:',e);}
+
+/* V52: Persönliche Statistik – Woche, Monat, 3/6/12 Monate */
+const V52_SOLL=[8.5,8.5,8.5,8.5,6,0,0];
+const V52_STATUS={arbeit:'Arbeit',krank:'🤒 Krank',urlaub:'🌴 Urlaub',feiertag:'🎉 Feiertag'};
+let v52Period='woche';
+function v52Days(){
+ const out=[];if(!v52Cache)return out;const today=v52Iso(new Date());
+ for(const s of v52Cache.sheets){(s.data?.days||[]).forEach((d,i)=>{const day=new Date(s.week_start+'T12:00:00');day.setDate(day.getDate()+i);const iso=v52Iso(day);if(iso>today)return;
+  const h=(d.entries||[]).reduce((v,e)=>v+(typeof tsNum==='function'?tsNum(e.hours):Number(String(e.hours||0).replace(',','.'))||0),0);
+  out.push({iso,week:s.week_start,h,status:d.status||'arbeit',soll:V52_SOLL[i]||0});});}
+ return out;
 }
-function v52PaintStats(){
- const root=document.getElementById('startseite');if(!root||!v52Stats||!isAdmin)return;
- let box=root.querySelector('.v52-stats');
- if(!box){box=document.createElement('section');box.className='v52-today v52-stats';const t=root.querySelector('.v52-today');t?t.after(box):root.prepend(box);}
- const s=v52Stats,f=n=>typeof tsNumFormat==='function'?tsNumFormat(Number(n)||0):String(n);
- const ago=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return m<5?'🟢 jetzt':m<60?'vor '+m+' Min.':m<1440?'vor '+Math.round(m/60)+' Std.':'vor '+Math.round(m/1440)+' T.';};
- box.innerHTML=`<div class="v52-head"><h3>📊 Team-Statistik</h3><small>nur für Admin</small></div>
- <div class="v52-hours"><div><b>${s.online_now}</b>gerade online</div><div><b>${s.online_today} / ${s.accounts}</b>heute aktiv</div><div><b>${s.sheets_week}</b>Stundenzettel diese Woche</div></div>
- <div class="v52-hours"><div><b>${f(s.hours_week)} h</b>Team-Stunden diese Woche</div><div><b>${s.reports_week}</b>Berichte diese Woche</div><div><b>${s.reports_total}</b>Berichte gesamt</div></div>
- ${(s.top||[]).length?`<div class="v52-job" style="margin-top:12px"><b style="font-size:14px">Zuletzt online</b>${s.top.map(p=>`<p>${v52Esc(p.name)} · ${ago(p.last_seen_at)}</p>`).join('')}</div>`:''}`;
+function v52Range(p){const n=new Date();if(p==='woche')return v52Monday(n);if(p==='monat')return v52Iso(n).slice(0,8)+'01';const d=new Date(n);d.setMonth(d.getMonth()-({m3:3,m6:6,m12:12}[p]));return v52Iso(d);}
+function v52StatsHtml(){
+ const from=v52Range(v52Period),days=v52Days().filter(d=>d.iso>=from);
+ const f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
+ const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0);
+ const soll=days.filter(d=>d.status==='arbeit').reduce((a,d)=>a+d.soll,0);
+ const ot=days.filter(d=>d.status==='arbeit').reduce((a,d)=>a+d.h,0)-soll;
+ const weeks=new Set(days.map(d=>d.week)).size;
+ const sick=days.filter(d=>d.status==='krank').length,vac=days.filter(d=>d.status==='urlaub').length;
+ const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52Period]);
+ const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52p="${k}" class="${k===v52Period?'on':''}">${l}</button>`).join('');
+ const otc=ot<-0.01?'#e47f7f':ot>0.01?'var(--ok,#4CC994)':'inherit';
+ return `<div class="v52-tabs">${tabs}</div>${!days.length?'<p class="muted" style="margin-top:10px">Für diesen Zeitraum gibt es noch keine Stundenzettel.</p>':`
+ <div class="v52-hours"><div><b>${f(total)} h</b>Stunden gesamt</div><div><b>${f(work.length?total/work.length:0)} h</b>Ø pro Arbeitstag</div><div><b>${f(weeks?total/weeks:0)} h</b>Ø pro Woche</div></div>
+ <div class="v52-hours"><div><b style="color:${otc}">${ot>0?'+':''}${f(ot)} h</b>Überstunden (Soll ${f(soll)} h)</div><div><b>${sick}</b>Krankentage${v52Period!=='woche'?` · Ø ${f(sick/months)}/Monat`:''}</div><div><b>${vac}</b>Urlaubstage</div></div>`}`;
 }
-window.addEventListener('load',()=>{const rs=window.renderStartseite;if(typeof rs==='function')window.renderStartseite=function(...a){const r=rs.apply(this,a);try{v52PaintStats();void v52LoadStats();}catch(e){console.warn(e);}return r;};setTimeout(()=>{if(typeof currentAppPage!=='undefined'&&currentAppPage==='startseite')void v52LoadStats();},4000);});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-v52p]');if(!b)return;v52Period=b.dataset.v52p;v52Paint();});
+(function(){const st=document.createElement('style');st.textContent=`.v52-tabs{display:flex;gap:6px;margin-top:14px;overflow-x:auto}.v52-tabs button{flex:1;min-height:38px;padding:0 10px;border-radius:999px;border:1px solid var(--line2,#2A3750);background:transparent;color:var(--muted,#9AA6B8);font-weight:600;font-size:13px;white-space:nowrap;cursor:pointer}.v52-tabs button.on{background:var(--accent-strong,#3567E0);border-color:var(--accent-strong,#3567E0);color:#fff}.v52-status{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.v52-status button{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line2,#2A3750);background:transparent;color:var(--text,#eef4fb);font-weight:600;cursor:pointer}.v52-status button.on{background:var(--accent-strong,#3567E0);border-color:var(--accent-strong,#3567E0);color:#fff}`;document.head.append(st);})();
+/* Tagesstatus im Stundenzettel: Arbeit / Krank / Urlaub / Feiertag */
+window.addEventListener('load',()=>{const rt=window.renderTimesheet;if(typeof rt!=='function')return;
+ window.renderTimesheet=function(...a){const r=rt.apply(this,a);try{
+  if(tsView==='day'&&tsData?.days?.[tsActiveDay]){const el=document.getElementById('stundenzettel'),add=el?.querySelector('.tz-add');
+   if(add&&!el.querySelector('.v52-status')){const cur=tsData.days[tsActiveDay].status||'arbeit',w=document.createElement('div');w.className='v52-status';
+    w.innerHTML=Object.entries(V52_STATUS).map(([k,l])=>`<button type="button" data-s="${k}" class="${k===cur?'on':''}">${l}</button>`).join('');
+    w.onclick=ev=>{const b=ev.target.closest('[data-s]');if(!b)return;tsCapture();const d=tsData.days[tsActiveDay];if(b.dataset.s==='arbeit')delete d.status;else d.status=b.dataset.s;renderTimesheet();tsQueueSave();v52Cache=null;};
+    const host=add.parentElement;host.insertBefore(w,host.firstChild);}}
+ }catch(e){console.warn('V52 Status:',e);}return r;};});
