@@ -151,25 +151,60 @@ function v52Days(){
  const out=[];if(!v52Cache)return out;const today=v52Iso(new Date());
  for(const s of v52Cache.sheets){(s.data?.days||[]).forEach((d,i)=>{const day=new Date(s.week_start+'T12:00:00');day.setDate(day.getDate()+i);const iso=v52Iso(day);if(iso>today)return;
   const h=(d.entries||[]).reduce((v,e)=>v+(typeof tsNum==='function'?tsNum(e.hours):Number(String(e.hours||0).replace(',','.'))||0),0);
-  out.push({iso,week:s.week_start,h,status:d.status||'arbeit',soll:V52_SOLL[i]||0});});}
+  out.push({iso,week:s.week_start,h,status:d.status||'arbeit',soll:V52_SOLL[i]||0,entries:d.entries||[]});});}
  return out;
 }
 function v52Range(p){const n=new Date();if(p==='woche')return v52Monday(n);if(p==='monat')return v52Iso(n).slice(0,8)+'01';const d=new Date(n);d.setMonth(d.getMonth()-({m3:3,m6:6,m12:12}[p]));return v52Iso(d);}
+let v52GradN=0;
+function v52Ring(pct,label,sub,c1,c2){const id='v52g'+(++v52GradN),r=34,C=2*Math.PI*r,p=Math.max(0,Math.min(1,pct/100));
+ return `<div class="v52-ring"><svg viewBox="0 0 84 84" width="84" height="84"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+ <circle cx="42" cy="42" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/><circle cx="42" cy="42" r="${r}" fill="none" stroke="url(#${id})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C*p} ${C}" transform="rotate(-90 42 42)"/>
+ <text x="42" y="47" text-anchor="middle" font-size="17" font-weight="800" fill="currentColor">${Math.round(pct)}%</text></svg><b>${label}</b><small>${sub}</small></div>`;}
+function v52Bars(items,unit){if(!items.length)return '';const W=320,H=150,max=Math.max(...items.map(x=>x.v),1),bw=Math.min(34,(W-10)/items.length-6),gap=(W-items.length*bw)/(items.length+1),id='v52b'+(++v52GradN);
+ return `<svg class="v52-chart" viewBox="0 0 ${W} ${H+34}" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7c3aed"/><stop offset=".55" stop-color="#ec4899"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
+ ${items.map((x,i)=>{const h=Math.max(x.v?4:0,x.v/max*(H-22)),X=gap+i*(bw+gap),Y=H-h;return `<rect x="${X}" y="${Y}" width="${bw}" height="${h}" rx="${bw/2.6}" fill="url(#${id})" opacity="${x.dim?.35:1}"/>${x.v?`<text x="${X+bw/2}" y="${Y-5}" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">${String(Math.round(x.v*10)/10).replace('.',',')}</text>`:''}<text x="${X+bw/2}" y="${H+15}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6">${x.l}</text>`;}).join('')}</svg>`;}
+function v52HBars(items){if(!items.length)return '';const max=Math.max(...items.map(x=>x.v),1),g=['#ec4899,#f59e0b','#8b5cf6,#3b82f6','#f97316,#facc15','#84cc16,#22d3ee','#06b6d4,#6366f1'];
+ return `<div class="v52-hb">${items.map((x,i)=>`<div><span class="n">${String(i+1).padStart(2,'0')}</span><div class="t"><i style="width:${Math.max(6,x.v/max*100)}%;background:linear-gradient(90deg,${g[i%5]})"></i><em>${v52Esc(x.l)}</em></div><span class="v">${String(Math.round(x.v*10)/10).replace('.',',')} h</span></div>`).join('')}</div>`;}
 function v52StatsHtml(){
+ v52GradN=0;
  const from=v52Range(v52Period),days=v52Days().filter(d=>d.iso>=from);
  const f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
  const work=days.filter(d=>d.h>0),total=work.reduce((a,d)=>a+d.h,0);
- const soll=days.filter(d=>d.status==='arbeit').reduce((a,d)=>a+d.soll,0);
- const ot=days.filter(d=>d.status==='arbeit').reduce((a,d)=>a+d.h,0)-soll;
+ const arb=days.filter(d=>d.status==='arbeit'),soll=arb.reduce((a,d)=>a+d.soll,0);
+ const ot=arb.reduce((a,d)=>a+d.h,0)-soll;
  const weeks=new Set(days.map(d=>d.week)).size;
- const sick=days.filter(d=>d.status==='krank').length,vac=days.filter(d=>d.status==='urlaub').length;
+ const sick=days.filter(d=>d.status==='krank').length,vac=days.filter(d=>d.status==='urlaub').length,sollDays=days.filter(d=>d.soll>0).length;
  const months=Math.max(1,{woche:.25,monat:1,m3:3,m6:6,m12:12}[v52Period]);
  const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52p="${k}" class="${k===v52Period?'on':''}">${l}</button>`).join('');
- const otc=ot<-0.01?'#e47f7f':ot>0.01?'var(--ok,#4CC994)':'inherit';
- return `<div class="v52-tabs">${tabs}</div>${!days.length?'<p class="muted" style="margin-top:10px">Für diesen Zeitraum gibt es noch keine Stundenzettel.</p>':`
- <div class="v52-hours"><div><b>${f(total)} h</b>Stunden gesamt</div><div><b>${f(work.length?total/work.length:0)} h</b>Ø pro Arbeitstag</div><div><b>${f(weeks?total/weeks:0)} h</b>Ø pro Woche</div></div>
- <div class="v52-hours"><div><b style="color:${otc}">${ot>0?'+':''}${f(ot)} h</b>Überstunden (Soll ${f(soll)} h)</div><div><b>${sick}</b>Krankentage${v52Period!=='woche'?` · Ø ${f(sick/months)}/Monat`:''}</div><div><b>${vac}</b>Urlaubstage</div></div>`}`;
+ if(!days.length)return `<div class="v52-tabs">${tabs}</div><p class="muted" style="margin-top:10px">Für diesen Zeitraum gibt es noch keine Stundenzettel.</p>`;
+ const avgDay=work.length?total/work.length:0;
+ // Balken: Woche → pro Tag, Monat/3M → pro Woche, 6/12M → pro Monat
+ let bars=[];
+ if(v52Period==='woche'){const wd=['Mo','Di','Mi','Do','Fr','Sa','So'];const m=v52Monday(new Date());bars=wd.map((l,i)=>{const d=new Date(m+'T12:00:00');d.setDate(d.getDate()+i);const x=days.find(y=>y.iso===v52Iso(d));return {l,v:x?.h||0,dim:x&&x.status!=='arbeit'};}).filter((x,i)=>i<5||x.v);}
+ else if(v52Period==='monat'||v52Period==='m3'){const m=new Map();days.forEach(d=>m.set(d.week,(m.get(d.week)||0)+d.h));bars=[...m].sort().map(([w,v])=>{const d=new Date(w+'T12:00:00');const kw=Math.ceil((((d-new Date(d.getFullYear(),0,1))/864e5)+new Date(d.getFullYear(),0,1).getDay()+1)/7);return {l:'KW'+kw,v};});}
+ else{const m=new Map();days.forEach(d=>m.set(d.iso.slice(0,7),(m.get(d.iso.slice(0,7))||0)+d.h));bars=[...m].sort().map(([k,v])=>({l:['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][+k.slice(5)-1],v}));}
+ // Baustellen-Ranking
+ const sm=new Map();days.forEach(d=>d.entries.forEach(e=>{const h=typeof tsNum==='function'?tsNum(e.hours):Number(String(e.hours||0).replace(',','.'))||0;if(!h)return;const site=(typeof sites!=='undefined'&&sites.find(s=>String(s.id)===String(e.siteId)))?.name||e.siteName||e.work||'Sonstiges';sm.set(site,(sm.get(site)||0)+h);}));
+ const top=[...sm].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([l,v])=>({l,v}));
+ const otc=ot<-0.01?'#f87171':ot>0.01?'#4ade80':'inherit';
+ return `<div class="v52-tabs">${tabs}</div>
+ <div class="v52-kpi"><div><b>${f(total)}</b><small>Stunden gesamt</small></div><div><b style="color:${otc}">${ot>0?'+':''}${f(ot)}</b><small>Überstunden</small></div><div><b>${f(avgDay)}</b><small>Ø h / Tag</small></div><div><b>${f(weeks?total/weeks:0)}</b><small>Ø h / Woche</small></div></div>
+ <div class="v52-rings">${v52Ring(soll?arb.reduce((a,d)=>a+d.h,0)/soll*100:0,'Soll erfüllt',f(soll)+' h Soll','#ec4899','#8b5cf6')}${v52Ring(avgDay/8.5*100,'Ø Tag',f(avgDay)+' von 8,5 h','#3b82f6','#22d3ee')}${v52Ring(sollDays?sick/sollDays*100:0,'Krank',sick+' Tage'+(v52Period!=='woche'?' · Ø '+f(sick/months)+'/Mon.':''),'#f97316','#facc15')}${v52Ring(sollDays?vac/sollDays*100:0,'Urlaub',vac+' Tage','#84cc16','#22d3ee')}</div>
+ <h4 class="v52-sub">${v52Period==='woche'?'Stunden pro Tag':v52Period==='monat'||v52Period==='m3'?'Stunden pro Woche':'Stunden pro Monat'}</h4>${v52Bars(bars)}
+ ${top.length?`<h4 class="v52-sub">Wo du gearbeitet hast</h4>${v52HBars(top)}`:''}`;
 }
+(function(){const st=document.createElement('style');st.textContent=`
+.v52-statbox{background:radial-gradient(120% 80% at 100% 0,rgba(139,92,246,.18),transparent 60%),radial-gradient(90% 70% at 0 100%,rgba(236,72,153,.12),transparent 60%),var(--surface,#111926)}
+.v52-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.v52-kpi div{text-align:center;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.v52-kpi b{display:block;font-size:20px;font-weight:800;background:linear-gradient(90deg,#f472b6,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}.v52-kpi b[style]{-webkit-text-fill-color:currentColor;background:none}
+.v52-kpi small,.v52-ring small{font-size:11.5px;color:var(--muted,#9AA6B8)}
+.v52-rings{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;text-align:center}.v52-ring svg{display:block;margin:0 auto;color:var(--text,#eef4fb);width:100%;max-width:84px;height:auto}.v52-ring b{display:block;font-size:13px;margin-top:2px}
+.v52-sub{margin:18px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#9AA6B8)}
+.v52-chart{width:100%;height:auto;color:var(--text,#eef4fb)}
+.v52-hb>div{display:flex;align-items:center;gap:10px;margin:7px 0}.v52-hb .n{font-size:18px;font-weight:300;color:var(--muted,#9AA6B8);width:26px}.v52-hb .t{flex:1;position:relative;height:26px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.v52-hb i{position:absolute;inset:0 auto 0 0;border-radius:999px}.v52-hb em{position:relative;font-style:normal;font-size:12.5px;font-weight:700;line-height:26px;padding-left:12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap}.v52-hb .v{font-size:13px;font-weight:700;width:58px;text-align:right}
+@media(max-width:560px){.v52-kpi{grid-template-columns:1fr 1fr}.v52-rings{grid-template-columns:1fr 1fr}}`;document.head.append(st);})();
+
 document.addEventListener('click',e=>{const b=e.target.closest('[data-v52p]');if(!b)return;v52Period=b.dataset.v52p;v52Paint();});
 (function(){const st=document.createElement('style');st.textContent=`.v52-tabs{display:flex;gap:6px;margin-top:14px;overflow-x:auto}.v52-tabs button{flex:1;min-height:38px;padding:0 10px;border-radius:999px;border:1px solid var(--line2,#2A3750);background:transparent;color:var(--muted,#9AA6B8);font-weight:600;font-size:13px;white-space:nowrap;cursor:pointer}.v52-tabs button.on{background:var(--accent-strong,#3567E0);border-color:var(--accent-strong,#3567E0);color:#fff}.v52-status{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.v52-status button{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line2,#2A3750);background:transparent;color:var(--text,#eef4fb);font-weight:600;cursor:pointer}.v52-status button.on{background:var(--accent-strong,#3567E0);border-color:var(--accent-strong,#3567E0);color:#fff}`;document.head.append(st);})();
 /* Tagesstatus im Stundenzettel: Arbeit / Krank / Urlaub / Feiertag */
