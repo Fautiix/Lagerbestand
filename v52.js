@@ -225,13 +225,20 @@ function v52Calc(days){
   sick:days.filter(d=>d.status==='krank').length,vac:days.filter(d=>d.status==='urlaub').length,hol:days.filter(d=>d.status==='feiertag').length,sollDays:days.filter(d=>d.soll>0).length};
 }
 let v52TeamPeriod='monat',v52TeamRows=null,v52TeamFrom='';
+function v52CanTeam(){return (typeof isAdmin!=='undefined'&&isAdmin)||(typeof isMeister!=='undefined'&&isMeister);}
+function v52TeamMode(){if(!v52CanTeam())return false;try{return localStorage.getItem('mv_v52_teamview')!=='0';}catch(_){return true;}}
 async function v52OpenTeamStats(){
  const root=document.getElementById('statistik');if(!root)return;
+ const can=v52CanTeam(),team=v52TeamMode();
+ root.innerHTML=`<div class="v52-team"><div class="v52-head"><h2 style="margin:0">📊 Statistik</h2>${can?`<label class="v52-switch"><input type="checkbox" id="v52TeamToggle" ${team?'checked':''}> Ganzes Team anzeigen</label>`:'<small>Deine eigenen Zahlen</small>'}</div><div id="v52TeamBody" class="${team?'':'v52-statbox v52-today'}"><p class="muted">Wird geladen …</p></div></div>`;
+ const t=document.getElementById('v52TeamToggle');if(t)t.onchange=()=>{try{localStorage.setItem('mv_v52_teamview',t.checked?'1':'0');}catch(_){}v52OpenTeamStats();};
+ if(!team){await v52Load(true);v52DrawOwnPage();return;}
  const from=v52Range('m12');
- root.innerHTML=`<div class="v52-team"><div class="v52-head"><h2 style="margin:0">📊 Statistik</h2><small>Alle Mitarbeiter · nur für Admin</small></div><div id="v52TeamBody"><p class="muted">Wird geladen …</p></div></div>`;
  try{if(!v52TeamRows||v52TeamFrom!==from){v52TeamRows=await rpc('app_v52_team_sheets',{p_from:from});v52TeamFrom=from;}v52DrawTeam();}
  catch(e){document.getElementById('v52TeamBody').innerHTML='<p class="muted">Statistik nicht verfügbar: '+v52Esc(e.message)+'</p>';}
 }
+function v52DrawOwnPage(){const b=document.getElementById('v52TeamBody');if(!b||v52TeamMode())return;b.innerHTML=!v52Cache?'<p class="muted">Wird geladen …</p>':v52Cache.sheetError?'<p class="muted">Stundenzettel derzeit nicht erreichbar.</p>':v52StatsHtml();}
+document.addEventListener('click',e=>{if(e.target.closest('#statistik [data-v52p]'))setTimeout(v52DrawOwnPage,0);});
 function v52DrawTeam(){
  const body=document.getElementById('v52TeamBody');if(!body)return;v52GradN=0;
  const from=v52Range(v52TeamPeriod),f=n=>typeof tsNumFormat==='function'?tsNumFormat(n):n.toFixed(2);
@@ -251,9 +258,9 @@ function v52DrawTeam(){
  </tbody></table></div>`;
  body.querySelectorAll('[data-v52t]').forEach(b=>b.onclick=()=>{v52TeamPeriod=b.dataset.v52t;v52DrawTeam();});
 }
-(function(){const st=document.createElement('style');st.textContent=`.v52-team{padding:18px;max-width:1100px;margin:0 auto}.v52-team .v52-head{margin-bottom:4px}
+(function(){const st=document.createElement('style');st.textContent=`.v52-team{padding:18px;max-width:1100px;margin:0 auto}.v52-team .v52-head{margin-bottom:4px}.v52-switch{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}.v52-switch input{width:20px;height:20px}#v52TeamBody.v52-today{margin-top:12px}
 .v52-tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line,#1F2A3C)}.v52-table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
 .v52-table th{text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#9AA6B8);background:rgba(255,255,255,.04)}
 .v52-table td{padding:10px 12px;border-top:1px solid var(--line,#1F2A3C)}.v52-table td:first-child{font-weight:700}.v52-table tr:hover td{background:rgba(139,92,246,.08)}`;document.head.append(st);})();
-/* Menüpunkt „Statistik“ nur für Admin einblenden */
-setInterval(()=>{const a=typeof isAdmin!=='undefined'&&isAdmin;for(const id of ['v52DeskStats','v52MoreStats']){const el=document.getElementById(id);if(el&&el.hidden===a)el.hidden=!a;}},1500);
+/* Menüpunkt „Statistik“ für alle */
+setTimeout(()=>{for(const id of ['v52DeskStats','v52MoreStats']){const el=document.getElementById(id);if(el)el.hidden=false;}},0);
