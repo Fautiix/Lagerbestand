@@ -232,6 +232,7 @@ async function v52OpenTeamStats(){
  root.innerHTML=`<div class="v52-team"><div class="v52-head"><h2 style="margin:0">📊 Statistik</h2>${can?`<label class="v52-switch"><input type="checkbox" id="v52TeamToggle" ${team?'checked':''}> Ganzes Team anzeigen</label>`:'<small>Deine eigenen Zahlen</small>'}</div><div id="v52TeamBody" class="${team?'':'v52-statbox v52-today'}"><p class="muted">Wird geladen …</p></div></div>`;
  const t=document.getElementById('v52TeamToggle');if(t)t.onchange=()=>{try{localStorage.setItem('mv_v52_teamview',t.checked?'1':'0');}catch(_){}v52OpenTeamStats();};
  if(!team){await v52Load(true);v52DrawOwnPage();return;}
+ if(!(typeof isAdmin!=='undefined'&&isAdmin))return v52DrawMeister();
  const from=v52Range('m12');
  try{if(!v52TeamRows||v52TeamFrom!==from){v52TeamRows=await rpc('app_v52_team_sheets',{p_from:from});v52TeamFrom=from;}v52DrawTeam();}
  catch(e){document.getElementById('v52TeamBody').innerHTML='<p class="muted">Statistik nicht verfügbar: '+v52Esc(e.message)+'</p>';}
@@ -477,3 +478,20 @@ function v52MiniStats(){
   w.classList.remove('v34size-small','v34size-medium','v34size-large','v34size-full','v34size-fullbig');w.classList.add('v34size-'+it.size);navigator.vibrate?.(8);}
  function save(){try{v34Persist();renderStartseite();}catch(e){console.warn(e);}}
 })();
+
+/* V52: E-Meister – nur Anteile der Tätigkeiten im Team, keine Stunden, keine Personen */
+let v52MeisterPeriod='monat';
+async function v52DrawMeister(){
+ const body=document.getElementById('v52TeamBody');if(!body)return;body.className='';
+ const tabs=[['woche','Woche'],['monat','Monat'],['m3','3 Mon.'],['m6','6 Mon.'],['m12','12 Mon.']].map(([k,l])=>`<button type="button" data-v52m="${k}" class="${k===v52MeisterPeriod?'on':''}">${l}</button>`).join('');
+ body.innerHTML=`<div class="v52-tabs">${tabs}</div><p class="muted">Wird geladen …</p>`;
+ body.querySelectorAll('[data-v52m]').forEach(b=>b.onclick=()=>{v52MeisterPeriod=b.dataset.v52m;v52DrawMeister();});
+ let rows=[];try{rows=await rpc('app_v52_team_activity',{p_from:v52Range(v52MeisterPeriod)})||[];}catch(e){body.innerHTML=`<div class="v52-tabs">${tabs}</div><p class="muted">Nicht verfügbar: ${v52Esc(e.message)}</p>`;return;}
+ const p=x=>String(Math.round(Number(x)*10)/10).replace('.',',')+' %';
+ const R=70,C=2*Math.PI*R;let off=0;const top=rows.slice(0,7),rest=rows.slice(7).reduce((a,r)=>a+Number(r.share),0),g=rest?[...top,{label:'Weitere',kind:'',share:rest}]:top;
+ const pie=!rows.length?'<p class="muted" style="margin-top:12px">Für diesen Zeitraum gibt es noch keine Einträge.</p>':`<h4 class="v52-sub">Wo das Team gearbeitet hat</h4><div class="v52-pie"><svg viewBox="0 0 180 180" width="180" height="180"><circle cx="90" cy="90" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="30"/>${g.map((r,i)=>{const len=Number(r.share)/100*C,s=`<circle cx="90" cy="90" r="${R}" fill="none" stroke="${V52_PIE[i%8]}" stroke-width="30" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"/>`;off+=len;return s;}).join('')}<text x="90" y="96" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor">Team</text></svg>
+ <ul>${g.map((r,i)=>`<li><i style="background:${V52_PIE[i%8]}"></i><span>${v52Esc(r.label)}</span><b>${p(r.share)}</b><small>${v52Esc(r.kind||'')}</small></li>`).join('')}</ul></div>
+ <h4 class="v52-sub">Ranking</h4><div class="v52-tablewrap"><table class="v52-table"><thead><tr><th>#</th><th>Baustelle / Tätigkeit</th><th>Art</th><th>Anteil</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${v52Esc(r.label)}</td><td>${v52Esc(r.kind)}</td><td><span class="v52-pct"><i style="width:${Number(r.share)}%"></i></span>${p(r.share)}</td></tr>`).join('')}</tbody></table></div>`;
+ body.innerHTML=`<div class="v52-tabs">${tabs}</div><p class="muted" style="margin:10px 0 0">Anteile aller Mitarbeiter zusammen – ohne Stunden und ohne einzelne Personen.</p>${pie}`;
+ body.querySelectorAll('[data-v52m]').forEach(b=>b.onclick=()=>{v52MeisterPeriod=b.dataset.v52m;v52DrawMeister();});
+}
