@@ -495,3 +495,34 @@ async function v52DrawMeister(){
  body.innerHTML=`<div class="v52-tabs">${tabs}</div><p class="muted" style="margin:10px 0 0">Anteile aller Mitarbeiter zusammen – ohne Stunden und ohne einzelne Personen.</p>${pie}`;
  body.querySelectorAll('[data-v52m]').forEach(b=>b.onclick=()=>{v52MeisterPeriod=b.dataset.v52m;v52DrawMeister();});
 }
+
+/* V52: Admin-Vorschau „Als E-Meister ansehen“ – nur für den echten Admin sichtbar */
+let v52AsMeister=false,v52RealAdmin=false;
+function v52ToggleAsMeister(on){
+ v52AsMeister=on;
+ if(on){isAdmin=false;try{adminViewEnabled=false;}catch(_){}isMeister=true;}
+ else{isAdmin=true;}
+ try{updateAdminUI();}catch(_){}
+ v52TeamRows=null;
+ try{const p=typeof currentAppPage!=='undefined'?currentAppPage:'startseite';navigateApp(p);}catch(_){}
+ v52AsMeisterUI();
+}
+function v52AsMeisterUI(){
+ let bar=document.getElementById('v52AsMeisterBar');
+ if(v52AsMeister){if(!bar){bar=document.createElement('div');bar.id='v52AsMeisterBar';bar.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 86px);z-index:9998;background:#6d28d9;color:#fff;padding:9px 14px;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.45);display:flex;gap:10px;align-items:center';bar.innerHTML='👁 Ansicht als E-Meister <button type="button" style="border:0;border-radius:999px;padding:5px 10px;font-weight:700;cursor:pointer">Beenden</button>';bar.querySelector('button').onclick=()=>v52ToggleAsMeister(false);document.body.append(bar);}}
+ else bar?.remove();
+ document.querySelectorAll('.v52-asm-btn').forEach(b=>{b.hidden=!v52RealAdmin||v52AsMeister;});
+}
+setInterval(()=>{
+ if(typeof isAdmin==='undefined')return;
+ if(isAdmin&&!v52AsMeister)v52RealAdmin=true;
+ if(typeof currentUserProfile!=='undefined'&&!currentUserProfile){v52RealAdmin=false;if(v52AsMeister){v52AsMeister=false;}}
+ if(v52AsMeister&&isAdmin){isAdmin=false;try{updateAdminUI();}catch(_){}}
+ if(v52RealAdmin){
+  const side=document.querySelector('aside.desk31-sidebar .v52-sidefoot')||document.querySelector('aside.desk31-sidebar');
+  if(side&&!side.querySelector('.v52-asm-btn')){const b=document.createElement('button');b.type='button';b.className='desk31-link v52-asm-btn';b.innerHTML='<span>👁 Als E-Meister ansehen</span>';b.onclick=()=>v52ToggleAsMeister(true);side.prepend(b);}
+  const more=document.getElementById('v52MoreStats')?.parentElement;
+  if(more&&!more.querySelector('.v52-asm-btn')){const b=document.createElement('button');b.type='button';b.className='v52-asm-btn';b.innerHTML='<span>👁 Als E-Meister ansehen</span>';b.onclick=()=>{try{document.querySelector('[data-close-more],.more-close')?.click();}catch(_){}v52ToggleAsMeister(true);};more.append(b);}
+ }
+ v52AsMeisterUI();
+},800);
